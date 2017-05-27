@@ -15,7 +15,7 @@ fire version control immediately after appopen.
 Initialize library
 ```
 KStack.setLogFunction { tag, msg -> Log.e(tag, msg) }
-KStack.init(this, "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW", "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke", true)
+KStack.init(this, "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW", "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke")
 KStack.setTranslationClass(Translation::class.java)
 ```
 
