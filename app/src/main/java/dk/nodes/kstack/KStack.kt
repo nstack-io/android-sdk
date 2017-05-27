@@ -63,7 +63,7 @@ object KStack {
     private val translationManager = TranslationManager()
     private var updateJob : Job? = null
     private var appOpenJob : Job? = null
-    private lateinit var jsonStore : JsonStore
+    private lateinit var store: JsonStore
     private lateinit var appOpenSettings : AppOpenSettings
     private var jsonLanguages : JSONObject? = null
     private var jsonTranslations : JSONObject? = null
@@ -100,7 +100,7 @@ object KStack {
         KStack.appKey = appKey
         kLog(TAG, "AppId = $appId, AppKey = $appKey")
         backendManager = BackendManager(HttpClientProvider.provideHttpClient(HttpCacheProvider.provideCache(appContext), debug))
-        jsonStore = PrefJsonStore(appContext)
+        store = PrefJsonStore(appContext)
         appOpenSettings = AppOpenSettings(appContext)
         isInitialized = true
         KStack.debug = debug
@@ -229,7 +229,7 @@ object KStack {
         {
             try {
                 val obj : JSONObject = JSONObject(response.body()?.string())
-                jsonStore.save(key, obj, {
+                store.save(key, obj, {
                     kLog(TAG, "Saved $key to JsonStore")
                 })
                 return obj
@@ -244,8 +244,8 @@ object KStack {
 
     private fun updateCache() {
         updateJob = launch(CommonPool) {
-            jsonLanguages = jsonStore.loadDeferred(StoreId.LANGUAGES.name).await()
-            jsonTranslations = jsonStore.loadDeferred(StoreId.TRANSLATIONS.name).await()
+            jsonLanguages = store.loadDeferred(StoreId.LANGUAGES.name).await()
+            jsonTranslations = store.loadDeferred(StoreId.TRANSLATIONS.name).await()
 
             if(jsonLanguages == null)
             {
