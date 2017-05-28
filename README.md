@@ -49,6 +49,13 @@ KStack.versionControl(this@MainActivity, {type, builder ->
 })
 ```
 
+## N-Meta Header
+Use like this:
+```
+.addInterceptor(NMetaInterceptor("staging"))
+```
+Where "staging" is a string you pass in a buildconfig flag or something similar
+
 ## Dependencies
 - appcompat
 - okhttp 3.8.0
