@@ -23,7 +23,7 @@ KStack.setTranslationClass(Translation::class.java)
 Initialize the library in debug mode (if its a debug build):
 ```
 KStack.setLogFunction { tag, msg -> Log.e(tag, msg) }
-KStack.init(this, "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW", "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke", true)
+KStack.init(this, "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW", "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke", BuildConfig.DEBUG)
 KStack.setTranslationClass(Translation::class.java)
 ```
 
