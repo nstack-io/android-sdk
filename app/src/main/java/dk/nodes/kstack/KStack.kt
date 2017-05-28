@@ -69,6 +69,7 @@ object KStack {
     private var jsonTranslations : JSONObject? = null
     private val localeLanguageMap : MutableMap<String, Language> = HashMap()
     private var appUpdate : AppUpdate? = null
+    lateinit var clientAppInfo : ClientAppInfo
 
     // Properties with custom setters/getters ---------------------------------------------------
     var currentLocale : String? = null
@@ -91,11 +92,14 @@ object KStack {
         }
 
     // Public interface --------------------------------------------------------------
-    fun init(appContext : Context, appId : String, appKey : String, debug : Boolean = false)
+    fun init(appContext : Context, appId : String, appKey : String, env : String = "development", debug : Boolean = false)
     {
         if(isInitialized)
             return
         KStack.appContext = appContext
+        clientAppInfo = ClientAppInfo(appContext)
+        clientAppInfo.environment = env
+        kLog(TAG, "Client App Info: package = ${clientAppInfo.packageName}, versionName = ${clientAppInfo.versionName}, versionCode = ${clientAppInfo.versionCode}")
         KStack.appId = appId
         KStack.appKey = appKey
         kLog(TAG, "AppId = $appId, AppKey = $appKey")
@@ -141,6 +145,8 @@ object KStack {
 
     fun versionControl(activity : Activity, callback : VersionControlCallback)
     {
+        if(!isInitialized)
+            throw IllegalStateException("init() was not called")
         // we launch this async in case we need to wait for the updateJob to complete
         launch(CommonPool)
         {
@@ -182,6 +188,13 @@ object KStack {
     fun setLogFunction(fnc : LogFunction)
     {
         kLog = fnc
+    }
+
+    fun setClientAppEnvironment(env : String)
+    {
+        if(!isInitialized)
+            throw IllegalStateException("init() was not called")
+        clientAppInfo.environment = env
     }
 
     fun setTranslationClass(translationClass : Class<*>)
