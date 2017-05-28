@@ -92,13 +92,12 @@ object KStack {
         }
 
     // Public interface --------------------------------------------------------------
-    fun init(appContext : Context, appId : String, appKey : String, env : String = "development", debug : Boolean = false)
+    fun init(appContext : Context, appId : String, appKey : String, debug : Boolean = false)
     {
         if(isInitialized)
             return
         KStack.appContext = appContext
         clientAppInfo = ClientAppInfo(appContext)
-        clientAppInfo.environment = env
         kLog(TAG, "Client App Info: package = ${clientAppInfo.packageName}, versionName = ${clientAppInfo.versionName}, versionCode = ${clientAppInfo.versionCode}")
         KStack.appId = appId
         KStack.appKey = appKey
@@ -190,13 +189,6 @@ object KStack {
         kLog = fnc
     }
 
-    fun setClientAppEnvironment(env : String)
-    {
-        if(!isInitialized)
-            throw IllegalStateException("init() was not called")
-        clientAppInfo.environment = env
-    }
-
     fun setTranslationClass(translationClass : Class<*>)
     {
         translationManager.setTranslationClass(translationClass)
@@ -268,8 +260,8 @@ object KStack {
             {
                 jsonTranslations = parseAndSave(StoreId.TRANSLATIONS.name, backendManager.getAllTranslationsAsync().await())
             }
-            kLog(TAG, "jsonLanguages = ${jsonLanguages?.toString(4) ?: "null"}")
-            kLog(TAG, "jsonTranslations = ${jsonTranslations?.toString(4) ?: "null"}")
+            //kLog(TAG, "jsonLanguages = ${jsonLanguages?.toString(4) ?: "null"}")
+            //kLog(TAG, "jsonTranslations = ${jsonTranslations?.toString(4) ?: "null"}")
         }
     }
 

@@ -13,7 +13,6 @@ class ClientAppInfo(context : Context) {
     val packageName : String = context.packageName
     val versionName : String
     val versionCode : Int
-    var environment : String = "development"
 
     init {
         val pInfo = context.packageManager.getPackageInfo(packageName, 0)
