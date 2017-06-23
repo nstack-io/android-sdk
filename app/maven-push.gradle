@@ -1,5 +1,6 @@
 apply plugin: 'signing'
 apply plugin: 'maven'
+apply plugin: 'io.codearte.nexus-staging'
 
 // Username & password for Sonatype, stored in gradle.properties
 def _ossrhUsername = System.getenv('NEXUS_USERNAME')
@@ -16,6 +17,10 @@ def _archivesBaseName = 'kstack'
 
 def _name = 'KStack Library'
 def _description = 'nstack.io library for translations, update management and more.'
+
+nexusStaging {
+    packageGroup = "dk.nodes"
+}
 
 afterEvaluate { project ->
     uploadArchives {
