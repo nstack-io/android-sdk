@@ -13,7 +13,7 @@ object HttpCacheProvider {
     fun provideCache(context : Context) : Cache?
     {
         try {
-            val cacheDirectory = context.getCacheDir()
+            val cacheDirectory = context.cacheDir
             val cacheSize = 10 * 1024 * 1024 // 10 MiB
             val cache = Cache(cacheDirectory, cacheSize.toLong())
             return cache

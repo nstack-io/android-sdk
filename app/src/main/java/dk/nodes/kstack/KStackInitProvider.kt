@@ -9,6 +9,12 @@ import android.util.Log
 
 /**
  * Created by Christian on 7/6/2017.
+ * Takes advantage of the fact that a ContentProvider has access to the context of the client app
+ * Looks-up the appId and apiKey from the manifest meta-data, so in your app's build-gradle, add
+ * the placeholders there in the defaultconfig; for example:
+ * manifestPlaceholders = [
+ *      appId:"IFeoifIMFIUFN8FfynFNLKJFiKLIFhUIFfnF",
+ *      apiKey:"oingiuyNyfng7y8NUYbnfgutyguMUim09hb"]
  * @author   Bison
  * @since    05/01/17.
  */
@@ -16,7 +22,7 @@ class KStackInitProvider : ContentProvider() {
     val TAG = javaClass.kotlin.simpleName
 
     override fun onCreate(): Boolean {
-        Log.i(TAG, "NStack init provider onCreate")
+//        Log.i(TAG, "NStack init provider onCreate")
         try {
             val ai = context!!.packageManager.getApplicationInfo(context!!.packageName, PackageManager.GET_META_DATA)
             val bundle = ai.metaData
