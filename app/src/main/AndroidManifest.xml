@@ -2,5 +2,15 @@
     package="dk.nodes.kstack">
 
     <application
-        android:theme="@style/AppTheme" />
+        android:theme="@style/AppTheme">
+
+        <provider
+            android:authorities="${applicationId}.NStackInitProvider"
+            android:name=".KStackInitProvider"
+            android:exported="false" />
+
+        <meta-data android:name="dk.nodes.nstack.appId" android:value="${appId}" />
+        <meta-data android:name="dk.nodes.nstack.apiKey" android:value="${apiKey}" />
+
+    </application>
 </manifest>

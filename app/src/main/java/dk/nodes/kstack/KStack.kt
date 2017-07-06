@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.support.v7.app.AlertDialog
 import dk.nodes.kstack.appopen.AppOpenSettings
 import dk.nodes.kstack.appopen.AppUpdate
@@ -24,7 +25,7 @@ import kotlin.collections.HashMap
  * Created by bison on 22-05-2017.
  */
 
-// log function definiton, yay typedef is back :D
+// log function defintion, yay typedef is back :D
 typealias LogFunction = (tag : String, msg : String) -> Unit
 
 enum class UpdateType {
@@ -88,6 +89,9 @@ object KStack {
 
     val deviceLocale: String
         get() {
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                return Locale.getDefault().toString().replace("_", "-")
+            }
             return Locale.getDefault().toLanguageTag()
         }
 
@@ -217,7 +221,7 @@ object KStack {
         val data = translations.getJSONObject("data")
         val iterator = data.keys()
         while (iterator.hasNext()) {
-            var langTag = iterator.next()
+            val langTag = iterator.next()
             kLog(TAG, langTag)
 
             if(locale.toLowerCase().contentEquals(langTag.toLowerCase()))
