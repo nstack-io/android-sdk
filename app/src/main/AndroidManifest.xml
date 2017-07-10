@@ -5,7 +5,7 @@
         android:theme="@style/AppTheme">
 
         <provider
-            android:authorities="${applicationId}.NStackInitProvider"
+            android:authorities="${applicationId}.KStackInitProvider"
             android:name=".KStackInitProvider"
             android:exported="false" />
 
