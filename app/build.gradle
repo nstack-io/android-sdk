@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply from: 'maven-push.gradle'
+//apply from: 'maven-push.gradle'
 
 android {
     compileSdkVersion 25
@@ -11,6 +11,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder"]
     }
     buildTypes {
         release {
