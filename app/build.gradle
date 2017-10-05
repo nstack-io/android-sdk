@@ -6,7 +6,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -46,7 +46,7 @@ task installArchives(type: Upload) {
         mavenDeployer {
             pom.groupId = 'dk.nodes.kstack'
             pom.artifactId = 'kstack'
-            pom.version = '0.2-LOCAL'
+            pom.version = '0.3-LOCAL'
             repository url: repositories.mavenLocal().url
         }
     }
