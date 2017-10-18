@@ -76,7 +76,7 @@ object KStack {
     var currentLocale : String? = null
         set(value) {
             field = value
-            kLog(TAG, "Current locale set to $value")
+            //kLog(TAG, "Current locale set to $value")
         }
 
     var debug : Boolean = false
@@ -137,11 +137,20 @@ object KStack {
             // if Update job is still running, wait for it
             updateJob?.join()
             val response = backendManager.postAppOpen(appOpenSettings, currentLocale ?: deviceLocale).await()
-            if(response.isSuccessful)
-                parseAppOpenResponse(response)
-            launch(UI)
+            if(response != null) {
+                if (response.isSuccessful)
+                    parseAppOpenResponse(response)
+                launch(UI)
+                {
+                    callback(response.isSuccessful)
+                }
+            }
+            else
             {
-                callback(response.isSuccessful)
+                launch(UI)
+                {
+                    callback(false)
+                }
             }
         }
     }
@@ -232,20 +241,22 @@ object KStack {
         }
     }
 
-    private fun parseAndSave(key : String, response : Response) : JSONObject?
+    private fun parseAndSave(key : String, response : Response?) : JSONObject?
     {
-        if(response.isSuccessful)
-        {
-            try {
-                val obj : JSONObject = JSONObject(response.body()?.string())
-                store.save(key, obj, {
-                    kLog(TAG, "Saved $key to JsonStore")
-                })
-                return obj
-            }
-            catch (e : JSONException)
+        response?.let {
+            if(response.isSuccessful)
             {
-                e.printStackTrace()
+                try {
+                    val obj : JSONObject = JSONObject(response.body()?.string())
+                    store.save(key, obj, {
+                        kLog(TAG, "Saved $key to JsonStore")
+                    })
+                    return obj
+                }
+                catch (e : JSONException)
+                {
+                    e.printStackTrace()
+                }
             }
         }
         return null
@@ -277,7 +288,7 @@ object KStack {
             val data : JSONObject = obj.getJSONObject("data")
             // set current locale
             currentLocale = obj.getJSONObject("meta").getJSONObject("language").getString("locale")
-            kLog(TAG, "AppOpen response = ${data.toString(4)}")
+            //kLog(TAG, "AppOpen response = ${data.toString(4)}")
             val translate : JSONObject? = data.getJSONObject("translate")
             if(translate != null)
                 translationManager.parseTranslations(translate)
