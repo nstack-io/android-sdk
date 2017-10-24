@@ -1,5 +1,6 @@
 package dk.nodes.kstack
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -54,6 +55,7 @@ internal var kLog : LogFunction = fun (tag, msg) {
     println("$tag : $msg")
 }
 
+@SuppressLint("StaticFieldLeak")
 object KStack {
     val TAG = "KStack"
     private lateinit var appContext : Context
