@@ -1,9 +1,9 @@
-package dk.nodes.kstack.store
+package dk.nodes.nstack.store
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import dk.nodes.kstack.kLog
+import dk.nodes.nstack.kotlin.nLog
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI
@@ -36,7 +36,7 @@ class PrefJsonStore(context : Context) : JsonStore {
                 return json_obj
             }
             else
-                kLog(TAG, "Could not load $key, key does not exist")
+                nLog(TAG, "Could not load $key, key does not exist")
         }
         catch (e : JSONException)
         {

@@ -1,7 +1,7 @@
-package dk.nodes.kstack.providers
+package dk.nodes.nstack.providers
 
 import android.content.Context
-import dk.nodes.kstack.kLog
+import dk.nodes.nstack.kotlin.nLog
 import okhttp3.Cache
 
 /**
@@ -18,7 +18,7 @@ object HttpCacheProvider {
             val cache = Cache(cacheDirectory, cacheSize.toLong())
             return cache
         } catch (e: Exception) {
-            kLog(TAG, e.toString())
+            nLog(TAG, e.toString())
         }
         return null
     }

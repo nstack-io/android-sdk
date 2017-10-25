@@ -1,4 +1,4 @@
-package dk.nodes.kstack
+package dk.nodes.nstack.kotlin
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -7,13 +7,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.support.v7.app.AlertDialog
-import dk.nodes.kstack.appopen.AppOpenSettings
-import dk.nodes.kstack.appopen.AppUpdate
-import dk.nodes.kstack.providers.HttpCacheProvider
-import dk.nodes.kstack.providers.HttpClientProvider
-import dk.nodes.kstack.translate.TranslationManager
-import dk.nodes.kstack.store.JsonStore
-import dk.nodes.kstack.store.PrefJsonStore
+import dk.nodes.nstack.R
+import dk.nodes.nstack.kotlin.appopen.AppOpenSettings
+import dk.nodes.nstack.kotlin.appopen.AppUpdate
+import dk.nodes.nstack.providers.HttpCacheProvider
+import dk.nodes.nstack.providers.HttpClientProvider
+import dk.nodes.nstack.translate.TranslationManager
+import dk.nodes.nstack.store.JsonStore
+import dk.nodes.nstack.store.PrefJsonStore
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import okhttp3.Response
@@ -21,10 +22,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
-
-/**
- * Created by bison on 22-05-2017.
- */
 
 // log function defintion, yay typedef is back :D
 typealias LogFunction = (tag : String, msg : String) -> Unit
@@ -51,13 +48,13 @@ typealias AppOpenCallback = (success: Boolean) -> Unit
 /*
     Default implementation of internal logger
 */
-internal var kLog : LogFunction = fun (tag, msg) {
+internal var nLog: LogFunction = fun (tag, msg) {
     println("$tag : $msg")
 }
 
 @SuppressLint("StaticFieldLeak")
-object KStack {
-    val TAG = "KStack"
+object NStack {
+    val TAG = "NStack"
     private lateinit var appContext : Context
     var appId : String = ""
     var appKey : String = ""
@@ -78,7 +75,7 @@ object KStack {
     var currentLocale : String? = null
         set(value) {
             field = value
-            //kLog(TAG, "Current locale set to $value")
+            //nLog(TAG, "Current locale set to $value")
         }
 
     var debug : Boolean = false
@@ -102,17 +99,17 @@ object KStack {
     {
         if(isInitialized)
             return
-        KStack.appContext = appContext
+        NStack.appContext = appContext
         clientAppInfo = ClientAppInfo(appContext)
-        kLog(TAG, "Client App Info: package = ${clientAppInfo.packageName}, versionName = ${clientAppInfo.versionName}, versionCode = ${clientAppInfo.versionCode}")
-        KStack.appId = appId
-        KStack.appKey = appKey
-        kLog(TAG, "AppId = $appId, AppKey = $appKey")
+        nLog(TAG, "Client App Info: package = ${clientAppInfo.packageName}, versionName = ${clientAppInfo.versionName}, versionCode = ${clientAppInfo.versionCode}")
+        NStack.appId = appId
+        NStack.appKey = appKey
+        nLog(TAG, "AppId = $appId, AppKey = $appKey")
         backendManager = BackendManager(HttpClientProvider.provideHttpClient(HttpCacheProvider.provideCache(appContext), debug))
         store = PrefJsonStore(appContext)
         appOpenSettings = AppOpenSettings(appContext)
         isInitialized = true
-        KStack.debug = debug
+        NStack.debug = debug
 
         updateCache()
         async(CommonPool)
@@ -126,7 +123,7 @@ object KStack {
                 updateTranslationClass(jsonTranslations!!)
         }
 
-        kLog(TAG, "Just ran updateCacheAsync")
+        nLog(TAG, "Just ran updateCacheAsync")
 
     }
 
@@ -176,13 +173,13 @@ object KStack {
                     val builder = AlertDialog.Builder(activity, R.style.znstack_DialogStyle)
                     builder.setTitle(appUpdate?.title)
                     builder.setMessage(appUpdate?.message)
-                    builder.setPositiveButton(appUpdate?.positiveBtn ?: "Ok", {dialog, which ->
+                    builder.setPositiveButton(appUpdate?.positiveBtn ?: "Ok", { dialog, which ->
                         try {
                             val i = Intent(Intent.ACTION_VIEW, Uri.parse(appUpdate?.link))
                             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             appContext.startActivity(i)
                         } catch (e: Exception) {
-                            kLog(TAG, e.message ?: "Exception opening google play")
+                            nLog(TAG, e.message ?: "Exception opening google play")
                         }
                     })
                     .setCancelable(!(appUpdate?.force ?: false))
@@ -201,7 +198,7 @@ object KStack {
 
     fun setLogFunction(fnc : LogFunction)
     {
-        kLog = fnc
+        nLog = fnc
     }
 
     fun setTranslationClass(translationClass : Class<*>)
@@ -222,22 +219,22 @@ object KStack {
             val lang : Language = Language(json_lang.getInt("id"), json_lang.getString("name"), json_lang.getString("locale"), json_lang.getString("direction"))
             localeLanguageMap[lang.locale] = lang
         }
-        kLog(TAG, "Language map = $localeLanguageMap")
+        nLog(TAG, "Language map = ${localeLanguageMap}")
     }
 
     private fun updateTranslationClass(translations : JSONObject)
     {
         val locale = currentLocale ?: deviceLocale
-        kLog(TAG, "Attempting to update translation class with locale $locale")
+        nLog(TAG, "Attempting to update translation class with locale $locale")
         val data = translations.getJSONObject("data")
         val iterator = data.keys()
         while (iterator.hasNext()) {
             val langTag = iterator.next()
-            kLog(TAG, langTag)
+            nLog(TAG, langTag)
 
             if(locale.toLowerCase().contentEquals(langTag.toLowerCase()))
             {
-                kLog(TAG, "Found matching locale in stored translations, overriding baked in language with $langTag")
+                nLog(TAG, "Found matching locale in stored translations, overriding baked in language with $langTag")
                 translationManager.parseTranslations(data.getJSONObject(langTag))
             }
         }
@@ -251,7 +248,7 @@ object KStack {
                 try {
                     val obj : JSONObject = JSONObject(response.body()?.string())
                     store.save(key, obj, {
-                        kLog(TAG, "Saved $key to JsonStore")
+                        nLog(TAG, "Saved $key to JsonStore")
                     })
                     return obj
                 }
@@ -277,8 +274,6 @@ object KStack {
             {
                 jsonTranslations = parseAndSave(StoreId.TRANSLATIONS.name, backendManager.getAllTranslationsAsync().await())
             }
-            //kLog(TAG, "jsonLanguages = ${jsonLanguages?.toString(4) ?: "null"}")
-            //kLog(TAG, "jsonTranslations = ${jsonTranslations?.toString(4) ?: "null"}")
         }
     }
 
@@ -290,7 +285,6 @@ object KStack {
             val data : JSONObject = obj.getJSONObject("data")
             // set current locale
             currentLocale = obj.getJSONObject("meta").getJSONObject("language").getString("locale")
-            //kLog(TAG, "AppOpen response = ${data.toString(4)}")
             val translate : JSONObject? = data.getJSONObject("translate")
             if(translate != null)
                 translationManager.parseTranslations(translate)

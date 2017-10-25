@@ -1,4 +1,4 @@
-package dk.nodes.kstack
+package dk.nodes.nstack.kotlin
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -18,7 +18,7 @@ import android.util.Log
  * @author   Bison
  * @since    05/01/17.
  */
-class KStackInitProvider : ContentProvider() {
+class NStackInitProvider : ContentProvider() {
     val TAG = javaClass.kotlin.simpleName
 
     override fun onCreate(): Boolean {
@@ -30,7 +30,7 @@ class KStackInitProvider : ContentProvider() {
                 val appId = bundle.getString("dk.nodes.nstack.appId")
                 val apiKey = bundle.getString("dk.nodes.nstack.apiKey")
                 Log.d(TAG, "Read appId = $appId apiKey = $apiKey")
-                KStack.init(context, appId, apiKey)
+                NStack.init(context, appId, apiKey)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed to load meta-data, NameNotFound: " + e.message)

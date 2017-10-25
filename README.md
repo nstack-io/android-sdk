@@ -1,4 +1,4 @@
-# KStack
+# nStack Kotlin
 Minimalistic reimplementation of NStack in kotlin with coroutines.
 Does a decent job of showcasing a lot of language features.
 
@@ -14,41 +14,41 @@ fire version control immediately after appopen.
 
 Initialize library
 ```
-KStack.init(this, "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW", "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke")
-KStack.setTranslationClass(Translation::class.java)
+NStack.init(this, "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW", "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke")
+NStack.setTranslationClass(Translation::class.java)
 ```
 
 ## Init in debug
 
 Initialize the library in debug mode (if its a debug build):
 ```
-KStack.setLogFunction { tag, msg -> Log.e(tag, msg) }
-KStack.init(this, "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW", "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke", BuildConfig.DEBUG)
-KStack.setTranslationClass(Translation::class.java)
+NStack.setLogFunction { tag, msg -> Log.e(tag, msg) }
+NStack.init(this, "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW", "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke", BuildConfig.DEBUG)
+NStack.setTranslationClass(Translation::class.java)
 ```
 
 Debug can mode can also be enabled post initialization by setting the debug property:
 ```
-KStack.debug = true
+NStack.debug = true
 ```
 
 ## AppOpen
 
 Minimal:
 ```
-KStack.appOpen()
+NStack.appOpen()
 ```
 
 If you care about the outcome or want to run code afterwards:
 ```
-KStack.appOpen({success -> Log.e("debug", "appopen success = $success") })
+NStack.appOpen({success -> Log.e("debug", "appopen success = $success") })
 ```
 
 ## VersionControl
 Version control example. Version control automatically waits for appopen. So if you never call
 appopen, it will never run
 ```
-KStack.versionControl(this@MainActivity, {type, builder ->
+NStack.versionControl(this@MainActivity, {type, builder ->
     when(type)
     {
         UpdateType.UPDATE -> builder?.show()

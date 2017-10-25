@@ -1,4 +1,4 @@
-package dk.nodes.kstack.store
+package dk.nodes.nstack.store
 
 import kotlinx.coroutines.experimental.Deferred
 import org.json.JSONObject

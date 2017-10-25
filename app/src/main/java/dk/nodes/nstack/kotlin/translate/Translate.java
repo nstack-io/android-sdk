@@ -1,4 +1,4 @@
-package dk.nodes.kstack.translate;
+package dk.nodes.nstack.kotlin.translate;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package dk.nodes.kstack.appopen
+package dk.nodes.nstack.kotlin.appopen
 
 import org.json.JSONObject
 
