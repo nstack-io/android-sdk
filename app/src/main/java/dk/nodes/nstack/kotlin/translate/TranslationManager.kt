@@ -1,6 +1,7 @@
-package dk.nodes.kstack.translate
+package dk.nodes.nstack.translate
 
-import dk.nodes.kstack.kLog
+import dk.nodes.nstack.kotlin.nLog
+import dk.nodes.nstack.kotlin.translate.Translate
 import org.json.JSONObject
 
 /**
@@ -52,7 +53,7 @@ class TranslationManager() {
             val field = sectionClass.getField(sectionKey)
             return field.get(null).toString()
         } catch (e: Exception) {
-            kLog("", "sections findValue failed on key: " + key + ". Exception -> " + e.toString())
+            nLog("", "sections findValue failed on key: " + key + ". Exception -> " + e.toString())
             throw IllegalArgumentException()
         }
 
@@ -77,7 +78,7 @@ class TranslationManager() {
                     }
                 }
             } catch (e: Exception) {
-                kLog("", "Parsing failed for section -> " + sectionKey + " | " + e.toString())
+                nLog("", "Parsing failed for section -> " + sectionKey + " | " + e.toString())
             }
 
         }
@@ -89,8 +90,8 @@ class TranslationManager() {
             field.isAccessible = true
             field.set(null, value)
         } catch (e: Exception) {
-            kLog("", e.message ?: "")
-            kLog("TranslationManager", "Error updating field: $key : $value")
+            nLog("", e.message ?: "")
+            nLog("TranslationManager", "Error updating field: $key : $value")
         }
 
     }

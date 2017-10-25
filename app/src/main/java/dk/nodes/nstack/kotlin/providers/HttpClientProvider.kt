@@ -1,4 +1,4 @@
-package dk.nodes.kstack.providers
+package dk.nodes.nstack.providers
 
 /**
  * Created by joso on 09/08/16.

@@ -1,7 +1,6 @@
-package dk.nodes.kstack.providers
+package dk.nodes.nstack.providers
 
-import android.os.Build
-import dk.nodes.kstack.KStack
+import dk.nodes.nstack.kotlin.NStack
 
 /**
  * Created by joso on 08/10/15.
@@ -14,8 +13,8 @@ class NStackInterceptor : okhttp3.Interceptor {
         val newRequest = originalRequest.newBuilder()
                 //Commented this out because it was causing issues with the cached languageHeader
                 //.header("Accept-Language", NStack.getStack().getSelectedLanguageHeader())
-                .header("X-Application-Id", KStack.appId)
-                .header("X-Rest-Api-Key", KStack.appKey)
+                .header("X-Application-Id", NStack.appId)
+                .header("X-Rest-Api-Key", NStack.appKey)
                 .build()
 
         return chain.proceed(newRequest)

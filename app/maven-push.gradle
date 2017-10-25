@@ -11,11 +11,11 @@ allprojects { ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile
 allprojects { ext."signing.password" = System.getenv('password') }
 
 // Artifact settings
-def _group = 'dk.nodes.kstack'
+def _group = 'dk.nodes.nstack'
 def _version = '1.0'
-def _archivesBaseName = 'kstack'
+def _archivesBaseName = 'nstack-kotlin'
 
-def _name = 'KStack Library'
+def _name = 'NStack Kotlin Library'
 def _description = 'nstack.io library for translations, update management and more.'
 
 nexusStaging {
@@ -44,12 +44,12 @@ afterEvaluate { project ->
                     name _name
                     packaging 'aar'
                     description _description
-                    url 'https://github.com/nodes-android/kstack'
+                    url 'https://github.com/nodes-android/nstack-kotlin'
                     inceptionYear '2017'
 
                     scm {
-                        url 'https://github.com/nodes-android/kstack'
-                        connection 'scm:https://github.com/nodes-android/kstack.git'
+                        url 'https://github.com/nodes-android/nstack-kotlin'
+                        connection 'scm:https://github.com/nodes-android/nstack-kotlin.git'
                     }
 
                     licenses {
@@ -69,7 +69,7 @@ afterEvaluate { project ->
 
                     issueManagement {
                         system 'GitHub issues'
-                        url 'https://github.com/nodes-android/nstack/issues'
+                        url 'https://github.com/nodes-android/nstack-kotlin/issues'
                     }
                 }
             }

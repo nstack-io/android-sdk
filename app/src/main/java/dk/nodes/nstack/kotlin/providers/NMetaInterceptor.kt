@@ -1,7 +1,7 @@
-package dk.nodes.kstack.providers
+package dk.nodes.nstack.providers
 
 import android.os.Build
-import dk.nodes.kstack.KStack
+import dk.nodes.nstack.kotlin.NStack
 
 /**
  * Created by joso on 08/10/15.
@@ -13,7 +13,7 @@ class NMetaInterceptor(val environment : String = "development") : okhttp3.Inter
 
         val newRequest = originalRequest.newBuilder()
                 .header("Accept", "application/vnd.nodes.v1+json")
-                .header("N-Meta", "android;${environment};${KStack.clientAppInfo.versionName} (${KStack.clientAppInfo.versionCode});${Build.VERSION.RELEASE};${Build.MODEL}")
+                .header("N-Meta", "android;${environment};${NStack.clientAppInfo.versionName} (${NStack.clientAppInfo.versionCode});${Build.VERSION.RELEASE};${Build.MODEL}")
                 .build()
 
         return chain.proceed(newRequest)

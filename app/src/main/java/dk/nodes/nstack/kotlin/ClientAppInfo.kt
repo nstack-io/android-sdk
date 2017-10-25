@@ -1,9 +1,6 @@
-package dk.nodes.kstack
+package dk.nodes.nstack.kotlin
 
 import android.content.Context
-import android.R.attr.versionName
-import android.content.pm.PackageInfo
-
 
 
 /**

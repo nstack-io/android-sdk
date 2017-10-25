@@ -1,6 +1,6 @@
-package dk.nodes.kstack
+package dk.nodes.nstack.kotlin
 
-import dk.nodes.kstack.appopen.AppOpenSettings
+import dk.nodes.nstack.kotlin.appopen.AppOpenSettings
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
@@ -22,7 +22,7 @@ class BackendManager(var client: OkHttpClient) {
         }
         catch(e : Exception)
         {
-            kLog(TAG, "Exception: $e.message")
+            nLog(TAG, "Exception: $e.message")
             null
         }
     }
@@ -37,7 +37,7 @@ class BackendManager(var client: OkHttpClient) {
         }
         catch(e : Exception)
         {
-            kLog(TAG, "Exception: $e.message")
+            nLog(TAG, "Exception: $e.message")
             null
         }
     }
@@ -60,7 +60,7 @@ class BackendManager(var client: OkHttpClient) {
         }
         catch(e : Exception)
         {
-            kLog(TAG, "Exception: $e.message")
+            nLog(TAG, "Exception: $e.message")
             null
         }
     }

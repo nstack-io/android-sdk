@@ -10,8 +10,6 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
         manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder"]
     }
     buildTypes {
@@ -23,10 +21,6 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19.1'
@@ -34,7 +28,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.squareup.okhttp3:okhttp:3.8.0'
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
-    testCompile 'junit:junit:4.12'
 }
 
 task installArchives(type: Upload) {
@@ -42,8 +35,8 @@ task installArchives(type: Upload) {
     configuration = configurations['archives']
     repositories {
         mavenDeployer {
-            pom.groupId = 'dk.nodes.kstack'
-            pom.artifactId = 'kstack'
+            pom.groupId = 'dk.nodes.nstack'
+            pom.artifactId = 'nstack-kotlin'
             pom.version = '1.0-LOCAL'
             repository url: repositories.mavenLocal().url
         }
