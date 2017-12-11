@@ -30,6 +30,8 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
 }
 
+apply plugin: 'maven'
+
 task installArchives(type: Upload) {
     description "Installs the artifacts to the local Maven repository."
     configuration = configurations['archives']
