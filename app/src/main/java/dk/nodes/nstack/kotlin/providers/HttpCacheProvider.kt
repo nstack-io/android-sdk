@@ -1,17 +1,13 @@
-package dk.nodes.nstack.providers
+package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
 import dk.nodes.nstack.kotlin.nLog
 import okhttp3.Cache
 
-/**
- * Created by bison on 23-05-2017.
- */
 object HttpCacheProvider {
-    val TAG = HttpCacheProvider.javaClass.simpleName
+    private val TAG = HttpCacheProvider::class.simpleName!!
 
-    fun provideCache(context : Context) : Cache?
-    {
+    fun provideCache(context: Context): Cache? {
         try {
             val cacheDirectory = context.cacheDir
             val cacheSize = 10 * 1024 * 1024 // 10 MiB

@@ -1,10 +1,7 @@
-package dk.nodes.nstack.providers
+package dk.nodes.nstack.kotlin.providers
 
 import dk.nodes.nstack.kotlin.NStack
 
-/**
- * Created by joso on 08/10/15.
- */
 class NStackInterceptor : okhttp3.Interceptor {
     @Throws(java.io.IOException::class)
     override fun intercept(chain: okhttp3.Interceptor.Chain): okhttp3.Response {

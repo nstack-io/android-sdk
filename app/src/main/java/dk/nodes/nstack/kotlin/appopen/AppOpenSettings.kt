@@ -6,9 +6,6 @@ import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.nLog
 import java.util.*
 
-/**
- * Created by bison on 25-05-2017.
- */
 class AppOpenSettings(context : Context) {
     val TAG : String = "AppOpenSettings"
     val prefs : SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
