@@ -1,9 +1,12 @@
-package dk.nodes.nstack.store
+package dk.nodes.nstack.kotlin.store
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.nLog
+import dk.nodes.nstack.kotlin.store.JsonStore
+import dk.nodes.nstack.kotlin.store.LoadCallback
+import dk.nodes.nstack.kotlin.store.SaveCallback
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI
@@ -12,12 +15,9 @@ import kotlinx.coroutines.experimental.launch
 import org.json.JSONException
 import org.json.JSONObject
 
-/**
- * Created by bison on 24-05-2017.
- */
 class PrefJsonStore(context : Context) : JsonStore {
-    val TAG = "PrefsJsonStore"
-    val prefs : SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    private val tag = "PrefsJsonStore"
+    private val prefs : SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     override fun save(key: String, obj: JSONObject, callback: SaveCallback) {
         async(CommonPool) {
@@ -36,7 +36,7 @@ class PrefJsonStore(context : Context) : JsonStore {
                 return json_obj
             }
             else
-                nLog(TAG, "Could not load $key, key does not exist")
+                nLog(tag, "Could not load $key, key does not exist")
         }
         catch (e : JSONException)
         {

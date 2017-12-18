@@ -7,80 +7,67 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.support.v7.app.AlertDialog
+import android.util.Log
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.appopen.AppOpenSettings
 import dk.nodes.nstack.kotlin.appopen.AppUpdate
-import dk.nodes.nstack.providers.HttpCacheProvider
-import dk.nodes.nstack.providers.HttpClientProvider
-import dk.nodes.nstack.translate.TranslationManager
-import dk.nodes.nstack.store.JsonStore
-import dk.nodes.nstack.store.PrefJsonStore
-import kotlinx.coroutines.experimental.*
+import dk.nodes.nstack.kotlin.models.Language
+import dk.nodes.nstack.kotlin.util.LocaleUtils
+import dk.nodes.nstack.kotlin.models.StoreId
+import dk.nodes.nstack.kotlin.models.UpdateType
+import dk.nodes.nstack.kotlin.providers.HttpCacheProvider
+import dk.nodes.nstack.kotlin.providers.HttpClientProvider
+import dk.nodes.nstack.kotlin.store.JsonStore
+import dk.nodes.nstack.kotlin.store.PrefJsonStore
+import dk.nodes.nstack.kotlin.translate.TranslationManager
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import okhttp3.Response
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
 
-// log function defintion, yay typedef is back :D
-typealias LogFunction = (tag : String, msg : String) -> Unit
-
-enum class UpdateType {
-    UPDATE,
-    FORCE_UPDATE,
-    //CHANGELOG, <-- fuck you changelog, nobody use you!!
-    NOTHING
-}
-
-enum class StoreId
-{
-    LANGUAGES,
-    TRANSLATIONS
-}
-
-// data/model class for storing information about available languages
-data class Language (var id : Int, var name : String, var locale : String, var direction : String)
-
-typealias VersionControlCallback = (type : UpdateType, builder : AlertDialog.Builder?) -> Unit
-typealias AppOpenCallback = (success: Boolean) -> Unit
-
-/*
-    Default implementation of internal logger
-*/
-internal var nLog: LogFunction = fun (tag, msg) {
-    println("$tag : $msg")
-}
-
 @SuppressLint("StaticFieldLeak")
 object NStack {
     val TAG = "NStack"
-    private lateinit var appContext : Context
-    var appId : String = ""
-    var appKey : String = ""
-    var isInitialized : Boolean = false
-    private lateinit var backendManager : BackendManager
+    private lateinit var appContext: Context
+    var appId: String = ""
+    var appKey: String = ""
+    var isInitialized: Boolean = false
+    private lateinit var backendManager: BackendManager
     private val translationManager = TranslationManager()
-    private var updateJob : Job? = null
-    private var appOpenJob : Job? = null
+    private var updateJob: Job? = null
+    private var appOpenJob: Job? = null
     private lateinit var store: JsonStore
-    private lateinit var appOpenSettings : AppOpenSettings
-    private var jsonLanguages : JSONObject? = null
-    private var jsonTranslations : JSONObject? = null
-    private val localeLanguageMap : MutableMap<String, Language> = HashMap()
-    private var appUpdate : AppUpdate? = null
-    lateinit var clientAppInfo : ClientAppInfo
+    private lateinit var appOpenSettings: AppOpenSettings
+    private var jsonLanguages: JSONObject? = null
+    private var jsonTranslations: JSONObject? = null
+    private val localeLanguageMap: MutableMap<String, Language> = HashMap()
+    private var appUpdate: AppUpdate? = null
+    lateinit var clientAppInfo: ClientAppInfo
 
     // Properties with custom setters/getters ---------------------------------------------------
-    var currentLocale : String? = null
+    var currentLocale: String? = null
         set(value) {
             field = value
             //nLog(TAG, "Current locale set to $value")
         }
 
-    var debug : Boolean = false
+    fun getCurrentLocale(): Locale {
+        return LocaleUtils.getLocalFromString(localeString = currentLocale)
+    }
+
+    fun getAvailableLanguages(): MutableMap<String, Language> {
+        return localeLanguageMap
+    }
+
+    var debug: Boolean = false
         set(value) {
-            if(!isInitialized)
+            if (!isInitialized)
                 throw IllegalStateException("init() was not called")
             field = value
             backendManager.client = HttpClientProvider.provideHttpClient(HttpCacheProvider.provideCache(appContext), value)
@@ -88,16 +75,15 @@ object NStack {
 
     val deviceLocale: String
         get() {
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 return Locale.getDefault().toString().replace("_", "-")
             }
             return Locale.getDefault().toLanguageTag()
         }
 
     // Public interface --------------------------------------------------------------
-    fun init(appContext : Context, appId : String, appKey : String, debug : Boolean = false)
-    {
-        if(isInitialized)
+    fun init(appContext: Context, appId: String, appKey: String, debug: Boolean = false) {
+        if (isInitialized)
             return
         NStack.appContext = appContext
         clientAppInfo = ClientAppInfo(appContext)
@@ -116,10 +102,10 @@ object NStack {
         {
             updateJob?.join()
             // build map of available nstack languages indexed by language tag
-            if(jsonLanguages != null)
+            if (jsonLanguages != null)
                 buildLocaleLanguageMap(jsonLanguages!!)
             // if device language matches a downloaded or cached language, update translation class
-            if(jsonTranslations != null)
+            if (jsonTranslations != null)
                 updateTranslationClass(jsonTranslations!!)
         }
 
@@ -127,25 +113,22 @@ object NStack {
 
     }
 
-    fun appOpen(callback: AppOpenCallback = {})
-    {
-        if(!isInitialized)
+    fun appOpen(callback: AppOpenCallback = {}) {
+        if (!isInitialized)
             throw IllegalStateException("init() was not called")
         appOpenJob = launch(CommonPool)
         {
             // if Update job is still running, wait for it
             updateJob?.join()
             val response = backendManager.postAppOpen(appOpenSettings, currentLocale ?: deviceLocale).await()
-            if(response != null) {
+            if (response != null) {
                 if (response.isSuccessful)
                     parseAppOpenResponse(response)
                 launch(UI)
                 {
                     callback(response.isSuccessful)
                 }
-            }
-            else
-            {
+            } else {
                 launch(UI)
                 {
                     callback(false)
@@ -154,9 +137,8 @@ object NStack {
         }
     }
 
-    fun versionControl(activity : Activity, callback : VersionControlCallback)
-    {
-        if(!isInitialized)
+    fun versionControl(activity: Activity, callback: VersionControlCallback) {
+        if (!isInitialized)
             throw IllegalStateException("init() was not called")
         // we launch this async in case we need to wait for the updateJob to complete
         launch(CommonPool)
@@ -168,8 +150,7 @@ object NStack {
 
             launch(UI)
             {
-                if(appUpdate?.isUpdate ?: false)
-                {
+                if (appUpdate?.isUpdate ?: false) {
                     val builder = AlertDialog.Builder(activity, R.style.znstack_DialogStyle)
                     builder.setTitle(appUpdate?.title)
                     builder.setMessage(appUpdate?.message)
@@ -182,48 +163,65 @@ object NStack {
                             nLog(TAG, e.message ?: "Exception opening google play")
                         }
                     })
-                    .setCancelable(!(appUpdate?.force ?: false))
+                            .setCancelable(!(appUpdate?.force ?: false))
 
-                    if(appUpdate?.force ?: false)
+                    if (appUpdate?.force ?: false)
                         callback(UpdateType.FORCE_UPDATE, builder)
                     else
                         callback(UpdateType.UPDATE, builder)
-                }
-                else    // we never got the app open object for some reason or isUpdate was false
+                } else    // we never got the app open object for some reason or isUpdate was false
                     callback(UpdateType.NOTHING, null)
 
             }
         }
     }
 
-    fun setLogFunction(fnc : LogFunction)
-    {
+    fun setLogFunction(fnc: LogFunction) {
         nLog = fnc
     }
 
-    fun setTranslationClass(translationClass : Class<*>)
-    {
+    fun setTranslationClass(translationClass: Class<*>) {
         translationManager.setTranslationClass(translationClass)
     }
 
-    fun translate(view: Any)
-    {
+    fun translate(view: Any) {
         translationManager.translate(view)
+    }
+
+    fun setLanguage(locale: Locale) {
+        Log.e(TAG, "Setting Language: " + locale.toString())
+
+        this.currentLocale = locale.toString()
+
+        updateTranslationClass(jsonTranslations!!)
+    }
+
+    fun setLanguage(locale: String) {
+        var newLocale = locale
+
+        if (newLocale.contains("_")) {
+            newLocale = newLocale.replace("_", "-")
+        }
+
+        Log.e(TAG, "Setting Language: " + newLocale)
+
+        this.currentLocale = newLocale
+
+        updateTranslationClass(jsonTranslations!!)
     }
 
     // private fun -------------------------------------------------------------------------------
     private fun buildLocaleLanguageMap(languages: JSONObject) {
         val lang_array = languages.getJSONArray("data")
         repeat(lang_array.length()) { i ->
-            val json_lang : JSONObject = lang_array.getJSONObject(i)
-            val lang : Language = Language(json_lang.getInt("id"), json_lang.getString("name"), json_lang.getString("locale"), json_lang.getString("direction"))
+            val json_lang: JSONObject = lang_array.getJSONObject(i)
+            val lang: Language = Language(json_lang.getInt("id"), json_lang.getString("name"), json_lang.getString("locale"), json_lang.getString("direction"))
             localeLanguageMap[lang.locale] = lang
         }
         nLog(TAG, "Language map = ${localeLanguageMap}")
     }
 
-    private fun updateTranslationClass(translations : JSONObject)
-    {
+    private fun updateTranslationClass(translations: JSONObject) {
         val locale = currentLocale ?: deviceLocale
         nLog(TAG, "Attempting to update translation class with locale $locale")
         val data = translations.getJSONObject("data")
@@ -232,28 +230,23 @@ object NStack {
             val langTag = iterator.next()
             nLog(TAG, langTag)
 
-            if(locale.toLowerCase().contentEquals(langTag.toLowerCase()))
-            {
+            if (locale.toLowerCase().contentEquals(langTag.toLowerCase())) {
                 nLog(TAG, "Found matching locale in stored translations, overriding baked in language with $langTag")
                 translationManager.parseTranslations(data.getJSONObject(langTag))
             }
         }
     }
 
-    private fun parseAndSave(key : String, response : Response?) : JSONObject?
-    {
+    private fun parseAndSave(key: String, response: Response?): JSONObject? {
         response?.let {
-            if(response.isSuccessful)
-            {
+            if (response.isSuccessful) {
                 try {
-                    val obj : JSONObject = JSONObject(response.body()?.string())
+                    val obj: JSONObject = JSONObject(response.body()?.string())
                     store.save(key, obj, {
                         nLog(TAG, "Saved $key to JsonStore")
                     })
                     return obj
-                }
-                catch (e : JSONException)
-                {
+                } catch (e: JSONException) {
                     e.printStackTrace()
                 }
             }
@@ -266,33 +259,27 @@ object NStack {
             jsonLanguages = store.loadDeferred(StoreId.LANGUAGES.name).await()
             jsonTranslations = store.loadDeferred(StoreId.TRANSLATIONS.name).await()
 
-            if(jsonLanguages == null)
-            {
+            if (jsonLanguages == null) {
                 jsonLanguages = parseAndSave(StoreId.LANGUAGES.name, backendManager.getAllLanguagesAsync().await())
             }
-            if(jsonTranslations == null)
-            {
+            if (jsonTranslations == null) {
                 jsonTranslations = parseAndSave(StoreId.TRANSLATIONS.name, backendManager.getAllTranslationsAsync().await())
             }
         }
     }
 
-
-
     private fun parseAppOpenResponse(response: Response) {
         try {
-            val obj : JSONObject = JSONObject(response.body()?.string())
-            val data : JSONObject = obj.getJSONObject("data")
+            val obj: JSONObject = JSONObject(response.body()?.string())
+            val data: JSONObject = obj.getJSONObject("data")
             // set current locale
             currentLocale = obj.getJSONObject("meta").getJSONObject("language").getString("locale")
-            val translate : JSONObject? = data.getJSONObject("translate")
-            if(translate != null)
+            val translate: JSONObject? = data.getJSONObject("translate")
+            if (translate != null)
                 translationManager.parseTranslations(translate)
-            if(data.has("update"))
+            if (data.has("update"))
                 appUpdate = AppUpdate(data.getJSONObject("update"))
-        }
-        catch (e : JSONException)
-        {
+        } catch (e: JSONException) {
             e.printStackTrace()
         }
     }

@@ -1,7 +1,6 @@
-package dk.nodes.nstack.translate
+package dk.nodes.nstack.kotlin.translate
 
 import dk.nodes.nstack.kotlin.nLog
-import dk.nodes.nstack.kotlin.translate.Translate
 import org.json.JSONObject
 
 /**

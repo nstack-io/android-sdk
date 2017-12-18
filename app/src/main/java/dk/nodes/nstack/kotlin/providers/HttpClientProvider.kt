@@ -1,10 +1,6 @@
-package dk.nodes.nstack.providers
+package dk.nodes.nstack.kotlin.providers
 
-/**
- * Created by joso on 09/08/16.
- */
 object HttpClientProvider {
-
     fun provideHttpClient(cache: okhttp3.Cache?, debug: Boolean): okhttp3.OkHttpClient {
         val client = okhttp3.OkHttpClient()
                 .newBuilder()
