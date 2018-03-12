@@ -1,7 +1,7 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
-import dk.nodes.nstack.kotlin.nLog
+import dk.nodes.nstack.kotlin.util.nLog
 import okhttp3.Cache
 
 object HttpCacheProvider {

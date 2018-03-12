@@ -3,7 +3,7 @@ package dk.nodes.nstack.kotlin.appopen
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import dk.nodes.nstack.kotlin.nLog
+import dk.nodes.nstack.kotlin.util.nLog
 import java.util.*
 
 class AppOpenSettings(context : Context) {
@@ -38,7 +38,10 @@ class AppOpenSettings(context : Context) {
 
             lastUpdated = Date(prefs.getLong(KEY.LASTUPDATED.name, 0))
         } catch (e: Exception) {
-            nLog(TAG, e.message ?: "Unknown exception obtaining versionName from PackageManager")
+            nLog(TAG,
+                                             e.message
+                                                     ?: "Unknown exception obtaining versionName from PackageManager"
+            )
             throw IllegalStateException("Could not obtain versionName from PackageManager")
         }
     }

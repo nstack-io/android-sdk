@@ -1,16 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dk.nodes.nstack">
 
-    <application
-        android:theme="@style/AppTheme">
-
-        <provider
-            android:authorities="${applicationId}.KStackInitProvider"
-            android:name="dk.nodes.nstack.kotlin.NStackInitProvider"
-            android:exported="false" />
-
-        <meta-data android:name="dk.nodes.nstack.appId" android:value="${appId}" />
-        <meta-data android:name="dk.nodes.nstack.apiKey" android:value="${apiKey}" />
-
+    <application android:theme="@style/AppTheme">
+        <meta-data
+            android:name="dk.nodes.nstack.appId"
+            android:value="${appId}" />
+        <meta-data
+            android:name="dk.nodes.nstack.apiKey"
+            android:value="${apiKey}" />
     </application>
 </manifest>
