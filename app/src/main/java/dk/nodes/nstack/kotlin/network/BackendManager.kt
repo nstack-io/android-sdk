@@ -1,6 +1,7 @@
-package dk.nodes.nstack.kotlin
+package dk.nodes.nstack.kotlin.network
 
 import dk.nodes.nstack.kotlin.appopen.AppOpenSettings
+import dk.nodes.nstack.kotlin.util.nLog
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
@@ -55,7 +56,9 @@ class BackendManager(var client: OkHttpClient) {
                     .header("Accept-Language", acceptLanguage)
                     .post(formBuilder.build())
                     .build()
+
             val response = client.newCall(request).execute()
+
             response
         }
         catch(e : Exception)
