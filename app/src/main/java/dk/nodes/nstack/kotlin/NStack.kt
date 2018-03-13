@@ -54,9 +54,9 @@ object NStack {
         }
 
 
-    // Listeners
-    var onLanguageChanged: ((Locale) -> Unit)? = null
-    var onLanguagesChanged: (() -> Unit)? = null
+    // Listener Lists
+    private var onLanguageChangedList: ArrayList<((Locale) -> Unit)?> = arrayListOf()
+    private var onLanguagesChangedList: ArrayList<(() -> Unit)?> = arrayListOf()
 
     // States
     var translationClass: Class<*>?
@@ -209,7 +209,7 @@ object NStack {
             cacheLanguages = assetCacheManager.loadTranslations()
         }
 
-        onLanguagesChanged?.invoke()
+        onLanguagesChanged()
     }
 
     /**
@@ -234,7 +234,7 @@ object NStack {
 
                             networkLanguages = it.toLanguageMap()
 
-                            onLanguagesChanged?.invoke()
+                            onLanguagesChanged()
                         },
                         {
                             NLog.i(TAG, "Error Loading Network Translations")
@@ -272,11 +272,43 @@ object NStack {
     private fun onLanguageChanged() {
         val selectedLanguage = languages[language] ?: return
         translationManager.parseTranslations(selectedLanguage)
-        onLanguageChanged?.invoke(language)
+        onLanguageChanged(language)
     }
 
     private fun onDebugModeChanged() {
         NLog.enableLogging = debugMode
+    }
+
+    /**
+     * Listener Methods
+     */
+
+    private fun onLanguageChanged(locale: Locale) {
+        onLanguageChangedList.forEach {
+            it?.invoke(locale)
+        }
+    }
+
+    private fun onLanguagesChanged() {
+        onLanguagesChangedList.forEach {
+            it?.invoke()
+        }
+    }
+
+    fun addLanguageChangeListener(listener: (Locale) -> Unit) {
+        onLanguageChangedList.add(listener)
+    }
+
+    fun removeLanguageChangeListener(listener: (Locale) -> Unit) {
+        onLanguageChangedList.remove(listener)
+    }
+
+    fun addLanguagesChangeListener(listener: () -> Unit) {
+        onLanguagesChangedList.add(listener)
+    }
+
+    fun removeLanguagesChangeListener(listener: () -> Unit) {
+        onLanguagesChangedList.remove(listener)
     }
 
     /**
