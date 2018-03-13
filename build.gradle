@@ -10,10 +10,12 @@ buildscript {
         jcenter()
         mavenLocal()
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.9.0"
+        classpath "dk.nodes.nstack:translation:1.0-LOCAL"
     }
 }
 
