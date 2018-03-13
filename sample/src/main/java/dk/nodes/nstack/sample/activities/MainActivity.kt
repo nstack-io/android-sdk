@@ -23,11 +23,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        NStack.onLanguageChanged = {
+        NStack.addLanguageChangeListener{
             setupTranslations()
         }
 
-        NStack.onLanguagesChanged = {
+        NStack.addLanguagesChangeListener {
             getLanguages()
         }
     }
