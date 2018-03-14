@@ -9,7 +9,7 @@ import java.util.*
 class AssetCacheManager(private val context: Context) {
 
     fun loadTranslations(): HashMap<Locale, JSONObject> {
-        var languageMap = hashMapOf<Locale, JSONObject>()
+        val languageMap: HashMap<Locale, JSONObject>
         val cacheString = getFileAsStringFromCache()
 
         languageMap = cacheString.toLanguageMap()
