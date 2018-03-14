@@ -14,7 +14,8 @@ NStack.translationClass = Translation::class.java
 NStack.init(this)
 ```
 
-#####Optional Functions
+##### Optional Parameters
+
 ` NStack.debugMode = true` - Enables debug mode for the library (Outputs messages to log)
 ` NStack.setRefreshPeriod(60, TimeUnit.MINUTES)` - Allows you to set the period for how often NStack should check for updates
 
