@@ -1,19 +1,19 @@
 package dk.nodes.nstack.kotlin.managers
 
-import com.google.gson.JsonObject
 import dk.nodes.nstack.kotlin.util.NLog
+import org.json.JSONObject
 
 class TranslationManager {
-    fun parseTranslations(jsonObject: JsonObject) {
-        val keys = jsonObject.keySet()
+    fun parseTranslations(jsonObject: JSONObject) {
+        val keys = jsonObject.keys()
 
         keys.forEach {
-            val sectionObject = jsonObject.getAsJsonObject(it)
+            val sectionObject = jsonObject.getJSONObject(it)
             updateSection(it, sectionObject)
         }
     }
 
-    private fun updateSection(sectionKey: String, sectionObject: JsonObject) {
+    private fun updateSection(sectionKey: String, sectionObject: JSONObject) {
         try {
             var sectionFixedKey = sectionKey
 
@@ -23,13 +23,13 @@ class TranslationManager {
 
             val sectionClass = Class.forName(translationClass!!.name + "$" + sectionFixedKey)
 
-            val sectionKeys = sectionObject.keySet()
+            val sectionKeys = sectionObject.keys()
 
             sectionKeys.forEach {
-                val value = sectionObject.getAsJsonPrimitive(it)
+                val value = sectionObject.getString(it)
 
-                if (value.isString) {
-                    updateField(sectionClass, it, value.asString)
+                if (value != null) {
+                    updateField(sectionClass, it, value)
                 }
             }
         } catch (e: Exception) {

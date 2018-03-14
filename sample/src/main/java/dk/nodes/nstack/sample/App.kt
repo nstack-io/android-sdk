@@ -9,12 +9,14 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
+
         NStack.debugMode = true
         NStack.translationClass = Translation::class.java
         NStack.setRefreshPeriod(1, TimeUnit.MINUTES)
-
         NStack.init(this)
 
-        println("Current Selected Language: " + NStack.language)
+
+        NStack.appOpen { success ->  }
+        NStack.onAppUpdateChanged = { appUpdate -> }
     }
 }

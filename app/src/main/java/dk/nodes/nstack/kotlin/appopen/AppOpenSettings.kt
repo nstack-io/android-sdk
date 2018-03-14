@@ -6,9 +6,9 @@ import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.util.nLog
 import java.util.*
 
-class AppOpenSettings(context : Context) {
-    val TAG : String = "AppOpenSettings"
-    val prefs : SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+class AppOpenSettings(context: Context) {
+    val TAG: String = "AppOpenSettings"
+    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     val platform = "android"
     var guid: String
     var version: String
@@ -25,22 +25,18 @@ class AppOpenSettings(context : Context) {
     init {
         try {
             guid = prefs.getString(KEY.GUID.name, UUID.randomUUID().toString())
-
-            version = /* if(prefs.contains(KEY.VERSION.name))
-                prefs.getString(KEY.VERSION.name, "")
-            else */
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName
-
-            oldVersion = if(prefs.contains(KEY.OLDVERSION.name))
+            version = context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            oldVersion = if (prefs.contains(KEY.OLDVERSION.name)) {
                 prefs.getString(KEY.OLDVERSION.name, "")
-            else
+            } else {
                 version
-
+            }
             lastUpdated = Date(prefs.getLong(KEY.LASTUPDATED.name, 0))
         } catch (e: Exception) {
-            nLog(TAG,
-                                             e.message
-                                                     ?: "Unknown exception obtaining versionName from PackageManager"
+            nLog(
+                    TAG,
+                    e.message
+                            ?: "Unknown exception obtaining versionName from PackageManager"
             )
             throw IllegalStateException("Could not obtain versionName from PackageManager")
         }
