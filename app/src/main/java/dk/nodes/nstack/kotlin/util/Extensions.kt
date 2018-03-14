@@ -1,8 +1,5 @@
 package dk.nodes.nstack.kotlin.util
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import dk.nodes.nstack.kotlin.models.UpdateType
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,9 +24,6 @@ fun Date.toFormattedString(): String {
 typealias LogFunction = (tag: String, msg: String) -> Unit
 
 typealias AppOpenCallback = (success: Boolean) -> Unit
-typealias VersionControlCallback = (updateType: UpdateType) -> Unit
-typealias SaveCallback = (success: Boolean) -> Unit
-typealias LoadCallback = (data: JSONObject?) -> Unit
 
 internal var nLog: LogFunction = fun(tag, msg) {
     println("$tag : $msg")
@@ -48,21 +42,19 @@ fun String.toLocale(): Locale {
     return Locale(language, country)
 }
 
-fun String.toLanguageMap(): HashMap<Locale, JsonObject> {
-    val languageMap = hashMapOf<Locale, JsonObject>()
+fun String.toLanguageMap(): HashMap<Locale, JSONObject> {
+    val languageMap = hashMapOf<Locale, JSONObject>()
 
-    val jsonElement = JsonParser().parse(this) as? JsonObject ?: return languageMap
+    var jsonRoot: JSONObject? = JSONObject(this)
 
-    var jsonObject = jsonElement.asJsonObject
-
-    if (jsonObject.has("data")) {
-        jsonObject = jsonObject.getAsJsonObject("data")
+    if (jsonRoot?.has("data") == true) {
+        jsonRoot = jsonRoot.optJSONObject("data")
     }
 
-    jsonObject.keySet()
-            .forEach { key ->
-                val language = jsonObject[key]
-                if (language is JsonObject) {
+    jsonRoot?.keys()
+            ?.forEach { key ->
+                val language = jsonRoot[key]
+                if (language is JSONObject) {
                     val localeKey = key.toLocale()
                     languageMap[localeKey] = language
                 }

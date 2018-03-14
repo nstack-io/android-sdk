@@ -1,10 +1,15 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
+import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.appopen.AppOpenSettings
+import dk.nodes.nstack.kotlin.appopen.AppUpdate
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
+import dk.nodes.nstack.kotlin.util.parseFromString
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import okhttp3.FormBody
 import okhttp3.Request
 
 class NetworkManager(context: Context) {
@@ -12,10 +17,8 @@ class NetworkManager(context: Context) {
     private val client = HttpClientProvider.getHttpClient(context)
     private val defaultRequestUrl = "https://nstack.io/api/v1/translate/mobile/keys?all=true&flat=false"
 
-    var customRequestUrl: String? = null
-
     private fun getRequestUrl(): String {
-        return customRequestUrl ?: defaultRequestUrl
+        return NStack.customRequestUrl ?: defaultRequestUrl
     }
 
     fun loadTranslations(): Single<String> {
@@ -40,28 +43,33 @@ class NetworkManager(context: Context) {
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-//    fun postAppOpen(settings: AppOpenSettings, acceptLanguage: String): Deferred<Response?> = async(
-//            CommonPool
-//    ) {
-//        try {
-//            val formBuilder = FormBody.Builder()
-//                    .add("guid", settings.guid)
-//                    .add("version", settings.version)
-//                    .add("old_version", settings.oldVersion)
-//                    .add("platform", settings.platform)
-//
-//            val request = Request.Builder()
-//                    .url("https://nstack.io/api/v1/open")
-//                    .header("Accept-Language", acceptLanguage)
-//                    .post(formBuilder.build())
-//                    .build()
-//
-//            val response = client.newCall(request).execute()
-//
-//            response
-//        } catch (e: Exception) {
-//            nLog(TAG, "Exception: $e.message")
-//            null
-//        }
-//    }
+    fun postAppOpen(settings: AppOpenSettings, acceptLanguage: String): Single<AppUpdate> {
+        return Single.create<AppUpdate> {
+            val formBuilder = FormBody.Builder()
+                    .add("guid", settings.guid)
+                    .add("version", settings.version)
+                    .add("old_version", settings.oldVersion)
+                    .add("platform", settings.platform)
+
+            val request = Request.Builder()
+                    .url("https://nstack.io/api/v1/open")
+                    .header("Accept-Language", acceptLanguage)
+                    .post(formBuilder.build())
+                    .build()
+
+            val response = client.newCall(request).execute()
+            val body = response.body()?.string()
+            val appUpdate = AppUpdate()
+
+            appUpdate.parseFromString(body ?: "")
+
+            if (body != null) {
+                it.onSuccess(appUpdate)
+            } else {
+                it.onError(Exception("Unable to parse data: $body"))
+            }
+        }
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
 }

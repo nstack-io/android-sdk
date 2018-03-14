@@ -1,15 +1,15 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
-import com.google.gson.JsonObject
 import dk.nodes.nstack.kotlin.util.toLanguageMap
+import org.json.JSONObject
 import java.util.*
 
 
 class AssetCacheManager(private val context: Context) {
 
-    fun loadTranslations(): HashMap<Locale, JsonObject> {
-        var languageMap = hashMapOf<Locale, JsonObject>()
+    fun loadTranslations(): HashMap<Locale, JSONObject> {
+        var languageMap = hashMapOf<Locale, JSONObject>()
         val cacheString = getFileAsStringFromCache()
 
         languageMap = cacheString.toLanguageMap()

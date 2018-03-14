@@ -3,12 +3,12 @@ package dk.nodes.nstack.kotlin.managers
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import com.google.gson.JsonObject
 import dk.nodes.nstack.kotlin.models.Constants
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.parseFromISO8601
 import dk.nodes.nstack.kotlin.util.toFormattedString
 import dk.nodes.nstack.kotlin.util.toLanguageMap
+import org.json.JSONObject
 import java.util.*
 
 
@@ -35,11 +35,11 @@ class PrefManager(context: Context) {
         setString(Constants.spk_languages_cache, translationString)
     }
 
-    fun getTranslations(): HashMap<Locale, JsonObject> {
+    fun getTranslations(): HashMap<Locale, JSONObject> {
         val translationString = getString(Constants.spk_languages_cache)
         val languageMap = translationString?.toLanguageMap()
 
-        NLog.d(TAG,"Getting Translations: ${languageMap?.size}")
+        NLog.d(TAG, "Getting Translations: ${languageMap?.size}")
 
         return languageMap ?: hashMapOf()
     }
