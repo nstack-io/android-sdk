@@ -1,12 +1,10 @@
-package dk.nodes.nstack.kotlin.appopen
+package dk.nodes.nstack.kotlin.models
 
 data class AppUpdate(
-        var state: String? = null,
+        var state: AppUpdateState = AppUpdateState.NONE,
         var link: String? = null,
         var versionCode: Int? = null,
         var versionName: String? = null,
-        var isUpdate: Boolean = false,
-        var force: Boolean = false,
         var title: String? = null,
         var message: String? = null,
         var positiveBtn: String? = null,

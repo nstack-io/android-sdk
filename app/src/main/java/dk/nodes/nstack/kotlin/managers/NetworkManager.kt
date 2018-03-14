@@ -2,8 +2,8 @@ package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.kotlin.appopen.AppOpenSettings
-import dk.nodes.nstack.kotlin.appopen.AppUpdate
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.parseFromString
 import io.reactivex.Single

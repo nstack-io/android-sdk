@@ -18,11 +18,11 @@ class PrefManager(context: Context) {
 
     private fun setLastUpdateDate() {
         val updateString = Date().toFormattedString()
-        setString(Constants.spk_update_time, updateString)
+        setString(Constants.spk_nstack_network_update_time, updateString)
     }
 
     fun getLastUpdateDate(): Date? {
-        val updateString = getString(Constants.spk_update_time) ?: return null
+        val updateString = getString(Constants.spk_nstack_network_update_time) ?: return null
         val updateDate = Date()
 
         updateDate.parseFromISO8601(updateString)
@@ -32,11 +32,11 @@ class PrefManager(context: Context) {
 
     fun setTranslations(translationString: String) {
         setLastUpdateDate()
-        setString(Constants.spk_languages_cache, translationString)
+        setString(Constants.spk_nstack_languages_cache, translationString)
     }
 
     fun getTranslations(): HashMap<Locale, JSONObject> {
-        val translationString = getString(Constants.spk_languages_cache)
+        val translationString = getString(Constants.spk_nstack_languages_cache)
         val languageMap = translationString?.toLanguageMap()
 
         NLog.d(TAG, "Getting Translations: ${languageMap?.size}")

@@ -3,12 +3,8 @@ package dk.nodes.nstack.kotlin
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import dk.nodes.nstack.kotlin.appopen.AppOpenSettings
-import dk.nodes.nstack.kotlin.appopen.AppUpdate
-import dk.nodes.nstack.kotlin.managers.AssetCacheManager
-import dk.nodes.nstack.kotlin.managers.NetworkManager
-import dk.nodes.nstack.kotlin.managers.PrefManager
-import dk.nodes.nstack.kotlin.managers.TranslationManager
+import dk.nodes.nstack.kotlin.models.AppUpdate
+import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.util.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.NLog
@@ -30,10 +26,10 @@ object NStack {
 
     // Internally used classes
     private var translationManager: TranslationManager = TranslationManager()
-    private lateinit var appOpenSettings: AppOpenSettings
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var clientAppInfo: ClientAppInfo
     private lateinit var networkManager: NetworkManager
+    private lateinit var appOpenSettingsManager: AppOpenSettingsManager
     private lateinit var prefManager: PrefManager
 
     // Cache Maps
@@ -136,8 +132,8 @@ object NStack {
         networkManager = NetworkManager(context)
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
+        appOpenSettingsManager = AppOpenSettingsManager(context)
         prefManager = PrefManager(context)
-        appOpenSettings = AppOpenSettings(context)
 
         loadCacheTranslations()
         loadNetworkTranslations()
@@ -169,16 +165,22 @@ object NStack {
 
         val localeString = language.toString()
 
-        NLog.d(TAG, "onAppOpened -> $localeString")
+        val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
+
+        NLog.d(TAG, "onAppOpened -> $localeString $appOpenSettings")
 
         networkManager
                 .postAppOpen(appOpenSettings, localeString)
                 .subscribe(
                         {
-                            NLog.d(TAG, "Successful: onAppOpened -> $it")
+                            NLog.d(TAG, "Successful: onAppOpened")
+
                             callback.invoke(true)
+
                             appUpdate = it
                             onAppUpdateListener?.invoke(it)
+
+                            appOpenSettingsManager.setUpdateDate()
                         },
                         {
                             NLog.e(TAG, "Error: onAppOpened")
@@ -231,11 +233,11 @@ object NStack {
         }
 
         if (appIdKey.isEmpty()) {
-            NLog.e(TAG, "Missing dk.nodes.nstack.appId-> disabling network")
+            NLog.e(TAG, "Missing dk.nodes.nstack.appId")
         }
 
         if (appApiKey.isEmpty()) {
-            NLog.e(TAG, "Missing dk.nodes.nstack.apiKey -> disabling network")
+            NLog.e(TAG, "Missing dk.nodes.nstack.apiKey")
         }
 
     }
@@ -249,12 +251,11 @@ object NStack {
      */
 
     private fun loadCacheTranslations() {
-        cacheLanguages = prefManager.getTranslations()
+        // Load our network cached data
+        networkLanguages = prefManager.getTranslations()
 
-        if (cacheLanguages.size == 0) {
-            NLog.i(TAG, "Missing Preference Cache -> Loading from assets")
-            cacheLanguages = assetCacheManager.loadTranslations()
-        }
+        // Load our asset cached data
+        cacheLanguages = assetCacheManager.loadTranslations()
 
         onLanguagesChanged()
     }
