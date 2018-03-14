@@ -25,7 +25,6 @@ NStack.init(this)
 
 Minimal:
 ```
-
 NStack.appOpen()
 ```
 
