@@ -45,8 +45,14 @@ fun String.toLocale(): Locale {
 
 fun String.toLanguageMap(): HashMap<Locale, JSONObject> {
     val languageMap = hashMapOf<Locale, JSONObject>()
+    
+    var jsonRoot: JSONObject?
 
-    var jsonRoot: JSONObject? = JSONObject(this)
+    jsonRoot = try {
+        JSONObject(this)
+    } catch (e: Exception) {
+        null
+    }
 
     if (jsonRoot?.has("data") == true) {
         jsonRoot = jsonRoot.optJSONObject("data")

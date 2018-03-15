@@ -8,8 +8,12 @@ class TranslationManager {
         val keys = jsonObject.keys()
 
         keys.forEach {
-            val sectionObject = jsonObject.getJSONObject(it)
-            updateSection(it, sectionObject)
+            val sectionObject = jsonObject.get(it)
+
+            if (sectionObject is JSONObject) {
+                updateSection(it, sectionObject)
+            }
+
         }
     }
 

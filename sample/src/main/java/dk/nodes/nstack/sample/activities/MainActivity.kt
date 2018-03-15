@@ -3,6 +3,7 @@ package dk.nodes.nstack.sample.activities
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.widget.Toast
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.AppUpdateState
 import dk.nodes.nstack.sample.R
@@ -28,10 +29,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         NStack.addLanguageChangeListener {
+            Toast.makeText(this, "Language Changed", Toast.LENGTH_SHORT).show()
             setupTranslations()
         }
 
         NStack.addLanguagesChangeListener {
+            Toast.makeText(this, "=Languages Changed=", Toast.LENGTH_SHORT).show()
             getLanguages()
         }
     }
