@@ -6,11 +6,8 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.parseFromString
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import okhttp3.FormBody
-import okhttp3.Request
+import okhttp3.*
+import java.io.IOException
 
 class NetworkManager(context: Context) {
     private val TAG = NetworkManager::class.java.simpleName
@@ -21,55 +18,60 @@ class NetworkManager(context: Context) {
         return NStack.customRequestUrl ?: defaultRequestUrl
     }
 
-    fun loadTranslations(): Single<String> {
-        return Single.create<String> {
-            val requestUrl = getRequestUrl()
+    fun loadTranslations(onSuccess: (String) -> Unit, onError: (IOException) -> Unit) {
+        val requestUrl = getRequestUrl()
 
-            val request = Request.Builder()
-                    .url(requestUrl)
-                    .build()
+        val request = Request.Builder()
+                .url(requestUrl)
+                .build()
 
-            val response = client.newCall(request).execute()
+        client
+                .newCall(request)
+                .enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        onError.invoke(e)
+                    }
 
-            val body = response.body()?.string()
+                    override fun onResponse(call: Call?, response: Response?) {
+                        val responseString = response?.body()?.string()
+                        onSuccess.invoke(responseString ?: "")
+                    }
 
-            if (body != null) {
-                it.onSuccess(body)
-            } else {
-                it.onError(Exception("Unable to parse data: $body"))
-            }
-        }
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
+                })
     }
 
-    fun postAppOpen(settings: AppOpenSettings, acceptLanguage: String): Single<AppUpdate> {
-        return Single.create<AppUpdate> {
-            val formBuilder = FormBody.Builder()
-                    .add("guid", settings.guid)
-                    .add("version", settings.version)
-                    .add("old_version", settings.oldVersion)
-                    .add("platform", settings.platform)
+    fun postAppOpen(
+            settings: AppOpenSettings,
+            acceptLanguage: String,
+            onSuccess: (AppUpdate) -> Unit,
+            onError: (IOException) -> Unit
+    ) {
+        val formBuilder = FormBody.Builder()
+                .add("guid", settings.guid)
+                .add("version", settings.version)
+                .add("old_version", settings.oldVersion)
+                .add("platform", settings.platform)
 
-            val request = Request.Builder()
-                    .url("https://nstack.io/api/v1/open")
-                    .header("Accept-Language", acceptLanguage)
-                    .post(formBuilder.build())
-                    .build()
+        val request = Request.Builder()
+                .url("https://nstack.io/api/v1/open")
+                .header("Accept-Language", acceptLanguage)
+                .post(formBuilder.build())
+                .build()
 
-            val response = client.newCall(request).execute()
-            val body = response.body()?.string()
-            val appUpdate = AppUpdate()
 
-            appUpdate.parseFromString(body ?: "")
+        client
+                .newCall(request)
+                .enqueue(object : Callback {
+                    override fun onFailure(call: Call?, e: IOException) {
+                        onError.invoke(e)
+                    }
 
-            if (body != null) {
-                it.onSuccess(appUpdate)
-            } else {
-                it.onError(Exception("Unable to parse data: $body"))
-            }
-        }
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
+                    override fun onResponse(call: Call?, response: Response?) {
+                        val appUpdate = AppUpdate()
+                        val responseString = response?.body()?.string()
+                        appUpdate.parseFromString(responseString ?: "")
+                        onSuccess.invoke(appUpdate)
+                    }
+                })
     }
 }

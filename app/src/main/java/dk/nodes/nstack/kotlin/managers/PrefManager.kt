@@ -37,6 +37,9 @@ class PrefManager(context: Context) {
 
     fun getTranslations(): HashMap<Locale, JSONObject> {
         val translationString = getString(Constants.spk_nstack_languages_cache)
+
+        NLog.d(TAG, "Getting Translations: $translationString")
+
         val languageMap = translationString?.toLanguageMap()
 
         NLog.d(TAG, "Getting Translations: ${languageMap?.size}")

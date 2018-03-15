@@ -3,8 +3,9 @@ package dk.nodes.nstack.kotlin
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import dk.nodes.nstack.kotlin.models.AppUpdate
+import android.os.Handler
 import dk.nodes.nstack.kotlin.managers.*
+import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.util.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.NLog
@@ -39,6 +40,8 @@ object NStack {
     // Internal Variables
     private var appUpdate: AppUpdate? = null
     private var refreshPeriod: Long = TimeUnit.HOURS.toMillis(1)
+
+    private var handler: Handler = Handler()
 
     /**
      * A map of all available languages keyed by their locale
@@ -170,23 +173,21 @@ object NStack {
         NLog.d(TAG, "onAppOpened -> $localeString $appOpenSettings")
 
         networkManager
-                .postAppOpen(appOpenSettings, localeString)
-                .subscribe(
-                        {
-                            NLog.d(TAG, "Successful: onAppOpened")
+                .postAppOpen(appOpenSettings, localeString,
+                             {
+                                 NLog.d(TAG, "Successful: onAppOpened")
 
-                            callback.invoke(true)
-
-                            appUpdate = it
-                            onAppUpdateListener?.invoke(it)
-
-                            appOpenSettingsManager.setUpdateDate()
-                        },
-                        {
-                            NLog.e(TAG, "Error: onAppOpened")
-                            it.printStackTrace()
-                            callback.invoke(false)
-                        }
+                                 runUiAction {
+                                     callback.invoke(true)
+                                     appUpdate = it
+                                     onAppUpdateListener?.invoke(it)
+                                     appOpenSettingsManager.setUpdateDate()
+                                 }
+                             },
+                             {
+                                 NLog.d(TAG, "Error: onAppOpened")
+                                 it.printStackTrace()
+                             }
                 )
     }
 
@@ -272,24 +273,24 @@ object NStack {
             return
         }
 
-        networkManager
-                .loadTranslations()
-                .subscribe(
-                        {
-                            NLog.i(TAG, "Successfully Loaded Network Translations")
+        networkManager.loadTranslations(
+                {
+                    NLog.i(
+                            TAG,
+                            "Successfully Loaded Network Translations"
+                    )
 
-                            prefManager.setTranslations(it)
-
-                            networkLanguages = it.toLanguageMap()
-
-                            onLanguagesChanged()
-                        },
-                        {
-                            NLog.i(TAG, "Error Loading Network Translations")
-                            networkLanguages = null
-                            it.printStackTrace()
-                        }
-                )
+                    runUiAction {
+                        prefManager.setTranslations(it)
+                        networkLanguages = it.toLanguageMap()
+                        onLanguagesChanged()
+                    }
+                },
+                {
+                    NLog.i(TAG, "Error Loading Network Translations")
+                    it.printStackTrace()
+                }
+        )
     }
 
     private fun hasRequireTimePassed(): Boolean {
@@ -382,6 +383,16 @@ object NStack {
         }
 
         return languageObject
+    }
+
+    /**
+     * Run Ui Action
+     */
+
+    fun runUiAction(action: () -> Unit) {
+        handler.post {
+            action()
+        }
     }
 
     /**
