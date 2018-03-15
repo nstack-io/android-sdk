@@ -14,6 +14,13 @@ NStack.translationClass = Translation::class.java
 NStack.init(this)
 ```
 
+## Setup
+
+Add this to gradle:
+```groovy
+compile "dk.nodes.nstack:nstack-kotlin:2.0.0"
+```
+
 ##### Optional Parameters
 
 ` NStack.debugMode = true` - Enables debug mode for the library (Outputs messages to log)
