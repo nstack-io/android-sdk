@@ -2,7 +2,7 @@
 
 buildscript {
     ext {
-        kotlin_version = '1.2.0'
+        kotlin_version = '1.2.30'
     }
 
     repositories {
@@ -15,13 +15,12 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.9.0"
-        classpath "dk.nodes.nstack:translation:1.0-LOCAL"
     }
 }
 
 allprojects {
     repositories {
-        maven { url 'https://maven.google.com' }
+        google()
         jcenter()
         mavenCentral()
         mavenLocal()
