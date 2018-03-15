@@ -10,7 +10,10 @@ class NMetaInterceptor(private val environment: String = "development") : okhttp
 
         val newRequest = originalRequest.newBuilder()
                 .header("Accept", "application/vnd.nodes.v1+json")
-                .header("N-Meta", "android;$environment;${NStack.clientAppInfo.versionName} (${NStack.clientAppInfo.versionCode});${Build.VERSION.RELEASE};${Build.MODEL}")
+                .header(
+                        "N-Meta",
+                        "android;$environment;${NStack.getAppClientInfo().versionName} (${NStack.getAppClientInfo().versionCode});${Build.VERSION.RELEASE};${Build.MODEL}"
+                )
                 .build()
 
         return chain.proceed(newRequest)
