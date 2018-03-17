@@ -33,10 +33,6 @@ class NLog {
         }
 
         fun e(tag: String, string: String) {
-            if (!enableLogging) {
-                return
-            }
-
             Log.e(tag, string)
         }
 
