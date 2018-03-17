@@ -1,3 +1,5 @@
+![nStack Badge](https://maven-badges.herokuapp.com/maven-central/dk.nodes.nstack/nstack-kotlin/badge.svg)
+
 # nStack Kotlin 2.0
 
 Updated version of nStack implemented in a more kotlin friendly way
@@ -18,7 +20,7 @@ NStack.init(this)
 
 Add this to gradle:
 ```groovy
-compile "dk.nodes.nstack:nstack-kotlin:2.0.0"
+compile "dk.nodes.nstack:nstack-kotlin:x.x.x"
 ```
 
 ##### Optional Parameters
