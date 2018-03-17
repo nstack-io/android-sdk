@@ -38,7 +38,6 @@ object NStack {
     private var cacheLanguages: HashMap<Locale, JSONObject> = hashMapOf()
 
     // Internal Variables
-    private var appUpdate: AppUpdate? = null
     private var refreshPeriod: Long = TimeUnit.HOURS.toMillis(1)
 
     private var handler: Handler = Handler()
@@ -68,10 +67,6 @@ object NStack {
      * Listener specifically for listening for any app update events
      */
     var onAppUpdateListener: ((AppUpdate) -> Unit)? = null
-        set(value) {
-            field = value
-            onAppUpdateListenerChanged()
-        }
 
     // States
     /**
@@ -179,7 +174,6 @@ object NStack {
 
                                  runUiAction {
                                      callback.invoke(true)
-                                     appUpdate = it
                                      onAppUpdateListener?.invoke(it)
                                      appOpenSettingsManager.setUpdateDate()
                                  }
@@ -324,12 +318,6 @@ object NStack {
         selectedLanguage?.let {
             translationManager.parseTranslations(it)
             onLanguageChanged(language)
-        }
-    }
-
-    private fun onAppUpdateListenerChanged() {
-        appUpdate?.let {
-            onAppUpdateListener?.invoke(it)
         }
     }
 
