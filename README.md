@@ -41,10 +41,12 @@ NStack.appOpen { success ->  }
 ```
 
 ## VersionControl
-Version control will now sent the last cached value for the updater or wait until the app opened to notify the app
-whether it should update
+Version control will send the result from `appOpen` to the listener for the application to handle
 
 Now it's up to the app to decide how you want to handle the app update status (Meaning you must create your own dialog and what not)
+
+**Note: You should set this before `appOpen`**
+
 ```
 NStack.onAppUpdateListener = { appUpdate ->
     when (appUpdate.state) {
