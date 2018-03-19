@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Handler
+import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
@@ -15,6 +16,7 @@ import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.toLanguageMap
 import dk.nodes.nstack.kotlin.util.toLocale
 import org.json.JSONObject
+import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -30,7 +32,8 @@ object NStack {
     private var appApiKey: String = ""
 
     // Internally used classes
-    private var translationManager: TranslationManager = TranslationManager()
+    private var classTranslationManager = ClassTranslationManager()
+    private var viewTranslationManager = ViewTranslationManager()
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var clientAppInfo: ClientAppInfo
     private lateinit var networkManager: NetworkManager
@@ -40,6 +43,17 @@ object NStack {
     // Cache Maps
     private var networkLanguages: HashMap<Locale, JSONObject>? = null
     private var cacheLanguages: HashMap<Locale, JSONObject> = hashMapOf()
+
+    /**
+     * Our store for ours views and their respective nstack key
+     */
+    var viewMap: HashMap<WeakReference<View>, String>
+        set(value) {
+            viewTranslationManager.viewMap = value
+        }
+        get() {
+            return viewTranslationManager.viewMap
+        }
 
     // Internal Variables
     private var refreshPeriod: Long = TimeUnit.HOURS.toMillis(1)
@@ -93,10 +107,10 @@ object NStack {
      */
     var translationClass: Class<*>?
         set(value) {
-            TranslationManager.translationClass = value
+            ClassTranslationManager.translationClass = value
         }
         get() {
-            return TranslationManager.translationClass
+            return ClassTranslationManager.translationClass
         }
     /**
      * Custom Request URL
@@ -112,6 +126,7 @@ object NStack {
             field = value
             onLanguageChanged()
         }
+
     /**
      * Return a list of all available languages
      */
@@ -168,6 +183,7 @@ object NStack {
      *
      *  This method will only care about the first front letters
      */
+
     fun setLanguageByString(localeString: String) {
         val locale = localeString.toLocale()
         language = locale
@@ -208,6 +224,14 @@ object NStack {
 
     fun setRefreshPeriod(duration: Long, timeUnit: TimeUnit) {
         this.refreshPeriod = timeUnit.toMillis(duration)
+    }
+
+    fun translate() {
+        viewTranslationManager.translate()
+    }
+
+    fun clearViewCache() {
+        viewTranslationManager.clear()
     }
 
     /**
@@ -335,8 +359,11 @@ object NStack {
     private fun onLanguageChanged() {
         val selectedLanguage = searchForLanguageByLocale(language)
 
+        NLog.d(TAG, "On Language Changed: $selectedLanguage")
+
         selectedLanguage?.let {
-            translationManager.parseTranslations(it)
+            viewTranslationManager.parseTranslations(it)
+            classTranslationManager.parseTranslations(it)
             onLanguageChanged(language)
         }
     }
@@ -397,7 +424,7 @@ object NStack {
      * Run Ui Action
      */
 
-    fun runUiAction(action: () -> Unit) {
+    private fun runUiAction(action: () -> Unit) {
         handler.post {
             action()
         }
