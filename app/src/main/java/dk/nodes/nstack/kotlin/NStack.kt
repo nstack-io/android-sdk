@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
@@ -21,7 +22,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-@SuppressLint("StaticFieldLeak")
+@SuppressLint("StaticFieldLeak","LogNotTimber")
 object NStack {
     private val TAG = "NStack"
     // Has our app been started yet?
@@ -390,13 +391,23 @@ object NStack {
      *
      * Provides both a perfect match or a fallback language and a default language
      */
+
     private fun searchForLanguageByLocale(locale: Locale): JSONObject? {
+        Log.d(TAG, "searchForLanguageByLocale: $locale")
         var languageObject: JSONObject?
+
+        Log.d(TAG, "searchForLanguageByLocale: Available Languages -> $availableLanguages")
         // TODO determine how to get a default language from nStack
         // If we don't have one single language available just return null
-        val defaultLanguage = availableLanguages.firstOrNull() ?: return null
+        val defaultLanguage = availableLanguages.firstOrNull()
+
+        if (defaultLanguage == null) {
+            Log.e(TAG, "searchForLanguageByLocale: Null Default Returning")
+            return null
+        }
 
         languageObject = if (languages.containsKey(language)) {
+            Log.i(TAG, "searchForLanguageByLocale: Found exact match returning -> $locale")
             languages[language]
         } else {
             // Search our available languages for any keys that might match
@@ -411,6 +422,10 @@ object NStack {
 
         // If after our search we still don't have a language then we should just default to our default
         if (languageObject == null) {
+            Log.e(
+                    TAG,
+                    "searchForLanguageByLocale: Unable to locate language returning default -> $locale"
+            )
             languageObject = languages[defaultLanguage]
         }
 

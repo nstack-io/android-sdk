@@ -1,8 +1,9 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.view.View
-import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toolbar
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
@@ -55,8 +56,17 @@ class ViewTranslationManager {
 
         // TODO add more types
         when (view) {
+            is Toolbar  -> {
+                view.title = translation
+                return
+            }
+
+            is EditText -> {
+                view.hint = translation
+                return
+            }
+
             is TextView -> view.text = translation
-            is Button   -> view.text = translation
         }
     }
 
@@ -116,9 +126,9 @@ class ViewTranslationManager {
      * Adds our view to our viewMap while adding the translation string as well
      */
     fun addView(weakView: WeakReference<View>, key: String) {
-        viewMap[weakView] = key
+        val view = weakView.get() ?: return
 
-        val view = weakView.get()
+        viewMap[weakView] = key
 
         updateView(view, key)
     }
