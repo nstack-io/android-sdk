@@ -44,17 +44,6 @@ object NStack {
     private var networkLanguages: HashMap<Locale, JSONObject>? = null
     private var cacheLanguages: HashMap<Locale, JSONObject> = hashMapOf()
 
-    /**
-     * Our store for ours views and their respective nstack key
-     */
-    var viewMap: HashMap<WeakReference<View>, String>
-        set(value) {
-            viewTranslationManager.viewMap = value
-        }
-        get() {
-            return viewTranslationManager.viewMap
-        }
-
     // Internal Variables
     private var refreshPeriod: Long = TimeUnit.HOURS.toMillis(1)
 
@@ -226,9 +215,17 @@ object NStack {
         this.refreshPeriod = timeUnit.toMillis(duration)
     }
 
+    /**
+     * Triggers a translation of all currently cached views
+     */
+
     fun translate() {
         viewTranslationManager.translate()
     }
+
+    /**
+     * Clears all cached views
+     */
 
     fun clearViewCache() {
         viewTranslationManager.clear()
@@ -464,5 +461,12 @@ object NStack {
 
     fun getAppApiKey(): String {
         return appApiKey
+    }
+
+    /**
+     * Exposed Adders(?)
+     */
+    fun addCachedView(weakView: WeakReference<View>, key: String) {
+        viewTranslationManager.addView(weakView, key)
     }
 }

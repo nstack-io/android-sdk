@@ -161,7 +161,7 @@ class NStackLayoutInflater extends LayoutInflater {
             return;
         }
 
-        NStack.INSTANCE.getViewMap().put(new WeakReference<>(view), nstackKey);
+        NStack.INSTANCE.addCachedView(new WeakReference<>(view), nstackKey);
     }
 
     private static class WrapperFactory implements Factory {

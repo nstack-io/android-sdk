@@ -10,7 +10,7 @@ class ViewTranslationManager {
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
      */
-    var viewMap: HashMap<WeakReference<View>, String> = hashMapOf()
+    private var viewMap: HashMap<WeakReference<View>, String> = hashMapOf()
 
     /**
      * Contains a flat map of the current selected language (Format -> sectionName_stringKey)
@@ -34,10 +34,13 @@ class ViewTranslationManager {
                 return@forEach
             }
 
-            val translationString = getTranslationByKey(it.value)
-
-            updateViewTranslation(view, translationString)
+            updateView(view, it.value)
         }
+    }
+
+    private fun updateView(view: View?, key: String) {
+        val translationString = getTranslationByKey(key)
+        updateViewTranslation(view, translationString)
     }
 
     /**
@@ -46,6 +49,10 @@ class ViewTranslationManager {
      * Should check if the view is of a type and try to add the translation
      */
     private fun updateViewTranslation(view: View?, translation: String?) {
+        if (view == null) {
+            return
+        }
+
         // TODO add more types
         when (view) {
             is TextView -> view.text = translation
@@ -70,7 +77,7 @@ class ViewTranslationManager {
      */
 
     fun parseTranslations(jsonParent: JSONObject) {
-        // Clear our langauge map
+        // Clear our language map
         language = JSONObject()
 
         // Pull our keys
@@ -106,9 +113,22 @@ class ViewTranslationManager {
     }
 
     /**
+     * Adds our view to our viewMap while adding the translation string as well
+     */
+    fun addView(weakView: WeakReference<View>, key: String) {
+        viewMap[weakView] = key
+
+        val view = weakView.get()
+
+        updateView(view, key)
+    }
+
+    /**
      * Clears the view map of any references
      */
     fun clear() {
         viewMap.clear()
     }
+
+
 }

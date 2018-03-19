@@ -110,6 +110,8 @@ When entering the key the following format should be used `sectionName_keyName`
 
 If you're using the NStack Gradle plugin a `nstack_keys.xml` should be generated containing all available keys it's suggested that you reference those keys when using this feature
 
+#### Queuing Manual Translations
+
 Once you have that setup you can trigger the translation via the following method
 
 ```
@@ -117,6 +119,14 @@ NStack.translate()
 ```
 
 **Note: Running this command is optional as the views get their translation added as they are added**
+
+#### Clearing View Cache
+
+If for whatever reason you need to clear the translate view cache you can trigger that view the following method
+
+```
+NStack.clearViewCache()
+```
 
 ## Language Listeners
 
