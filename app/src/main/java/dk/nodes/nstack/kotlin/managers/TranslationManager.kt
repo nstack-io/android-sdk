@@ -1,5 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
+import android.app.Activity
 import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
 
@@ -39,7 +40,6 @@ class TranslationManager {
         } catch (e: Exception) {
             NLog.d("", "Parsing failed for section -> " + sectionKey + " | " + e.toString())
         }
-
     }
 
     private fun updateField(classType: Class<*>, key: String, value: String) {
