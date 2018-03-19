@@ -1,10 +1,9 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.app.Activity
 import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
 
-class TranslationManager {
+class ClassTranslationManager {
     fun parseTranslations(jsonObject: JSONObject) {
         val keys = jsonObject.keys()
 
@@ -49,7 +48,7 @@ class TranslationManager {
             field.set(null, value)
         } catch (e: Exception) {
             NLog.d("", e.message ?: "")
-            NLog.d("TranslationManager", "Error updating field: $key : $value")
+            NLog.d("ClassTranslationManager", "Error updating field: $key : $value")
         }
 
     }

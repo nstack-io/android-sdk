@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Handler
+import android.util.Log
+import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
@@ -15,11 +17,12 @@ import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.toLanguageMap
 import dk.nodes.nstack.kotlin.util.toLocale
 import org.json.JSONObject
+import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-@SuppressLint("StaticFieldLeak")
+@SuppressLint("StaticFieldLeak","LogNotTimber")
 object NStack {
     private val TAG = "NStack"
     // Has our app been started yet?
@@ -30,7 +33,8 @@ object NStack {
     private var appApiKey: String = ""
 
     // Internally used classes
-    private var translationManager: TranslationManager = TranslationManager()
+    private var classTranslationManager = ClassTranslationManager()
+    private var viewTranslationManager = ViewTranslationManager()
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var clientAppInfo: ClientAppInfo
     private lateinit var networkManager: NetworkManager
@@ -93,10 +97,10 @@ object NStack {
      */
     var translationClass: Class<*>?
         set(value) {
-            TranslationManager.translationClass = value
+            ClassTranslationManager.translationClass = value
         }
         get() {
-            return TranslationManager.translationClass
+            return ClassTranslationManager.translationClass
         }
     /**
      * Custom Request URL
@@ -112,6 +116,7 @@ object NStack {
             field = value
             onLanguageChanged()
         }
+
     /**
      * Return a list of all available languages
      */
@@ -168,6 +173,7 @@ object NStack {
      *
      *  This method will only care about the first front letters
      */
+
     fun setLanguageByString(localeString: String) {
         val locale = localeString.toLocale()
         language = locale
@@ -208,6 +214,22 @@ object NStack {
 
     fun setRefreshPeriod(duration: Long, timeUnit: TimeUnit) {
         this.refreshPeriod = timeUnit.toMillis(duration)
+    }
+
+    /**
+     * Triggers a translation of all currently cached views
+     */
+
+    fun translate() {
+        viewTranslationManager.translate()
+    }
+
+    /**
+     * Clears all cached views
+     */
+
+    fun clearViewCache() {
+        viewTranslationManager.clear()
     }
 
     /**
@@ -335,8 +357,11 @@ object NStack {
     private fun onLanguageChanged() {
         val selectedLanguage = searchForLanguageByLocale(language)
 
+        NLog.d(TAG, "On Language Changed: $selectedLanguage")
+
         selectedLanguage?.let {
-            translationManager.parseTranslations(it)
+            viewTranslationManager.parseTranslations(it)
+            classTranslationManager.parseTranslations(it)
             onLanguageChanged(language)
         }
     }
@@ -366,13 +391,23 @@ object NStack {
      *
      * Provides both a perfect match or a fallback language and a default language
      */
+
     private fun searchForLanguageByLocale(locale: Locale): JSONObject? {
+        Log.d(TAG, "searchForLanguageByLocale: $locale")
         var languageObject: JSONObject?
+
+        Log.d(TAG, "searchForLanguageByLocale: Available Languages -> $availableLanguages")
         // TODO determine how to get a default language from nStack
         // If we don't have one single language available just return null
-        val defaultLanguage = availableLanguages.firstOrNull() ?: return null
+        val defaultLanguage = availableLanguages.firstOrNull()
+
+        if (defaultLanguage == null) {
+            Log.e(TAG, "searchForLanguageByLocale: Null Default Returning")
+            return null
+        }
 
         languageObject = if (languages.containsKey(language)) {
+            Log.i(TAG, "searchForLanguageByLocale: Found exact match returning -> $locale")
             languages[language]
         } else {
             // Search our available languages for any keys that might match
@@ -387,6 +422,10 @@ object NStack {
 
         // If after our search we still don't have a language then we should just default to our default
         if (languageObject == null) {
+            Log.e(
+                    TAG,
+                    "searchForLanguageByLocale: Unable to locate language returning default -> $locale"
+            )
             languageObject = languages[defaultLanguage]
         }
 
@@ -397,7 +436,7 @@ object NStack {
      * Run Ui Action
      */
 
-    fun runUiAction(action: () -> Unit) {
+    private fun runUiAction(action: () -> Unit) {
         handler.post {
             action()
         }
@@ -437,5 +476,12 @@ object NStack {
 
     fun getAppApiKey(): String {
         return appApiKey
+    }
+
+    /**
+     * Exposed Adders(?)
+     */
+    fun addCachedView(weakView: WeakReference<View>, key: String) {
+        viewTranslationManager.addView(weakView, key)
     }
 }

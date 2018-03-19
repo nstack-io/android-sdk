@@ -1,5 +1,7 @@
 package dk.nodes.nstack.kotlin.util
 
+import android.view.View
+import android.view.ViewGroup
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -20,6 +22,25 @@ fun Date.toFormattedString(): String {
     return format.format(this)
 }
 
+/**
+ * Gets all children (And their children too) views if the view is a view group
+ */
+fun View.getChildrenViews(): ArrayList<View> {
+    val children = arrayListOf<View>()
+
+    if (this is ViewGroup) {
+        // Go through our views
+        for (i in 0..(childCount - 1)) {
+            val childView = getChildAt(i)
+            // Add Self
+            children.add(childView)
+            // Omg recursion
+            children.addAll(childView.getChildrenViews())
+        }
+    }
+
+    return children
+}
 
 // log function defintion, yay typedef is back :D
 typealias LogFunction = (tag: String, msg: String) -> Unit
@@ -45,7 +66,7 @@ fun String.toLocale(): Locale {
 
 fun String.toLanguageMap(): HashMap<Locale, JSONObject> {
     val languageMap = hashMapOf<Locale, JSONObject>()
-    
+
     var jsonRoot: JSONObject?
 
     jsonRoot = try {
