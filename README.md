@@ -92,6 +92,42 @@ NStack.setLanguageByString("en-gb")
 
 Allows you to set the language by string the format must follow either the `language-country` or `language_country` format otherwise it just won't do anything
 
+## Xml Translation
+
+Starting in version `2.0.2` NStack-Kotlin now supports XML based translations
+
+```
+   <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        nstack:key="@string/nstack_attachments_lockedMessage" />
+```
+
+The following field should be used to set the nstack key `nstack:key="{keyGoesHere}"`
+
+When entering the key the following format should be used `sectionName_keyName`
+
+If you're using the NStack Gradle plugin a `nstack_keys.xml` should be generated containing all available keys it's suggested that you reference those keys when using this feature
+
+#### Queuing Manual Translations
+
+Once you have that setup you can trigger the translation via the following method
+
+```
+NStack.translate()
+```
+
+**Note: Running this command is optional as the views get their translation added as they are added**
+
+#### Clearing View Cache
+
+If for whatever reason you need to clear the translate view cache you can trigger that view the following method
+
+```
+NStack.clearViewCache()
+```
+
 ## Language Listeners
 
 ```
