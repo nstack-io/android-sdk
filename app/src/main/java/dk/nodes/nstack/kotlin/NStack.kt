@@ -1,7 +1,10 @@
 package dk.nodes.nstack.kotlin
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Handler
 import dk.nodes.nstack.kotlin.managers.*
@@ -14,6 +17,7 @@ import dk.nodes.nstack.kotlin.util.toLocale
 import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.TimeUnit
+
 
 @SuppressLint("StaticFieldLeak")
 object NStack {
@@ -43,6 +47,20 @@ object NStack {
     private var handler: Handler = Handler()
 
     /**
+     * Device Change Broadcast Listener
+     *
+     * Will listen for any changes in the device locale and send out the new locale for the user to do whatever they need to with
+     */
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            val newLocale = context.resources.configuration.locale
+            if (autoChangeLanguage) {
+                language = newLocale
+            }
+        }
+    }
+
+    /**
      * A map of all available languages keyed by their locale
      *
      * Will return the network languages if available if not it will return the
@@ -63,6 +81,7 @@ object NStack {
     // Listener Lists
     private var onLanguageChangedList: ArrayList<((Locale) -> Unit)?> = arrayListOf()
     private var onLanguagesChangedList: ArrayList<(() -> Unit)?> = arrayListOf()
+
     /**
      * Listener specifically for listening for any app update events
      */
@@ -110,6 +129,11 @@ object NStack {
         }
 
     /**
+     * If flag is set to true this will auto change NStack's language when the device's locale is changed
+     */
+    var autoChangeLanguage: Boolean = false
+
+    /**
      * Class Start
      */
 
@@ -122,10 +146,7 @@ object NStack {
         }
 
         getApplicationInfo(context)
-
-        if (!checkForValidKeys()) {
-            throw IllegalStateException("Missing app keys in manifest")
-        }
+        registerLocaleChangeBroadcastListener(context)
 
         networkManager = NetworkManager(context)
         assetCacheManager = AssetCacheManager(context)
@@ -189,20 +210,11 @@ object NStack {
         this.refreshPeriod = timeUnit.toMillis(duration)
     }
 
-
     /**
-     * Method used to check for weather there were valid keys in the manifest or not
+     * Call this method when you're done using the NStack Library
      */
-    private fun checkForValidKeys(): Boolean {
-        if (appIdKey.isEmpty()) {
-            return false
-        }
-
-        if (appApiKey.isEmpty()) {
-            return false
-        }
-
-        return true
+    fun destroy(context: Context) {
+        context.unregisterReceiver(broadcastReceiver)
     }
 
     /**
@@ -237,6 +249,10 @@ object NStack {
 
     }
 
+    private fun registerLocaleChangeBroadcastListener(context: Context) {
+        val filter = IntentFilter(Intent.ACTION_LOCALE_CHANGED)
+        context.registerReceiver(broadcastReceiver, filter)
+    }
     /**
      * Loaders
      */
@@ -252,7 +268,11 @@ object NStack {
         // Load our asset cached data
         cacheLanguages = assetCacheManager.loadTranslations()
 
+        // Broadcast our languages changed
         onLanguagesChanged()
+
+        // Broadcast our default language changed
+        onLanguageChanged()
     }
 
     /**
