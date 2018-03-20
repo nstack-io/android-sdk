@@ -22,7 +22,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-@SuppressLint("StaticFieldLeak","LogNotTimber")
+@SuppressLint("StaticFieldLeak", "LogNotTimber")
 object NStack {
     private val TAG = "NStack"
     // Has our app been started yet?
@@ -108,6 +108,7 @@ object NStack {
      */
     var customRequestUrl: String? = null
 
+    var defaultLanguage: Locale = Locale.US
     /**
      * Used for settings or getting the current locale selected for language
      */
@@ -394,20 +395,35 @@ object NStack {
 
     private fun searchForLanguageByLocale(locale: Locale): JSONObject? {
         Log.d(TAG, "searchForLanguageByLocale: $locale")
-        var languageObject: JSONObject?
 
-        Log.d(TAG, "searchForLanguageByLocale: Available Languages -> $availableLanguages")
-        // TODO determine how to get a default language from nStack
-        // If we don't have one single language available just return null
-        val defaultLanguage = availableLanguages.firstOrNull()
+        // Search for our exact language
+        var languageJson = searchForLocale(locale)
 
-        if (defaultLanguage == null) {
-            Log.e(TAG, "searchForLanguageByLocale: Null Default Returning")
-            return null
+        // If that fails then we search for the default language
+        if (languageJson == null) {
+            NLog.w(TAG, "Locating language failed $locale, Trying default $defaultLanguage")
+            languageJson = searchForLocale(defaultLanguage)
+            language = defaultLanguage
         }
 
-        languageObject = if (languages.containsKey(language)) {
-            Log.i(TAG, "searchForLanguageByLocale: Found exact match returning -> $locale")
+        // And if all else fails then we just pick the first available language and hope for the best
+        if (languageJson == null) {
+            val firstAvailableLanguage = availableLanguages.firstOrNull()
+
+            NLog.w(TAG, "Locating Default language failed $defaultLanguage")
+            NLog.w(TAG, "Trying first available language $firstAvailableLanguage")
+
+            firstAvailableLanguage?.let {
+                languageJson = searchForLocale(it)
+                language = firstAvailableLanguage
+            }
+        }
+
+        return languageJson
+    }
+
+    private fun searchForLocale(locale: Locale): JSONObject? {
+        return if (languages.containsKey(language)) {
             languages[language]
         } else {
             // Search our available languages for any keys that might match
@@ -419,17 +435,6 @@ object NStack {
                     // Return the first value or null
                     .firstOrNull()
         }
-
-        // If after our search we still don't have a language then we should just default to our default
-        if (languageObject == null) {
-            Log.e(
-                    TAG,
-                    "searchForLanguageByLocale: Unable to locate language returning default -> $locale"
-            )
-            languageObject = languages[defaultLanguage]
-        }
-
-        return languageObject
     }
 
     /**
