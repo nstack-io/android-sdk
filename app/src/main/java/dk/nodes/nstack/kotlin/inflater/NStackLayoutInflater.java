@@ -142,7 +142,7 @@ class NStackLayoutInflater extends LayoutInflater {
 
     private void processView(String name, Context context, View view, AttributeSet attrs) {
         if (view == null) {
-            Log.i(TAG, "processView -> Null View Returning " + name);
+            Log.d(TAG, "processView -> Null View Returning " + name);
             return;
         }
         // Get our typed array
@@ -157,7 +157,7 @@ class NStackLayoutInflater extends LayoutInflater {
         }
 
         if (nstackKey == null || nstackKey.isEmpty()) {
-            Log.i(TAG, "processView -> Invalid NStack Key Returning " + name);
+            Log.e(TAG, "processView -> Invalid NStack Key Returning " + name);
             return;
         }
 

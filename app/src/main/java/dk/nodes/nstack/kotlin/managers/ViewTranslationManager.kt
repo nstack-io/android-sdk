@@ -77,9 +77,13 @@ class ViewTranslationManager {
      * (This is because of JSONObject)
      */
     private fun getTranslationByKey(key: String): String? {
-        val value: String? = language.getString(key)
-        // Don't inline me
-        return value
+        val hasValue = language.has(key)
+
+        return if (hasValue) {
+            language.getString(key)
+        } else {
+            null
+        }
     }
 
     /**
