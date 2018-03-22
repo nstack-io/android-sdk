@@ -6,12 +6,15 @@ import android.widget.TextView
 import android.widget.Toolbar
 import org.json.JSONObject
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 
 class ViewTranslationManager {
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
+     *
+     * We shouldn't need a lock when using the ConcurrentHashMap
      */
-    private var viewMap: HashMap<WeakReference<View>, String> = hashMapOf()
+    private var viewMap: ConcurrentHashMap<WeakReference<View>, String> = ConcurrentHashMap()
 
     /**
      * Contains a flat map of the current selected language (Format -> sectionName_stringKey)
@@ -24,18 +27,19 @@ class ViewTranslationManager {
 
     /**
      * Iterates through each view in the language map and tries to apply translation for the matching key
+     * and removes garbage collected views
      */
     private fun updateViews() {
-        viewMap.forEach {
-            val view = it.key.get()
-
+        val it : MutableIterator<Map.Entry<WeakReference<View>, String>> = viewMap.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            val view = entry.key.get()
             // If our view is null we should remove it from the map and return
             if (view == null) {
-                viewMap.remove(it.key)
-                return@forEach
+                it.remove()
             }
-
-            updateView(view, it.value)
+            else
+                updateView(view, entry.value)
         }
     }
 
