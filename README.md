@@ -97,11 +97,12 @@ Allows you to set the language by string the format must follow either the `lang
 Starting in version `2.0.2` NStack-Kotlin now supports XML based translations
 
 ```
-   <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        nstack:key="@string/nstack_attachments_lockedMessage" />
+nstack:key="{sectionName_keyName}"
+nstack:text="{sectionName_keyName}"
+nstack:hint="{sectionName_keyName}"
+nstack:description="{sectionName_keyName}"
+nstack:textOn="{sectionName_keyName}"
+nstack:textOff="{sectionName_keyName}"
 ```
 
 The following field should be used to set the nstack key `nstack:key="{keyGoesHere}"`
