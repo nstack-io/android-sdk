@@ -12,6 +12,7 @@ import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.toLanguageMap
@@ -128,7 +129,7 @@ object NStack {
     /**
      * Enable/Disable debug mode
      */
-    var debugMode: Boolean = false
+    var debugMode: Boolean = true
         set(value) {
             field = value
             onDebugModeChanged()
@@ -144,7 +145,7 @@ object NStack {
      */
 
     fun init(context: Context) {
-        NLog.i(TAG, "NStack initializing")
+        NLog.i(TAG, "NStack initializinggg")
 
         if (isInitialized) {
             NLog.w(TAG, "NStack already initialized")
@@ -486,7 +487,7 @@ object NStack {
     /**
      * Exposed Adders(?)
      */
-    fun addCachedView(weakView: WeakReference<View>, key: String) {
-        viewTranslationManager.addView(weakView, key)
+    fun addCachedView(weakView: WeakReference<View>, translationData: TranslationData) {
+        viewTranslationManager.addView(weakView, translationData)
     }
 }

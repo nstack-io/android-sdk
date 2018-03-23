@@ -2,5 +2,10 @@
 <resources>
     <declare-styleable name="nstack">
         <attr name="key" format="string" />
+        <attr name="text" format="string" />
+        <attr name="hint" format="string" />
+        <attr name="description" format="string" />
+        <attr name="textOn" format="string" />
+        <attr name="textOff" format="string" />
     </declare-styleable>
 </resources>
