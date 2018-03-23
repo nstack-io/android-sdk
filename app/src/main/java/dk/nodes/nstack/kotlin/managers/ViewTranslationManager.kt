@@ -1,20 +1,24 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.view.View
-import android.widget.EditText
 import android.widget.TextView
+import android.widget.ToggleButton
 import android.widget.Toolbar
+import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
 class ViewTranslationManager {
+    private val TAG = "NStack"
+
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
      *
      * We shouldn't need a lock when using the ConcurrentHashMap
      */
-    private var viewMap: ConcurrentHashMap<WeakReference<View>, String> = ConcurrentHashMap()
+    private var viewMap: ConcurrentHashMap<WeakReference<View>, TranslationData> = ConcurrentHashMap()
 
     /**
      * Contains a flat map of the current selected language (Format -> sectionName_stringKey)
@@ -30,22 +34,21 @@ class ViewTranslationManager {
      * and removes garbage collected views
      */
     private fun updateViews() {
-        val it : MutableIterator<Map.Entry<WeakReference<View>, String>> = viewMap.iterator()
+        val it: MutableIterator<Map.Entry<WeakReference<View>, TranslationData>> = viewMap.iterator()
+
         while (it.hasNext()) {
             val entry = it.next()
             val view = entry.key.get()
             // If our view is null we should remove it from the map and return
             if (view == null) {
                 it.remove()
-            }
-            else
+            } else
                 updateView(view, entry.value)
         }
     }
 
-    private fun updateView(view: View?, key: String) {
-        val translationString = getTranslationByKey(key)
-        updateViewTranslation(view, translationString)
+    private fun updateView(view: View?, translationData: TranslationData) {
+        updateViewTranslation(view, translationData)
     }
 
     /**
@@ -53,24 +56,65 @@ class ViewTranslationManager {
      *
      * Should check if the view is of a type and try to add the translation
      */
-    private fun updateViewTranslation(view: View?, translation: String?) {
+    private fun updateViewTranslation(view: View?, translationData: TranslationData) {
         if (view == null) {
             return
         }
 
-        // TODO add more types
+        val translatedKey = getTranslationByKey(translationData.key)
+        val translatedText = getTranslationByKey(translationData.text)
+        val translatedHint = getTranslationByKey(translationData.hint)
+        val translatedDescription = getTranslationByKey(translationData.description)
+        val translatedTextOn = getTranslationByKey(translationData.textOn)
+        val translatedTextOff = getTranslationByKey(translationData.textOff)
+
         when (view) {
-            is Toolbar  -> {
-                view.title = translation
+
+            is Toolbar      -> {
+                translatedKey?.let {
+                    view.title = it
+                }
+                translatedText?.let {
+                    view.title = it
+                }
                 return
             }
+            is ToggleButton -> {
+                NLog.w(TAG, "IS TOGGLE BUTTON")
 
-            is EditText -> {
-                view.hint = translation
-                return
+                translatedKey?.let {
+                    view.text = it
+                }
+                translatedText?.let {
+                    view.text = it
+                }
+                translatedHint?.let {
+                    view.hint = it
+                }
+                translatedDescription?.let {
+                    view.contentDescription = it
+                }
+                translatedTextOn?.let {
+                    view.textOn = it
+                }
+                translatedTextOff?.let {
+                    view.textOff = it
+                }
             }
-
-            is TextView -> view.text = translation
+            is TextView     -> {
+                translatedKey?.let {
+                    view.text = it
+                }
+                translatedText?.let {
+                    view.text = it
+                }
+                translatedHint?.let {
+                    view.hint = it
+                }
+                translatedDescription?.let {
+                    view.contentDescription = it
+                }
+            }
         }
     }
 
@@ -80,7 +124,11 @@ class ViewTranslationManager {
      * Can return a null so we need to cast it to a nullable string
      * (This is because of JSONObject)
      */
-    private fun getTranslationByKey(key: String): String? {
+    private fun getTranslationByKey(key: String?): String? {
+        if (key == null) {
+            return null
+        }
+
         val hasValue = language.has(key)
 
         return if (hasValue) {
@@ -110,8 +158,6 @@ class ViewTranslationManager {
             }
         }
 
-        println("New Language")
-
         updateViews()
     }
 
@@ -133,12 +179,12 @@ class ViewTranslationManager {
     /**
      * Adds our view to our viewMap while adding the translation string as well
      */
-    fun addView(weakView: WeakReference<View>, key: String) {
+    fun addView(weakView: WeakReference<View>, translationData: TranslationData) {
         val view = weakView.get() ?: return
 
-        viewMap[weakView] = key
+        viewMap[weakView] = translationData
 
-        updateView(view, key)
+        updateView(view, translationData)
     }
 
     /**
