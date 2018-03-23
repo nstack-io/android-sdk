@@ -23,6 +23,14 @@ Add this to gradle:
 compile "dk.nodes.nstack:nstack-kotlin:x.x.x"
 ```
 
+Add this to which ever activity you are trying to use NStack in
+
+```
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(NStackBaseContext(newBase))
+    }
+```
+
 ##### Optional Parameters
 
 ` NStack.debugMode = true` - Enables debug mode for the library (Outputs messages to log)
