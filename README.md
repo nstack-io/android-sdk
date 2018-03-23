@@ -25,18 +25,22 @@ compile "dk.nodes.nstack:nstack-kotlin:x.x.x"
 
 Add this to which ever activity you are trying to use NStack in
 
-```
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(NStackBaseContext(newBase))
-    }
-```
-
 ##### Optional Parameters
 
 ` NStack.debugMode = true` - Enables debug mode for the library (Outputs messages to log)
 ` NStack.setRefreshPeriod(60, TimeUnit.MINUTES)` - Allows you to set the period for how often NStack should check for updates
 
 *Warning: In almost every instance you want to set these optional methods before NStack is initialized*
+
+## Activity Setup
+
+```
+override fun attachBaseContext(newBase: Context) {
+    super.attachBaseContext(NStackBaseContext(newBase))
+}
+```
+
+Pretty simple you just need to wrap your `BaseContext` with our custom wrapper
 
 ## AppOpen
 
