@@ -37,6 +37,7 @@ object NStack {
     private var classTranslationManager = ClassTranslationManager()
     private var viewTranslationManager = ViewTranslationManager()
     private lateinit var assetCacheManager: AssetCacheManager
+    private lateinit var connectionManager: ConnectionManager
     private lateinit var clientAppInfo: ClientAppInfo
     private lateinit var networkManager: NetworkManager
     private lateinit var appOpenSettingsManager: AppOpenSettingsManager
@@ -156,6 +157,7 @@ object NStack {
         registerLocaleChangeBroadcastListener(context)
 
         networkManager = NetworkManager(context)
+        connectionManager = ConnectionManager(context)
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
         appOpenSettingsManager = AppOpenSettingsManager(context)
@@ -195,6 +197,12 @@ object NStack {
         val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
 
         NLog.d(TAG, "onAppOpened -> $localeString $appOpenSettings")
+
+        // If we aren't connected we should just send the app open call back as none
+        if (!connectionManager.isConnected()) {
+            onAppUpdateListener?.invoke(AppUpdate())
+            return
+        }
 
         networkManager
                 .postAppOpen(appOpenSettings, localeString,
@@ -277,6 +285,7 @@ object NStack {
         val filter = IntentFilter(Intent.ACTION_LOCALE_CHANGED)
         context.registerReceiver(broadcastReceiver, filter)
     }
+
     /**
      * Loaders
      */
@@ -308,6 +317,12 @@ object NStack {
 
         if (!hasRequireTimePassed && !debugMode) {
             NLog.i(TAG, "Skipping Network Call")
+            return
+        }
+
+        // If we aren't connected we shouldn't try polling for new data
+        if (!connectionManager.isConnected()) {
+            NLog.e(TAG, "Missing Network Connection")
             return
         }
 
