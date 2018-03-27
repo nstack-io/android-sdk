@@ -200,6 +200,7 @@ object NStack {
 
         // If we aren't connected we should just send the app open call back as none
         if (!connectionManager.isConnected()) {
+            NLog.e(TAG, "No internet skipping appOpen")
             onAppUpdateListener?.invoke(AppUpdate())
             return
         }
@@ -217,6 +218,11 @@ object NStack {
                              },
                              {
                                  NLog.d(TAG, "Error: onAppOpened")
+
+                                 // If our update failed for whatever reason we should still send an no update start
+                                 callback.invoke(false)
+                                 onAppUpdateListener?.invoke(AppUpdate())
+
                                  it.printStackTrace()
                              }
                 )

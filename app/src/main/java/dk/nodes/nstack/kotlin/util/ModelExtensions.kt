@@ -4,8 +4,13 @@ import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.AppUpdateState
 import org.json.JSONObject
 
-fun AppUpdate.parseFromString(string: String) {
-    val jsonRoot: JSONObject? = JSONObject(string)
+fun AppUpdate.parseFromString(string: String?) {
+    val jsonRoot: JSONObject? = try {
+        JSONObject(string)
+    } catch (e: Exception) {
+        JSONObject()
+    }
+
     val jsonData: JSONObject? = jsonRoot?.optJSONObject("data")
     val jsonUpdate: JSONObject? = jsonData?.optJSONObject("update")
     val jsonVersion: JSONObject? = jsonUpdate?.optJSONObject("newer_version")
