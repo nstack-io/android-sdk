@@ -13,10 +13,7 @@ import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.TranslationData
-import dk.nodes.nstack.kotlin.util.AppOpenCallback
-import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.toLanguageMap
-import dk.nodes.nstack.kotlin.util.toLocale
+import dk.nodes.nstack.kotlin.util.*
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
@@ -85,8 +82,8 @@ object NStack {
 
 
     // Listener Lists
-    private var onLanguageChangedList: ArrayList<((Locale) -> Unit)?> = arrayListOf()
-    private var onLanguagesChangedList: ArrayList<(() -> Unit)?> = arrayListOf()
+    private var onLanguageChangedList: ArrayList<LanguageListener?> = arrayListOf()
+    private var onLanguagesChangedList: ArrayList<LanguagesListener?> = arrayListOf()
 
     /**
      * Listener specifically for listening for any app update events
@@ -207,24 +204,24 @@ object NStack {
 
         networkManager
                 .postAppOpen(appOpenSettings, localeString,
-                             {
-                                 NLog.d(TAG, "Successful: onAppOpened")
+                        {
+                            NLog.d(TAG, "Successful: onAppOpened")
 
-                                 runUiAction {
-                                     callback.invoke(true)
-                                     onAppUpdateListener?.invoke(it)
-                                     appOpenSettingsManager.setUpdateDate()
-                                 }
-                             },
-                             {
-                                 NLog.d(TAG, "Error: onAppOpened")
+                            runUiAction {
+                                callback.invoke(true)
+                                onAppUpdateListener?.invoke(it)
+                                appOpenSettingsManager.setUpdateDate()
+                            }
+                        },
+                        {
+                            NLog.d(TAG, "Error: onAppOpened")
 
-                                 // If our update failed for whatever reason we should still send an no update start
-                                 callback.invoke(false)
-                                 onAppUpdateListener?.invoke(AppUpdate())
+                            // If our update failed for whatever reason we should still send an no update start
+                            callback.invoke(false)
+                            onAppUpdateListener?.invoke(AppUpdate())
 
-                                 it.printStackTrace()
-                             }
+                            it.printStackTrace()
+                        }
                 )
     }
 
@@ -391,13 +388,15 @@ object NStack {
 
     private fun onLanguageChanged(locale: Locale) {
         onLanguageChangedList.forEach {
-            it?.invoke(locale)
+            it?.onLanguageChangedListener?.onLanguageChanged(locale)
+            it?.onLanguageChangedFunction?.invoke(locale)
         }
     }
 
     private fun onLanguagesChanged() {
         onLanguagesChangedList.forEach {
-            it?.invoke()
+            it?.onLanguagesChangedListener?.onLanguagesChanged()
+            it?.onLanguagesChangedFunction?.invoke()
         }
     }
 
@@ -473,20 +472,54 @@ object NStack {
      * Listener Methods
      */
 
-    fun addLanguageChangeListener(listener: (Locale) -> Unit) {
-        onLanguageChangedList.add(listener)
+    // Listener
+
+    fun addLanguageChangeListener(listener: OnLanguageChangedListener) {
+        onLanguageChangedList.add(LanguageListener(onLanguageChangedListener = listener))
     }
 
-    fun removeLanguageChangeListener(listener: (Locale) -> Unit) {
-        onLanguageChangedList.remove(listener)
+    fun removeLanguageChangeListener(listener: OnLanguageChangedListener) {
+        val listenerContainer = onLanguageChangedList.firstOrNull { it?.onLanguageChangedListener == listener }
+                ?: return
+        onLanguageChangedList.remove(listenerContainer)
     }
 
-    fun addLanguagesChangeListener(listener: () -> Unit) {
-        onLanguagesChangedList.add(listener)
+    // Function
+
+    fun addLanguageChangeListener(listener: OnLanguageChangedFunction) {
+        onLanguageChangedList.add(LanguageListener(onLanguageChangedFunction = listener))
     }
 
-    fun removeLanguagesChangeListener(listener: () -> Unit) {
-        onLanguagesChangedList.remove(listener)
+    fun removeLanguageChangeListener(listener: OnLanguageChangedFunction) {
+        val listenerContainer = onLanguageChangedList.firstOrNull { it?.onLanguageChangedFunction == listener }
+                ?: return
+        onLanguageChangedList.remove(listenerContainer)
+    }
+
+    // Languages Listeners
+
+    // Listener
+
+    fun addLanguagesChangeListener(listener: OnLanguagesChangedListener) {
+        onLanguagesChangedList.add(LanguagesListener(onLanguagesChangedListener = listener))
+    }
+
+    fun removeLanguagesChangeListener(listener: OnLanguagesChangedListener) {
+        val listenerContainer = onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedListener == listener }
+                ?: return
+        onLanguagesChangedList.remove(listenerContainer)
+    }
+
+    //Function
+
+    fun addLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
+        onLanguagesChangedList.add(LanguagesListener(onLanguagesChangedFunction = listener))
+    }
+
+    fun removeLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
+        val listenerContainer = onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedFunction == listener }
+                ?: return
+        onLanguagesChangedList.remove(listenerContainer)
     }
 
     /**

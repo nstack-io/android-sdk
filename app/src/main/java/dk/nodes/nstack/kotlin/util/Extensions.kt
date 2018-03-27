@@ -55,7 +55,7 @@ fun String.toLocale(): Locale {
     val splitLocale = when {
         contains("_") -> split("_")
         contains("-") -> split("-")
-        else          -> arrayListOf("en", "gb")
+        else -> arrayListOf("en", "gb")
     }
 
     val language = splitLocale[0]
