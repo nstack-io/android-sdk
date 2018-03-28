@@ -4,7 +4,7 @@ apply from: 'maven-push.gradle'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    buildToolsVersion '27.0.3'
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 27
@@ -21,11 +21,11 @@ android {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
-    compile 'com.squareup.okhttp3:okhttp:3.9.1'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
 }
 
 apply plugin: 'maven'
