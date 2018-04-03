@@ -109,6 +109,13 @@ Allows you to set the language by string the format must follow either the `lang
 Starting in version `2.0.2` NStack-Kotlin now supports XML based translations
 
 ```
+xmlns:nstack="http://schemas.android.com/apk/res-auto"
+tools:ignore="MissingPrefix"
+```
+
+Before starting with the XML translations be sure to add the following block to the root of whatever layout you're using.
+
+```
 nstack:key="{sectionName_keyName}"
 nstack:text="{sectionName_keyName}"
 nstack:hint="{sectionName_keyName}"
