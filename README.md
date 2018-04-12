@@ -1,4 +1,4 @@
-![nStack Badge](https://maven-badges.herokuapp.com/maven-central/dk.nodes.nstack/nstack-kotlin/badge.svg)
+![nStack Badge](https://img.shields.io/maven-central/v/dk.nodes.nstack/nstack-kotlin.svg)
 
 # nStack Kotlin 2.0
 
