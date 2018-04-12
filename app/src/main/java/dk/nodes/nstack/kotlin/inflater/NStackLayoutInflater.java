@@ -1,6 +1,5 @@
 package dk.nodes.nstack.kotlin.inflater;
 
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -205,7 +204,7 @@ class NStackLayoutInflater extends LayoutInflater {
                 textOn == null &&
                 textOff == null
                 ) {
-            Log.e(TAG, "processView -> Found no valid NStack keys " + name);
+            Log.v(TAG, "processView -> Found no valid NStack keys " + name);
             return;
         }
 

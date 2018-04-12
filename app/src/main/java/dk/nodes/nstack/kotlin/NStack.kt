@@ -132,6 +132,16 @@ object NStack {
             field = value
             onDebugModeChanged()
         }
+    /**
+     * Set the level at which the debug log should output
+     */
+    var debugLogLevel: NLog.Level
+        get() {
+            return NLog.level
+        }
+        set(value) {
+            NLog.level
+        }
 
     /**
      * If flag is set to true this will auto change NStack's language when the device's locale is changed
@@ -204,24 +214,24 @@ object NStack {
 
         networkManager
                 .postAppOpen(appOpenSettings, localeString,
-                        {
-                            NLog.d(TAG, "Successful: onAppOpened")
+                             {
+                                 NLog.d(TAG, "Successful: onAppOpened")
 
-                            runUiAction {
-                                callback.invoke(true)
-                                onAppUpdateListener?.invoke(it)
-                                appOpenSettingsManager.setUpdateDate()
-                            }
-                        },
-                        {
-                            NLog.d(TAG, "Error: onAppOpened")
+                                 runUiAction {
+                                     callback.invoke(true)
+                                     onAppUpdateListener?.invoke(it)
+                                     appOpenSettingsManager.setUpdateDate()
+                                 }
+                             },
+                             {
+                                 NLog.d(TAG, "Error: onAppOpened")
 
-                            // If our update failed for whatever reason we should still send an no update start
-                            callback.invoke(false)
-                            onAppUpdateListener?.invoke(AppUpdate())
+                                 // If our update failed for whatever reason we should still send an no update start
+                                 callback.invoke(false)
+                                 onAppUpdateListener?.invoke(AppUpdate())
 
-                            it.printStackTrace()
-                        }
+                                 it.printStackTrace()
+                             }
                 )
     }
 
@@ -402,6 +412,10 @@ object NStack {
 
     private fun onDebugModeChanged() {
         NLog.enableLogging = debugMode
+    }
+
+    private fun onDebugLogLevel() {
+        NLog.level = debugLogLevel
     }
 
     /**
