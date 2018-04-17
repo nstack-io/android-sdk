@@ -224,13 +224,11 @@ object NStack {
                                  }
                              },
                              {
-                                 NLog.d(TAG, "Error: onAppOpened")
+                                 NLog.e(TAG, "Error: onAppOpened", it)
 
                                  // If our update failed for whatever reason we should still send an no update start
                                  callback.invoke(false)
                                  onAppUpdateListener?.invoke(AppUpdate())
-
-                                 it.printStackTrace()
                              }
                 )
     }
@@ -353,8 +351,7 @@ object NStack {
                     }
                 },
                 {
-                    NLog.i(TAG, "Error Loading Network Translations")
-                    it.printStackTrace()
+                    NLog.e(TAG, "Error Loading Network Translations", it)
                 }
         )
     }
