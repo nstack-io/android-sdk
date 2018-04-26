@@ -11,7 +11,6 @@ import dk.nodes.nstack.kotlin.util.toFormattedString
 import java.util.*
 
 class AppOpenSettingsManager(private val context: Context) {
-    private val TAG = "NStack"
     private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     fun getAppOpenSettings(): AppOpenSettings {
@@ -40,12 +39,12 @@ class AppOpenSettingsManager(private val context: Context) {
     /** App Settings Stuff **/
 
     private fun getAppUUID(): String {
-        NLog.d(TAG, "Getting UUID")
+        NLog.d(this, "Getting UUID")
 
         var uuid = getString(Constants.spk_nstack_guid)
 
         if (uuid == null) {
-            NLog.d(TAG, "UUID missing -> Generating!")
+            NLog.d(this, "UUID missing -> Generating!")
             uuid = UUID.randomUUID().toString()
             setString(Constants.spk_nstack_guid, uuid)
         }
@@ -54,13 +53,11 @@ class AppOpenSettingsManager(private val context: Context) {
     }
 
     private fun getAppVersion(): String {
-        val appVersion = try {
+        return try {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
         } catch (e: Exception) {
             ""
         }
-
-        return appVersion
     }
 
     private fun getAppOldVersion(): String? {

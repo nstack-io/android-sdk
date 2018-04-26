@@ -13,7 +13,6 @@ import java.util.*
 
 
 class PrefManager(context: Context) {
-    private val TAG = "NStack"
     private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     private fun setLastUpdateDate() {
@@ -38,11 +37,11 @@ class PrefManager(context: Context) {
     fun getTranslations(): HashMap<Locale, JSONObject> {
         val translationString = getString(Constants.spk_nstack_languages_cache)
 
-        NLog.d(TAG, "Getting Translations: $translationString")
+        NLog.d(this, "Getting Translations: $translationString")
 
         val languageMap = translationString?.toLanguageMap()
 
-        NLog.d(TAG, "Getting Translations: ${languageMap?.size}")
+        NLog.d(this, "Getting Translations: ${languageMap?.size}")
 
         return languageMap ?: hashMapOf()
     }

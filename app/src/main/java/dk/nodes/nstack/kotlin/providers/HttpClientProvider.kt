@@ -1,14 +1,13 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
-import dk.nodes.nstack.kotlin.util.nLog
+import dk.nodes.nstack.kotlin.util.NLog
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
 object HttpClientProvider {
-    private val TAG = HttpClientProvider::class.simpleName!!
 
     private fun providesCache(context: Context): Cache? {
         return try {
@@ -16,7 +15,7 @@ object HttpClientProvider {
             val cacheSize = 10 * 1024 * 1024 // 10 MiB
             Cache(cacheDirectory, cacheSize.toLong())
         } catch (e: Exception) {
-            nLog(TAG, e.toString())
+            NLog.e(this, "Error", e)
             null
         }
     }

@@ -10,7 +10,6 @@ import okhttp3.*
 import java.io.IOException
 
 class NetworkManager(context: Context) {
-    private val TAG = NetworkManager::class.java.simpleName
     private val client = HttpClientProvider.getHttpClient(context)
     private val defaultRequestUrl = "https://nstack.io/api/v1/translate/mobile/keys?all=true&flat=false"
 
