@@ -43,6 +43,7 @@ fun View.getChildrenViews(): ArrayList<View> {
 }
 
 // log function defintion, yay typedef is back :D
+
 typealias LogFunction = (tag: String, msg: String) -> Unit
 
 typealias AppOpenCallback = (success: Boolean) -> Unit

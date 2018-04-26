@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +19,9 @@ import java.lang.reflect.Method;
 import dk.nodes.nstack.R;
 import dk.nodes.nstack.kotlin.NStack;
 import dk.nodes.nstack.kotlin.models.TranslationData;
+import dk.nodes.nstack.kotlin.util.NLog;
 
 class NStackLayoutInflater extends LayoutInflater {
-    private static final String TAG = "NStack";
-
     private static final String[] classPrefix = {
             "",
             "android.widget.",
@@ -173,7 +171,7 @@ class NStackLayoutInflater extends LayoutInflater {
      */
     private void processView(String name, Context context, View view, AttributeSet attrs) {
         if (view == null) {
-            //NLog.Companion.e(TAG, "processView -> Null View Returning " + name);
+            NLog.INSTANCE.d(this, "processView -> Null View Returning " + name);
             return;
         }
         // Get our typed array
@@ -204,7 +202,8 @@ class NStackLayoutInflater extends LayoutInflater {
                 textOn == null &&
                 textOff == null
                 ) {
-            Log.v(TAG, "processView -> Found no valid NStack keys " + name);
+
+            NLog.INSTANCE.d(this, "processView -> Found no valid NStack keys " + name);
             return;
         }
 

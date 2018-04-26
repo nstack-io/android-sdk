@@ -11,8 +11,6 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
 class ViewTranslationManager {
-    private val TAG = "NStack"
-
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
      *
@@ -69,7 +67,6 @@ class ViewTranslationManager {
         val translatedTextOff = getTranslationByKey(translationData.textOff)
 
         when (view) {
-
             is Toolbar      -> {
                 translatedKey?.let {
                     view.title = it
@@ -80,7 +77,7 @@ class ViewTranslationManager {
                 return
             }
             is ToggleButton -> {
-                NLog.w(TAG, "IS TOGGLE BUTTON")
+                NLog.w(this, "IS TOGGLE BUTTON")
 
                 translatedKey?.let {
                     view.text = it

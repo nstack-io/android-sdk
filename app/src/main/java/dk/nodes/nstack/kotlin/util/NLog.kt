@@ -4,65 +4,87 @@ import android.annotation.SuppressLint
 import android.util.Log
 
 @SuppressLint("LogNotTimber")
-class NLog {
-    enum class Level(public val level: Int) {
-        Error(0),
-        Warning(1),
-        Info(2),
-        Verbose(3),
-        Debug(4)
+object NLog {
+    var enableLogging: Boolean = false
+
+    enum class Level(var value: Int) {
+        OFF(5),
+        ERROR(4),
+        WARN(3),
+        INFO(2),
+        VERBOSE(1),
+        DEBUG(0)
     }
 
-    companion object {
-        var enableLogging: Boolean = false
-        var level: Level = Level.Error
+    var level: Level = Level.INFO
 
-        fun e(tag: String, string: String) {
-            if (!enableLogging || level < Level.Error) {
-                return
-            }
-
-            Log.e(tag, string)
+    fun e(parent: Any, message: String) {
+        if (!enableLogging) {
+            return
         }
 
-        fun e(tag: String, string: String, throwable: Throwable) {
-            if (!enableLogging || level < Level.Error) {
-                return
-            }
-
-            Log.e(tag, string, throwable)
+        if (level.value >= Level.ERROR.value) {
+            return
         }
 
-        fun w(tag: String, string: String) {
-            if (!enableLogging || level < Level.Warning) {
-                return
-            }
+        Log.e(parent.javaClass.simpleName, message)
+    }
 
-            Log.w(tag, string)
+    fun e(parent: Any, message: String, exception: Exception) {
+        if (!enableLogging) {
+            return
         }
 
-        fun i(tag: String, string: String) {
-            if (!enableLogging || level < Level.Info) {
-                return
-            }
-
-            Log.i(tag, string)
+        if (level.value >= Level.ERROR.value) {
+            return
         }
 
-        fun v(tag: String, string: String) {
-            if (!enableLogging || level < Level.Verbose) {
-                return
-            }
+        Log.e(parent.javaClass.simpleName, message, exception)
+    }
 
-            Log.v(tag, string)
+    fun w(parent: Any, message: String) {
+        if (!enableLogging) {
+            return
         }
 
-        fun d(tag: String, string: String) {
-            if (!enableLogging || level < Level.Debug) {
-                return
-            }
-
-            Log.d(tag, string)
+        if (level.value > Level.WARN.value) {
+            return
         }
+        Log.w(parent.javaClass.simpleName, message)
+    }
+
+    fun i(parent: Any, message: String) {
+        if (!enableLogging) {
+            return
+        }
+
+        if (level.value > Level.INFO.value) {
+            return
+        }
+        Log.i(parent.javaClass.simpleName, message)
+    }
+
+    fun v(parent: Any, message: String) {
+        if (!enableLogging) {
+            return
+        }
+
+        if (level.value > Level.VERBOSE.value) {
+            return
+        }
+
+        Log.v(parent.javaClass.simpleName, message)
+    }
+
+    fun d(parent: Any, message: String) {
+        if (!enableLogging) {
+            return
+        }
+
+        if (level.value > Level.DEBUG.value) {
+            return
+        }
+        
+        Log.d(parent.javaClass.simpleName, message)
     }
 }

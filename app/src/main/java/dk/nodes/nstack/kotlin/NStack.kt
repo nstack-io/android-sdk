@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Handler
-import android.util.Log
 import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
@@ -19,10 +18,8 @@ import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-
 @SuppressLint("StaticFieldLeak", "LogNotTimber")
 object NStack {
-    private val TAG = "NStack"
     // Has our app been started yet?
     private var isInitialized: Boolean = false
 
@@ -153,10 +150,10 @@ object NStack {
      */
 
     fun init(context: Context) {
-        NLog.i(TAG, "NStack initializinggg")
+        NLog.i(this, "NStack initializinggg")
 
         if (isInitialized) {
-            NLog.w(TAG, "NStack already initialized")
+            NLog.w(this, "NStack already initialized")
             return
         }
 
@@ -203,11 +200,11 @@ object NStack {
 
         val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
 
-        NLog.d(TAG, "onAppOpened -> $localeString $appOpenSettings")
+        NLog.d(this, "onAppOpened -> $localeString $appOpenSettings")
 
         // If we aren't connected we should just send the app open call back as none
         if (!connectionManager.isConnected()) {
-            NLog.e(TAG, "No internet skipping appOpen")
+            NLog.e(this, "No internet skipping appOpen")
             onAppUpdateListener?.invoke(AppUpdate())
             return
         }
@@ -215,7 +212,7 @@ object NStack {
         networkManager
                 .postAppOpen(appOpenSettings, localeString,
                              {
-                                 NLog.d(TAG, "Successful: onAppOpened")
+                                 NLog.d(this, "Successful: onAppOpened")
 
                                  runUiAction {
                                      callback.invoke(true)
@@ -224,7 +221,7 @@ object NStack {
                                  }
                              },
                              {
-                                 NLog.e(TAG, "Error: onAppOpened", it)
+                                 NLog.e(this, "Error: onAppOpened", it)
 
                                  // If our update failed for whatever reason we should still send an no update start
                                  callback.invoke(false)
@@ -265,7 +262,7 @@ object NStack {
      */
 
     private fun getApplicationInfo(context: Context) {
-        NLog.i(TAG, "getApplicationInfo")
+        NLog.i(this, "getApplicationInfo")
 
         val applicationInfo = context.packageManager.getApplicationInfo(
                 context.packageName,
@@ -283,11 +280,11 @@ object NStack {
         }
 
         if (appIdKey.isEmpty()) {
-            NLog.e(TAG, "Missing dk.nodes.nstack.appId")
+            NLog.e(this, "Missing dk.nodes.nstack.appId")
         }
 
         if (appApiKey.isEmpty()) {
-            NLog.e(TAG, "Missing dk.nodes.nstack.apiKey")
+            NLog.e(this, "Missing dk.nodes.nstack.apiKey")
         }
 
     }
@@ -327,20 +324,20 @@ object NStack {
         val hasRequireTimePassed = hasRequireTimePassed()
 
         if (!hasRequireTimePassed && !debugMode) {
-            NLog.i(TAG, "Skipping Network Call")
+            NLog.i(this, "Skipping Network Call")
             return
         }
 
         // If we aren't connected we shouldn't try polling for new data
         if (!connectionManager.isConnected()) {
-            NLog.e(TAG, "Missing Network Connection")
+            NLog.e(this, "Missing Network Connection")
             return
         }
 
         networkManager.loadTranslations(
                 {
                     NLog.i(
-                            TAG,
+                            this,
                             "Successfully Loaded Network Translations"
                     )
 
@@ -351,7 +348,7 @@ object NStack {
                     }
                 },
                 {
-                    NLog.e(TAG, "Error Loading Network Translations", it)
+                    NLog.e(this, "Error Loading Network Translations", it)
                 }
         )
     }
@@ -363,16 +360,16 @@ object NStack {
         val nowTimeStamp = nowDate.time
         val lastTimeStamp = lastUpdateDate.time
 
-        NLog.d(TAG, "Now Date -> $nowTimeStamp Last Update -> $lastTimeStamp")
+        NLog.d(this, "Now Date -> $nowTimeStamp Last Update -> $lastTimeStamp")
 
         val passedTime = nowTimeStamp - lastTimeStamp
 
-        NLog.d(TAG, "Refresh Period: $refreshPeriod")
-        NLog.d(TAG, "Passed Time: $passedTime")
+        NLog.d(this, "Refresh Period: $refreshPeriod")
+        NLog.d(this, "Passed Time: $passedTime")
 
         val hasTimePassed = passedTime >= refreshPeriod
 
-        NLog.d(TAG, "Has Time Passed: $hasTimePassed")
+        NLog.d(this, "Has Time Passed: $hasTimePassed")
 
         return hasTimePassed
     }
@@ -384,7 +381,7 @@ object NStack {
     private fun onLanguageChanged() {
         val selectedLanguage = searchForLanguageByLocale(language)
 
-        NLog.d(TAG, "On Language Changed: $selectedLanguage")
+        NLog.d(this, "On Language Changed: $selectedLanguage")
 
         selectedLanguage?.let {
             viewTranslationManager.parseTranslations(it)
@@ -426,14 +423,14 @@ object NStack {
      */
 
     private fun searchForLanguageByLocale(locale: Locale): JSONObject? {
-        Log.d(TAG, "searchForLanguageByLocale: $locale")
+        NLog.d(this, "searchForLanguageByLocale: $locale")
 
         // Search for our exact language
         var languageJson = searchForLocale(locale)
 
         // If that fails then we search for the default language
         if (languageJson == null) {
-            NLog.w(TAG, "Locating language failed $locale, Trying default $defaultLanguage")
+            NLog.w(this, "Locating language failed $locale, Trying default $defaultLanguage")
             languageJson = searchForLocale(defaultLanguage)
             language = defaultLanguage
         }
@@ -442,8 +439,8 @@ object NStack {
         if (languageJson == null) {
             val firstAvailableLanguage = availableLanguages.firstOrNull()
 
-            NLog.w(TAG, "Locating Default language failed $defaultLanguage")
-            NLog.w(TAG, "Trying first available language $firstAvailableLanguage")
+            NLog.w(this, "Locating Default language failed $defaultLanguage")
+            NLog.w(this, "Trying first available language $firstAvailableLanguage")
 
             firstAvailableLanguage?.let {
                 languageJson = searchForLocale(it)
