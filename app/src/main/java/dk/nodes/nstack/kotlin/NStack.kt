@@ -124,10 +124,10 @@ object NStack {
     /**
      * Enable/Disable debug mode
      */
-    var debugMode: Boolean = true
+    var debugMode: Boolean
+        get() = NLog.enableLogging
         set(value) {
-            field = value
-            onDebugModeChanged()
+            NLog.enableLogging = value
         }
     /**
      * Set the level at which the debug log should output
@@ -402,14 +402,6 @@ object NStack {
             it?.onLanguagesChangedListener?.onLanguagesChanged()
             it?.onLanguagesChangedFunction?.invoke()
         }
-    }
-
-    private fun onDebugModeChanged() {
-        NLog.enableLogging = debugMode
-    }
-
-    private fun onDebugLogLevel() {
-        NLog.level = debugLogLevel
     }
 
     /**
