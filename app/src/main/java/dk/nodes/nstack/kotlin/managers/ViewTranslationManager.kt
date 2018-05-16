@@ -1,9 +1,7 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.view.View
-import android.widget.TextView
-import android.widget.ToggleButton
-import android.widget.Toolbar
+import android.widget.*
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
@@ -74,11 +72,9 @@ class ViewTranslationManager {
                 translatedText?.let {
                     view.title = it
                 }
-                return
             }
             is ToggleButton -> {
-                NLog.w(this, "IS TOGGLE BUTTON")
-
+                NLog.w(this, "Is ToggleButton")
                 translatedKey?.let {
                     view.text = it
                 }
@@ -96,6 +92,22 @@ class ViewTranslationManager {
                 }
                 translatedTextOff?.let {
                     view.textOff = it
+                }
+            }
+            is CompoundButton -> {
+                NLog.w(this, "Is CompoundButton")
+
+                translatedKey?.let {
+                    view.text = it
+                }
+                translatedText?.let {
+                    view.text = it
+                }
+                translatedHint?.let {
+                    view.hint = it
+                }
+                translatedDescription?.let {
+                    view.contentDescription = it
                 }
             }
             is TextView     -> {
