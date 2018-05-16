@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 3
-        versionName "1.0"
+        versionCode 4
+        versionName "1.0.1"
         manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder"]
     }
     buildTypes {
