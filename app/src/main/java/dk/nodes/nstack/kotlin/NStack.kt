@@ -421,7 +421,7 @@ object NStack {
         var languageJson = searchForLocale(locale)
 
         // If that fails then we search for the default language
-        if (languageJson == null) {
+        if (languageJson == null && defaultLanguage != locale) {
             NLog.w(this, "Locating language failed $locale, Trying default $defaultLanguage")
             languageJson = searchForLocale(defaultLanguage)
             language = defaultLanguage
