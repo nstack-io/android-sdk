@@ -7,6 +7,7 @@ Updated version of nStack implemented in a more kotlin friendly way
 Developed by 
 - @STPE
 - @BRES
+- @JOSO
 
 ## Init
 
