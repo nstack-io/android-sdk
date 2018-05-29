@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import dk.nodes.nstack.R;
 import dk.nodes.nstack.kotlin.NStack;
@@ -27,6 +30,30 @@ class NStackLayoutInflater extends LayoutInflater {
             "android.widget.",
             "android.webkit."
     };
+
+    // Standard android:* attributes
+    private static final int[] set = {
+            android.R.attr.text,
+            android.R.attr.hint,
+            android.R.attr.description,
+            android.R.attr.textOn,
+            android.R.attr.textOff
+    };
+
+    String androidText = null;
+    String androidHint = null;
+    String androidDescription = null;
+    String androidTextOn = null;
+    String androidTextOff = null;
+
+    String key;
+    String text;
+    String hint;
+    String description;
+    String textOn;
+    String textOff;
+
+    private static HashMap<String, Class<? extends View>> classLookup = new HashMap<>();
 
     private boolean mSetPrivateFactory = false;
     private static final Class<?>[] constructorSignature = new Class[]{Context.class, AttributeSet.class};
@@ -154,9 +181,17 @@ class NStackLayoutInflater extends LayoutInflater {
     }
 
     private View inflateFromName(String name, Context context, AttributeSet attrs) {
+
+
         try {
             Constructor<? extends View> constructor;
-            Class<? extends View> clazz = context.getClassLoader().loadClass(name).asSubclass(View.class);
+            Class<? extends View> clazz;
+            if(classLookup.containsKey(name)) {
+                clazz = classLookup.get(name);
+            } else {
+                clazz = context.getClassLoader().loadClass(name).asSubclass(View.class);
+                classLookup.put(name, clazz);
+            }
             constructor = clazz.getConstructor(constructorSignature);
             constructor.setAccessible(true);
             return constructor.newInstance(context, attrs);
@@ -174,15 +209,34 @@ class NStackLayoutInflater extends LayoutInflater {
             NLog.INSTANCE.d(this, "processView -> Null View Returning " + name);
             return;
         }
+
+        if(name.contains("Layout")) return;
+
+        // try to pull our value from it
+        androidText = null;
+        androidHint = null;
+        androidDescription = null;
+        androidTextOn = null;
+        androidTextOff = null;
+
+        TypedArray androidAttributes = context.obtainStyledAttributes(attrs, set);
+        if(androidAttributes.getText(0) != null) { androidText = androidAttributes.getText(0).toString(); }
+        if(androidAttributes.getText(1) != null) { androidHint = androidAttributes.getText(1).toString(); }
+        if(androidAttributes.getText(2) != null) { androidDescription = androidAttributes.getText(2).toString(); }
+        if(androidAttributes.getText(3) != null) { androidTextOn = androidAttributes.getText(3).toString(); }
+        if(androidAttributes.getText(4) != null) { androidTextOff = androidAttributes.getText(4).toString(); }
+        androidAttributes.recycle();
+
+
         // Get our typed array
         TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.nstack, 0, 0);
-        // try to pull our value from it
-        String key;
-        String text;
-        String hint;
-        String description;
-        String textOn;
-        String textOff;
+        // Custom nstack:* attributes
+        key = null;
+        text = null;
+        hint = null;
+        description = null;
+        textOn = null;
+        textOff = null;
 
         try {
             key = typedArray.getString(R.styleable.nstack_key);
@@ -193,6 +247,26 @@ class NStackLayoutInflater extends LayoutInflater {
             textOff = typedArray.getString(R.styleable.nstack_textOff);
         } finally {
             typedArray.recycle();
+        }
+
+        if(androidText != null && androidText.startsWith("{") && androidText.endsWith("}")) {
+            text = androidText.substring(1, androidText.length() - 1);
+        }
+
+        if(androidHint != null && androidHint.startsWith("{") && androidHint.endsWith("}")) {
+            hint = androidHint.substring(1, androidHint.length() - 1);
+        }
+
+        if(androidDescription != null && androidDescription.startsWith("{") && androidDescription.endsWith("}")) {
+            description = androidDescription.substring(1, androidDescription.length() - 1);
+        }
+
+        if(androidTextOn != null && androidTextOn.startsWith("{") && androidTextOn.endsWith("}")) {
+            textOn = androidTextOn.substring(1, androidTextOn.length() - 1);
+        }
+
+        if(androidTextOff != null && androidTextOff.startsWith("{") && androidTextOff.endsWith("}")) {
+            textOff = androidTextOff.substring(1, androidTextOff.length() - 1);
         }
 
         if (key == null &&
