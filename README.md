@@ -35,7 +35,7 @@ Add this to which ever activity you are trying to use NStack in
 
 ## Activity Setup
 
-```
+```kotlin
 override fun attachBaseContext(newBase: Context) {
     super.attachBaseContext(NStackBaseContext(newBase))
 }
@@ -46,12 +46,12 @@ Pretty simple you just need to wrap your `BaseContext` with our custom wrapper
 ## AppOpen
 
 Minimal:
-```
+```kotlin
 NStack.appOpen()
 ```
 
 If you care about the outcome or want to run code afterwards:
-```
+```kotlin
 NStack.appOpen { success ->  }
 ```
 
@@ -62,7 +62,7 @@ Now it's up to the app to decide how you want to handle the app update status (M
 
 **Note: You should set this before `appOpen`**
 
-```
+```kotlin
 NStack.onAppUpdateListener = { appUpdate ->
     when (appUpdate.state) {
         AppUpdateState.NONE      -> {
@@ -83,23 +83,23 @@ NStack.onAppUpdateListener = { appUpdate ->
 
 ## Language Selection
 
-```
+```kotlin
 NStack.availableLanguages
 ```
 Provides an `Arraylist<Locale>` of all available languages
 
-```
+```kotlin
 NStack.languages
 ```
 Provides an `HashMap<Locale, JSONObject>` of all available languages as the key and the language json object as the value
 
-```
+```kotlin
 NStack.language = selectedLocale
 ```
 
 Using any of the provided locales you are able to select a language simply by setting the `language` variable in NStack
 
-```
+```kotlin
 NStack.setLanguageByString("en-gb")
 ```
 
@@ -109,7 +109,7 @@ Allows you to set the language by string the format must follow either the `lang
 
 Starting in version `2.1.0` NStack-Kotlin now supports XML based translations embedded in the android namespace
 
-```
+```XML
 android:text="{sectionName_keyName}"
 android:hint="{sectionName_keyName}"
 android:description="{sectionName_keyName}"
@@ -119,14 +119,14 @@ android:textOff="{sectionName_keyName}"
 
 Method from 2.0.2+ is still supported as follows:
 
-```
+```XML
 xmlns:nstack="http://schemas.android.com/apk/res-auto"
 tools:ignore="MissingPrefix"
 ```
 
 Before starting with the XML translations be sure to add the following block to the root of whatever layout you're using.
 
-```
+```XML
 nstack:key="sectionName_keyName"
 nstack:text="sectionName_keyName"
 nstack:hint="sectionName_keyName"
@@ -145,7 +145,7 @@ If you're using the NStack Gradle plugin a `nstack_keys.xml` should be generated
 
 Once you have that setup you can trigger the translation via the following method
 
-```
+```kotlin
 NStack.translate()
 ```
 
@@ -155,13 +155,13 @@ NStack.translate()
 
 If for whatever reason you need to clear the translate view cache you can trigger that view the following method
 
-```
+```kotlin
 NStack.clearViewCache()
 ```
 
 ## Language Listeners
 
-```
+```kotlin
 NStack.addLanguageChangeListener{ locale ->
 }
 ```
@@ -169,7 +169,7 @@ NStack.addLanguageChangeListener{ locale ->
 Adds a listener to NStack that will trigger every time the language is changed (returns the new locale)
 
 
-```
+```kotlin
 NStack.addLanguagesChangeListener {
 }
 ```
@@ -178,7 +178,7 @@ This listener should trigger every time the available languages change
 
 ## N-Meta Header
 Use like this:
-```
+```kotlin
 .addInterceptor(NMetaInterceptor("staging"))
 ```
 Where "staging" is a string you pass in a buildconfig flag or something similar
