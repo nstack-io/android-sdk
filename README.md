@@ -107,7 +107,17 @@ Allows you to set the language by string the format must follow either the `lang
 
 ## Xml Translation
 
-Starting in version `2.0.2` NStack-Kotlin now supports XML based translations
+Starting in version `2.1.0` NStack-Kotlin now supports XML based translations embedded in the android namespace
+
+```
+android:text="{sectionName_keyName}"
+android:hint="{sectionName_keyName}"
+android:description="{sectionName_keyName}"
+android:textOn="{sectionName_keyName}"
+android:textOff="{sectionName_keyName}"
+``
+
+Method from 2.0.2+ is still supported as follows:
 
 ```
 xmlns:nstack="http://schemas.android.com/apk/res-auto"
@@ -117,15 +127,15 @@ tools:ignore="MissingPrefix"
 Before starting with the XML translations be sure to add the following block to the root of whatever layout you're using.
 
 ```
-nstack:key="{sectionName_keyName}"
-nstack:text="{sectionName_keyName}"
-nstack:hint="{sectionName_keyName}"
-nstack:description="{sectionName_keyName}"
-nstack:textOn="{sectionName_keyName}"
-nstack:textOff="{sectionName_keyName}"
-```
+nstack:key="sectionName_keyName"
+nstack:text="sectionName_keyName"
+nstack:hint="sectionName_keyName"
+nstack:description="sectionName_keyName"
+nstack:textOn="sectionName_keyName"
+nstack:textOff="sectionName_keyName"
+````
 
-The following field should be used to set the nstack key `nstack:key="{keyGoesHere}"`
+The following field should be used to set the nstack key `nstack:key="keyGoesHere"`
 
 When entering the key the following format should be used `sectionName_keyName`
 
