@@ -115,7 +115,7 @@ android:hint="{sectionName_keyName}"
 android:description="{sectionName_keyName}"
 android:textOn="{sectionName_keyName}"
 android:textOff="{sectionName_keyName}"
-``
+```
 
 Method from 2.0.2+ is still supported as follows:
 
