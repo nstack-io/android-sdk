@@ -171,7 +171,7 @@ object NStack {
 
         loadCacheTranslations()
 
-        if (skipNetworkLoading) {
+        if (!skipNetworkLoading) {
             loadNetworkTranslations()
         }
 
