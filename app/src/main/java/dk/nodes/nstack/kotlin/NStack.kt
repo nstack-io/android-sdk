@@ -121,6 +121,8 @@ object NStack {
         get() {
             return ArrayList(languages.keys)
         }
+
+    var skipNetworkLoading: Boolean = false
     /**
      * Enable/Disable debug mode
      */
@@ -168,7 +170,10 @@ object NStack {
         prefManager = PrefManager(context)
 
         loadCacheTranslations()
-        loadNetworkTranslations()
+
+        if (skipNetworkLoading) {
+            loadNetworkTranslations()
+        }
 
         isInitialized = true
     }
