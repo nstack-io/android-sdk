@@ -13,13 +13,19 @@ fun AppUpdate.parseFromString(string: String?) {
 
     val jsonData: JSONObject? = jsonRoot?.optJSONObject("data")
     val jsonUpdate: JSONObject? = jsonData?.optJSONObject("update")
-    val jsonVersion: JSONObject? = jsonUpdate?.optJSONObject("newer_version")
+    val jsonVersion: JSONObject? = jsonUpdate?.optJSONObject("newer_version") ?: jsonUpdate?.optJSONObject("new_in_version")
+    val isChangelog = jsonUpdate?.has("new_in_version") ?: false
 
     versionName = jsonVersion?.optString("version", null)
     versionCode = jsonVersion?.optInt("last_id", 0)
     link = jsonVersion?.optString("link", null)
+    translationsUpdated = jsonData?.has("translate") ?: false
 
-    val stateValue = jsonVersion?.optString("state", null)
+    val stateValue = if(isChangelog) {
+        "changelog"
+    } else {
+        jsonVersion?.optString("state", null)
+    }
 
     state = when (stateValue) {
         "yes"       -> AppUpdateState.UPDATE

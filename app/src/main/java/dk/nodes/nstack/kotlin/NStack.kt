@@ -152,7 +152,7 @@ object NStack {
      */
 
     fun init(context: Context) {
-        NLog.i(this, "NStack initializinggg")
+        NLog.i(this, "NStack initializing")
 
         if (isInitialized) {
             NLog.w(this, "NStack already initialized")
@@ -170,10 +170,6 @@ object NStack {
         prefManager = PrefManager(context)
 
         loadCacheTranslations()
-
-        if (!skipNetworkLoading) {
-            loadNetworkTranslations()
-        }
 
         isInitialized = true
     }
@@ -217,12 +213,15 @@ object NStack {
         networkManager
                 .postAppOpen(appOpenSettings, localeString,
                              {
-                                 NLog.d(this, "Successful: onAppOpened")
+                                 NLog.d(this, "NStack appOpen -> translation updated: ${it.translationsUpdated}")
+
+                                 if(it.translationsUpdated) {
+                                     loadNetworkTranslations()
+                                 }
 
                                  runUiAction {
                                      callback.invoke(true)
                                      onAppUpdateListener?.invoke(it)
-                                     appOpenSettingsManager.setUpdateDate()
                                  }
                              },
                              {
@@ -326,13 +325,6 @@ object NStack {
      */
 
     private fun loadNetworkTranslations() {
-        val hasRequireTimePassed = hasRequireTimePassed()
-
-        if (!hasRequireTimePassed && !debugMode) {
-            NLog.i(this, "Skipping Network Call")
-            return
-        }
-
         // If we aren't connected we shouldn't try polling for new data
         if (!connectionManager.isConnected()) {
             NLog.e(this, "Missing Network Connection")
@@ -346,6 +338,9 @@ object NStack {
                             "Successfully Loaded Network Translations"
                     )
 
+                    NLog.i(this, "Saving when we updated translations at -> ${Date()}")
+                    appOpenSettingsManager.setUpdateDate()
+
                     runUiAction {
                         prefManager.setTranslations(it)
                         networkLanguages = it.toLanguageMap()
@@ -356,27 +351,6 @@ object NStack {
                     NLog.e(this, "Error Loading Network Translations", it)
                 }
         )
-    }
-
-    private fun hasRequireTimePassed(): Boolean {
-        val nowDate = Date()
-        val lastUpdateDate = prefManager.getLastUpdateDate() ?: return true
-
-        val nowTimeStamp = nowDate.time
-        val lastTimeStamp = lastUpdateDate.time
-
-        NLog.d(this, "Now Date -> $nowTimeStamp Last Update -> $lastTimeStamp")
-
-        val passedTime = nowTimeStamp - lastTimeStamp
-
-        NLog.d(this, "Refresh Period: $refreshPeriod")
-        NLog.d(this, "Passed Time: $passedTime")
-
-        val hasTimePassed = passedTime >= refreshPeriod
-
-        NLog.d(this, "Has Time Passed: $hasTimePassed")
-
-        return hasTimePassed
     }
 
     /**

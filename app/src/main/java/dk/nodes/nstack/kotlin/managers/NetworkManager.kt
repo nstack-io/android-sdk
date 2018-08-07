@@ -6,6 +6,7 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.parseFromString
+import dk.nodes.nstack.kotlin.util.toFormattedString
 import okhttp3.*
 import java.io.IOException
 
@@ -50,6 +51,7 @@ class NetworkManager(context: Context) {
                 .add("version", settings.version)
                 .add("old_version", settings.oldVersion)
                 .add("platform", settings.platform)
+                .add("last_updated", settings.lastUpdated.toFormattedString())
 
         val request = Request.Builder()
                 .url("https://nstack.io/api/v1/open")

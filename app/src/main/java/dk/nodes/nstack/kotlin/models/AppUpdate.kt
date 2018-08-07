@@ -8,5 +8,6 @@ data class AppUpdate(
         var title: String? = null,
         var message: String? = null,
         var positiveBtn: String? = null,
-        var negativeBtn: String? = null
+        var negativeBtn: String? = null,
+        var translationsUpdated: Boolean = false
 )

@@ -38,7 +38,7 @@ task installArchives(type: Upload) {
         mavenDeployer {
             pom.groupId = 'dk.nodes.nstack'
             pom.artifactId = 'nstack-kotlin'
-            pom.version = '2.0.12-LOCAL'
+            pom.version = '2.0.13-LOCAL'
             repository url: repositories.mavenLocal().url
         }
     }
