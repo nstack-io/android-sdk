@@ -21,7 +21,7 @@ NStack.init(this)
 
 Add this to gradle:
 ```groovy
-compile "dk.nodes.nstack:nstack-kotlin:2.1.0"
+compile "dk.nodes.nstack:nstack-kotlin:2.1.3"
 ```
 
 Add this to which ever activity you are trying to use NStack in
