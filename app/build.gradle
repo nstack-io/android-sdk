@@ -28,8 +28,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
 }
 
-apply plugin: 'maven'
-
+//apply plugin: 'maven'
+/*
 task installArchives(type: Upload) {
     group = "maven"
     description "Installs the artifacts to the local Maven repository."
@@ -43,3 +43,4 @@ task installArchives(type: Upload) {
         }
     }
 }
+*/
