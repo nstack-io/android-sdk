@@ -115,6 +115,7 @@ android:hint="{sectionName_keyName}"
 android:description="{sectionName_keyName}"
 android:textOn="{sectionName_keyName}"
 android:textOff="{sectionName_keyName}"
+android:contentDescription="{sectionName_keyName}"
 ```
 
 Method from 2.0.2+ is still supported as follows:
@@ -133,6 +134,7 @@ nstack:hint="sectionName_keyName"
 nstack:description="sectionName_keyName"
 nstack:textOn="sectionName_keyName"
 nstack:textOff="sectionName_keyName"
+nstack:contentDescription="sectionName_keyName"
 ````
 
 The following field should be used to set the nstack key `nstack:key="keyGoesHere"`
