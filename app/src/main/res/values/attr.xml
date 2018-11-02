@@ -7,5 +7,6 @@
         <attr name="description" format="string" />
         <attr name="textOn" format="string" />
         <attr name="textOff" format="string" />
+        <attr name="contentDescription" format="string" />
     </declare-styleable>
 </resources>
