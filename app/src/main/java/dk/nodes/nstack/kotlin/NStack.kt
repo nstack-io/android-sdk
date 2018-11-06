@@ -500,6 +500,13 @@ object NStack {
                 ?: return
         onLanguagesChangedList.remove(listenerContainer)
     }
+    /**
+     * Exposed force functions
+     */
+
+    fun forceReloadTranslations(){
+        loadCacheTranslations()
+    }
 
     /**
      * Exposed Getters
