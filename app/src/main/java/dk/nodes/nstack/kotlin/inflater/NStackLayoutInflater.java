@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.jetbrains.annotations.Nullable;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.lang.ref.WeakReference;
@@ -216,6 +218,7 @@ class NStackLayoutInflater extends LayoutInflater {
         if (name.contains("Layout")) return;
 
         // try to pull our value from it
+
         androidText = null;
         androidHint = null;
         androidDescription = null;
@@ -270,39 +273,43 @@ class NStackLayoutInflater extends LayoutInflater {
             typedArray.recycle();
         }
 
-        if (androidText != null && androidText.startsWith("{") && androidText.endsWith("}")) {
-            text = androidText.substring(1, androidText.length() - 1);
+        if (androidText != null) {
+            text = androidText;
+        }
+        if (androidHint != null) {
+            hint = androidHint;
+        }
+        if (androidDescription != null) {
+            description = androidDescription;
         }
 
-        if (androidHint != null && androidHint.startsWith("{") && androidHint.endsWith("}")) {
-            hint = androidHint.substring(1, androidHint.length() - 1);
+        if (androidTextOn != null) {
+            textOn = androidTextOn;
+        }
+        if (androidTextOff != null) {
+            textOff = androidTextOff;
+        }
+        if (androidContentDescription != null) {
+            contentDescription = androidContentDescription;
         }
 
-        if (androidDescription != null && androidDescription.startsWith("{") && androidDescription.endsWith("}")) {
-            description = androidDescription.substring(1, androidDescription.length() - 1);
-        }
+        key = cleanKeyName(key);
+        text = cleanKeyName(text);
+        hint = cleanKeyName(hint);
+        description = cleanKeyName(description);
+        textOn = cleanKeyName(textOn);
+        textOff = cleanKeyName(textOff);
+        contentDescription = cleanKeyName(contentDescription);
 
-        if (androidTextOn != null && androidTextOn.startsWith("{") && androidTextOn.endsWith("}")) {
-            textOn = androidTextOn.substring(1, androidTextOn.length() - 1);
-        }
-
-        if (androidTextOff != null && androidTextOff.startsWith("{") && androidTextOff.endsWith("}")) {
-            textOff = androidTextOff.substring(1, androidTextOff.length() - 1);
-        }
-
-        if (androidContentDescription != null && androidContentDescription.startsWith("{") && androidContentDescription.endsWith("}")) {
-            contentDescription = androidContentDescription.substring(1, androidContentDescription.length() - 1);
-        }
-
-        if (key == null &&
-                text == null &&
-                hint == null &&
-                description == null &&
-                textOn == null &&
-                textOff == null &&
-                contentDescription == null
+        if (
+                key == null &&
+                        text == null &&
+                        hint == null &&
+                        description == null &&
+                        textOn == null &&
+                        textOff == null &&
+                        contentDescription == null
                 ) {
-
             NLog.INSTANCE.d(this, "processView -> Found no valid NStack keys " + name);
             return;
         }
@@ -310,6 +317,19 @@ class NStackLayoutInflater extends LayoutInflater {
         TranslationData translationData = new TranslationData(key, text, hint, description, textOn, textOff, contentDescription);
 
         NStack.INSTANCE.addCachedView(new WeakReference<>(view), translationData);
+    }
+
+    @Nullable
+    private String cleanKeyName(String keyName) {
+        if (keyName == null) {
+            return null;
+        }
+
+        if (keyName.startsWith("{") && keyName.endsWith("}")) {
+            keyName = keyName.substring(1, keyName.length() - 1);
+        }
+
+        return keyName;
     }
 
     private static class WrapperFactory implements Factory {

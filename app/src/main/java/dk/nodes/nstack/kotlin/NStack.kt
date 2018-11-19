@@ -213,9 +213,12 @@ object NStack {
         networkManager
                 .postAppOpen(appOpenSettings, localeString,
                              {
-                                 NLog.d(this, "NStack appOpen -> translation updated: ${it.translationsUpdated}")
+                                 NLog.d(
+                                         this,
+                                         "NStack appOpen -> translation updated: ${it.translationsUpdated}"
+                                 )
 
-                                 if(it.translationsUpdated) {
+                                 if (it.translationsUpdated) {
                                      loadNetworkTranslations()
                                  }
 
@@ -307,6 +310,8 @@ object NStack {
      */
 
     private fun loadCacheTranslations() {
+        NLog.e(this, "loadCacheTranslations")
+
         // Load our network cached data
         networkLanguages = prefManager.getTranslations()
 
@@ -339,11 +344,12 @@ object NStack {
                     )
 
                     NLog.i(this, "Saving when we updated translations at -> ${Date()}")
-                    appOpenSettingsManager.setUpdateDate()
+                    //appOpenSettingsManager.setUpdateDate()
 
                     runUiAction {
                         prefManager.setTranslations(it)
                         networkLanguages = it.toLanguageMap()
+                        onLanguageChanged()
                         onLanguagesChanged()
                     }
                 },
@@ -499,13 +505,6 @@ object NStack {
         val listenerContainer = onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedFunction == listener }
                 ?: return
         onLanguagesChangedList.remove(listenerContainer)
-    }
-    /**
-     * Exposed force functions
-     */
-
-    fun forceReloadTranslations(){
-        loadCacheTranslations()
     }
 
     /**
