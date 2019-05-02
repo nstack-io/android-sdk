@@ -69,9 +69,7 @@ class ViewTranslationManager {
         val translatedTextOff = getTranslationByKey(translationData.textOff)
         val translatedContentDescription = getTranslationByKey(translationData.contentDescription)
 
-
         // All views should have this
-
         translatedContentDescription?.let {
             view.contentDescription = it
         }
@@ -82,6 +80,7 @@ class ViewTranslationManager {
             }
             return
         }
+
         when (view) {
             is androidx.appcompat.widget.Toolbar -> {
                 (translatedKey ?: translatedText)?.let {
