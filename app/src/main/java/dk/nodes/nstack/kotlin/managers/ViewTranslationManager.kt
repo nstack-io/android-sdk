@@ -67,6 +67,14 @@ class ViewTranslationManager {
         val translatedDescription = getTranslationByKey(translationData.description)
         val translatedTextOn = getTranslationByKey(translationData.textOn)
         val translatedTextOff = getTranslationByKey(translationData.textOff)
+        val translatedContentDescription = getTranslationByKey(translationData.contentDescription)
+
+
+        // All views should have this
+
+        translatedContentDescription?.let {
+            view.contentDescription = it
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && view is Toolbar) {
             (translatedKey ?: translatedText)?.let {
@@ -192,6 +200,4 @@ class ViewTranslationManager {
     fun clear() {
         viewMap.clear()
     }
-
-
 }
