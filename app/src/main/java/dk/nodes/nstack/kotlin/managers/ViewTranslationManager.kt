@@ -6,6 +6,8 @@ import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.ToggleButton
 import android.widget.Toolbar
+import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.tabs.TabItem
 import com.google.android.material.textfield.TextInputLayout
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
@@ -88,12 +90,20 @@ class ViewTranslationManager {
                     view.title = it
                 }
             }
+
+            is CollapsingToolbarLayout -> {
+                (translatedKey ?: translatedText)?.let {
+                    view.title = it
+                }
+            }
+
             is TextInputLayout -> {
                 NLog.d(this, "Is TextInputLayout")
                 translatedHint?.let {
                     view.hint = it
                 }
             }
+
             is ToggleButton -> {
                 NLog.d(this, "Is ToggleButton")
                 (translatedKey ?: translatedText)?.let {
