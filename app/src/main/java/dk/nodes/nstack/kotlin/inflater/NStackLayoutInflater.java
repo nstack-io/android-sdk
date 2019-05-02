@@ -1,5 +1,6 @@
 package dk.nodes.nstack.kotlin.inflater;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.jetbrains.annotations.Nullable;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.lang.ref.WeakReference;
@@ -17,7 +19,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 import dk.nodes.nstack.R;
 import dk.nodes.nstack.kotlin.NStack;
@@ -37,7 +38,8 @@ class NStackLayoutInflater extends LayoutInflater {
             android.R.attr.hint,
             android.R.attr.description,
             android.R.attr.textOn,
-            android.R.attr.textOff
+            android.R.attr.textOff,
+            android.R.attr.contentDescription
     };
 
     String androidText = null;
@@ -45,6 +47,7 @@ class NStackLayoutInflater extends LayoutInflater {
     String androidDescription = null;
     String androidTextOn = null;
     String androidTextOff = null;
+    String androidContentDescription = null;
 
     String key;
     String text;
@@ -52,6 +55,7 @@ class NStackLayoutInflater extends LayoutInflater {
     String description;
     String textOn;
     String textOff;
+    String contentDescription;
 
     private static HashMap<String, Class<? extends View>> classLookup = new HashMap<>();
 
@@ -186,7 +190,7 @@ class NStackLayoutInflater extends LayoutInflater {
         try {
             Constructor<? extends View> constructor;
             Class<? extends View> clazz;
-            if(classLookup.containsKey(name)) {
+            if (classLookup.containsKey(name)) {
                 clazz = classLookup.get(name);
             } else {
                 clazz = context.getClassLoader().loadClass(name).asSubclass(View.class);
@@ -204,27 +208,45 @@ class NStackLayoutInflater extends LayoutInflater {
     /**
      * Take our view strip whatever values were put into the XML and then add that to our NStack Translation Library Cache
      */
+    @SuppressLint("ResourceType")
     private void processView(String name, Context context, View view, AttributeSet attrs) {
         if (view == null) {
             NLog.INSTANCE.d(this, "processView -> Null View Returning " + name);
             return;
         }
 
-        if(name.contains("Layout")) return;
+        if (name.contains("Layout")) return;
 
         // try to pull our value from it
+
         androidText = null;
         androidHint = null;
         androidDescription = null;
         androidTextOn = null;
         androidTextOff = null;
+        androidContentDescription = null;
 
         TypedArray androidAttributes = context.obtainStyledAttributes(attrs, set);
-        if(androidAttributes.getText(0) != null) { androidText = androidAttributes.getText(0).toString(); }
-        if(androidAttributes.getText(1) != null) { androidHint = androidAttributes.getText(1).toString(); }
-        if(androidAttributes.getText(2) != null) { androidDescription = androidAttributes.getText(2).toString(); }
-        if(androidAttributes.getText(3) != null) { androidTextOn = androidAttributes.getText(3).toString(); }
-        if(androidAttributes.getText(4) != null) { androidTextOff = androidAttributes.getText(4).toString(); }
+
+        if (androidAttributes.getText(0) != null) {
+            androidText = androidAttributes.getText(0).toString();
+        }
+        if (androidAttributes.getText(1) != null) {
+            androidHint = androidAttributes.getText(1).toString();
+        }
+        if (androidAttributes.getText(2) != null) {
+            androidDescription = androidAttributes.getText(2).toString();
+        }
+        if (androidAttributes.getText(3) != null) {
+            androidTextOn = androidAttributes.getText(3).toString();
+        }
+        if (androidAttributes.getText(4) != null) {
+            androidTextOff = androidAttributes.getText(4).toString();
+        }
+        if (androidAttributes.getText(5) != null) {
+            androidContentDescription = androidAttributes.getText(5).toString();
+        }
+
         androidAttributes.recycle();
 
 
@@ -237,6 +259,7 @@ class NStackLayoutInflater extends LayoutInflater {
         description = null;
         textOn = null;
         textOff = null;
+        contentDescription = null;
 
         try {
             key = typedArray.getString(R.styleable.nstack_key);
@@ -245,45 +268,68 @@ class NStackLayoutInflater extends LayoutInflater {
             description = typedArray.getString(R.styleable.nstack_description);
             textOn = typedArray.getString(R.styleable.nstack_textOn);
             textOff = typedArray.getString(R.styleable.nstack_textOff);
+            contentDescription = typedArray.getString(R.styleable.nstack_contentDescription);
         } finally {
             typedArray.recycle();
         }
 
-        if(androidText != null && androidText.startsWith("{") && androidText.endsWith("}")) {
-            text = androidText.substring(1, androidText.length() - 1);
+        if (androidText != null) {
+            text = androidText;
+        }
+        if (androidHint != null) {
+            hint = androidHint;
+        }
+        if (androidDescription != null) {
+            description = androidDescription;
         }
 
-        if(androidHint != null && androidHint.startsWith("{") && androidHint.endsWith("}")) {
-            hint = androidHint.substring(1, androidHint.length() - 1);
+        if (androidTextOn != null) {
+            textOn = androidTextOn;
+        }
+        if (androidTextOff != null) {
+            textOff = androidTextOff;
+        }
+        if (androidContentDescription != null) {
+            contentDescription = androidContentDescription;
         }
 
-        if(androidDescription != null && androidDescription.startsWith("{") && androidDescription.endsWith("}")) {
-            description = androidDescription.substring(1, androidDescription.length() - 1);
-        }
+        key = cleanKeyName(key);
+        text = cleanKeyName(text);
+        hint = cleanKeyName(hint);
+        description = cleanKeyName(description);
+        textOn = cleanKeyName(textOn);
+        textOff = cleanKeyName(textOff);
+        contentDescription = cleanKeyName(contentDescription);
 
-        if(androidTextOn != null && androidTextOn.startsWith("{") && androidTextOn.endsWith("}")) {
-            textOn = androidTextOn.substring(1, androidTextOn.length() - 1);
-        }
-
-        if(androidTextOff != null && androidTextOff.startsWith("{") && androidTextOff.endsWith("}")) {
-            textOff = androidTextOff.substring(1, androidTextOff.length() - 1);
-        }
-
-        if (key == null &&
-                text == null &&
-                hint == null &&
-                description == null &&
-                textOn == null &&
-                textOff == null
+        if (
+                key == null &&
+                        text == null &&
+                        hint == null &&
+                        description == null &&
+                        textOn == null &&
+                        textOff == null &&
+                        contentDescription == null
                 ) {
-
             NLog.INSTANCE.d(this, "processView -> Found no valid NStack keys " + name);
             return;
         }
 
-        TranslationData translationData = new TranslationData(key, text, hint, description, textOn, textOff);
+        TranslationData translationData = new TranslationData(key, text, hint, description, textOn, textOff, contentDescription);
 
         NStack.INSTANCE.addCachedView(new WeakReference<>(view), translationData);
+    }
+
+    @Nullable
+    private String cleanKeyName(String keyName) {
+        if (keyName == null) {
+            return null;
+        }
+
+        if (keyName.startsWith("{") && keyName.endsWith("}")) {
+            keyName = keyName.substring(1, keyName.length() - 1);
+        }
+
+        return keyName;
     }
 
     private static class WrapperFactory implements Factory {
