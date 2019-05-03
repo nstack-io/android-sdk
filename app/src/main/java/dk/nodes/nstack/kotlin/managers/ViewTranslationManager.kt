@@ -1,13 +1,9 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.os.Build
 import android.view.View
 import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.ToggleButton
-import android.widget.Toolbar
-import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.google.android.material.textfield.TextInputLayout
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
@@ -70,35 +66,20 @@ class ViewTranslationManager {
         val translatedTextOn = getTranslationByKey(translationData.textOn)
         val translatedTextOff = getTranslationByKey(translationData.textOff)
         val translatedContentDescription = getTranslationByKey(translationData.contentDescription)
-
+        val translatedTitle = getTranslationByKey(translationData.title)
+        val translatedSubtitle = getTranslationByKey(translationData.subtitle)
         // All views should have this
         translatedContentDescription?.let {
             view.contentDescription = it
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && view is Toolbar) {
-            (translatedKey ?: translatedText)?.let {
-                view.title = it
-            }
-            return
-        }
-
         when (view) {
             is androidx.appcompat.widget.Toolbar -> {
-                (translatedKey ?: translatedText)?.let {
+                translatedTitle?.let {
                     view.title = it
                 }
-            }
-
-            is CollapsingToolbarLayout -> {
-                (translatedKey ?: translatedText)?.let {
-                    view.title = it
-                }
-            }
-
-            is TextInputLayout -> {
-                translatedHint?.let {
-                    view.hint = it
+                translatedSubtitle?.let {
+                    view.subtitle = it
                 }
             }
 
