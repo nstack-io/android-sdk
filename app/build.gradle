@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 220
-        versionName "2.2.0"
+        versionCode 230
+        versionName "2.3.0"
         manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder"]
     }
     buildTypes {
@@ -26,10 +26,11 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
+    implementation 'com.google.android.material:material:1.0.0'
 }
 
-//apply plugin: 'maven'
-/*
+apply plugin: 'maven'
+
 task installArchives(type: Upload) {
     group = "maven"
     description "Installs the artifacts to the local Maven repository."
@@ -43,4 +44,3 @@ task installArchives(type: Upload) {
         }
     }
 }
-*/

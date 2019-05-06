@@ -8,5 +8,7 @@
         <attr name="textOn" format="string" />
         <attr name="textOff" format="string" />
         <attr name="contentDescription" format="string" />
+        <attr name="title" format="string" />
+        <attr name="subtitle" format="string" />
     </declare-styleable>
 </resources>
