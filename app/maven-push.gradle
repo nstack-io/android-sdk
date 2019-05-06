@@ -12,7 +12,7 @@ allprojects { ext."signing.password" = System.getenv('password') }
 
 // Artifact settings
 def _group = 'dk.nodes.nstack'
-def _version = '2.2.0'
+def _version = '2.3.0'
 def _archivesBaseName = 'nstack-kotlin'
 
 def _name = 'NStack Kotlin Library'

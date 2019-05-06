@@ -4,7 +4,6 @@ import android.view.View
 import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.ToggleButton
-import android.widget.Toolbar
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
@@ -67,29 +66,26 @@ class ViewTranslationManager {
         val translatedTextOn = getTranslationByKey(translationData.textOn)
         val translatedTextOff = getTranslationByKey(translationData.textOff)
         val translatedContentDescription = getTranslationByKey(translationData.contentDescription)
-
-
+        val translatedTitle = getTranslationByKey(translationData.title)
+        val translatedSubtitle = getTranslationByKey(translationData.subtitle)
         // All views should have this
-
         translatedContentDescription?.let {
             view.contentDescription = it
         }
 
         when (view) {
-            is Toolbar        -> {
-                translatedKey?.let {
+            is androidx.appcompat.widget.Toolbar -> {
+                translatedTitle?.let {
                     view.title = it
                 }
-                translatedText?.let {
-                    view.title = it
+                translatedSubtitle?.let {
+                    view.subtitle = it
                 }
             }
-            is ToggleButton   -> {
-                NLog.w(this, "Is ToggleButton")
-                translatedKey?.let {
-                    view.text = it
-                }
-                translatedText?.let {
+
+            is ToggleButton -> {
+                NLog.d(this, "Is ToggleButton")
+                (translatedKey ?: translatedText)?.let {
                     view.text = it
                 }
                 translatedHint?.let {
@@ -106,12 +102,8 @@ class ViewTranslationManager {
                 }
             }
             is CompoundButton -> {
-                NLog.w(this, "Is CompoundButton")
-
-                translatedKey?.let {
-                    view.text = it
-                }
-                translatedText?.let {
+                NLog.d(this, "Is CompoundButton")
+                (translatedKey ?: translatedText)?.let {
                     view.text = it
                 }
                 translatedHint?.let {
@@ -121,11 +113,8 @@ class ViewTranslationManager {
                     view.contentDescription = it
                 }
             }
-            is TextView       -> {
-                translatedKey?.let {
-                    view.text = it
-                }
-                translatedText?.let {
+            is TextView -> {
+                (translatedKey ?: translatedText)?.let {
                     view.text = it
                 }
                 translatedHint?.let {
@@ -148,14 +137,7 @@ class ViewTranslationManager {
         if (key == null) {
             return null
         }
-
-        val hasValue = language.has(key)
-
-        return if (hasValue) {
-            language.getString(key)
-        } else {
-            null
-        }
+        return language.optString(key, null)
     }
 
     /**
@@ -213,6 +195,4 @@ class ViewTranslationManager {
     fun clear() {
         viewMap.clear()
     }
-
-
 }

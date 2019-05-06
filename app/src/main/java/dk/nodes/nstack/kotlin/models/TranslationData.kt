@@ -7,5 +7,7 @@ data class TranslationData(
         var description: String? = null,
         var textOn: String? = null,
         var textOff: String? = null,
-        var contentDescription: String? = null
+        var contentDescription: String? = null,
+        var title: String? = null,
+        var subtitle : String? = null
 )

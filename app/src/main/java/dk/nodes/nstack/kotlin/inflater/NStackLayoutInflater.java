@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,23 +38,10 @@ class NStackLayoutInflater extends LayoutInflater {
             android.R.attr.description,
             android.R.attr.textOn,
             android.R.attr.textOff,
-            android.R.attr.contentDescription
+            android.R.attr.contentDescription,
+            R.attr.title,
+            R.attr.subtitle
     };
-
-    String androidText = null;
-    String androidHint = null;
-    String androidDescription = null;
-    String androidTextOn = null;
-    String androidTextOff = null;
-    String androidContentDescription = null;
-
-    String key;
-    String text;
-    String hint;
-    String description;
-    String textOn;
-    String textOff;
-    String contentDescription;
 
     private static HashMap<String, Class<? extends View>> classLookup = new HashMap<>();
 
@@ -219,12 +205,14 @@ class NStackLayoutInflater extends LayoutInflater {
 
         // try to pull our value from it
 
-        androidText = null;
-        androidHint = null;
-        androidDescription = null;
-        androidTextOn = null;
-        androidTextOff = null;
-        androidContentDescription = null;
+        String androidText = null;
+        String androidHint = null;
+        String androidDescription = null;
+        String androidTextOn = null;
+        String androidTextOff = null;
+        String androidContentDescription = null;
+        String appTitle = null;
+        String appSubtitle = null;
 
         TypedArray androidAttributes = context.obtainStyledAttributes(attrs, set);
 
@@ -246,6 +234,12 @@ class NStackLayoutInflater extends LayoutInflater {
         if (androidAttributes.getText(5) != null) {
             androidContentDescription = androidAttributes.getText(5).toString();
         }
+        if (androidAttributes.getText(6) != null) {
+            appTitle = androidAttributes.getText(6).toString();
+        }
+        if (androidAttributes.getText(7) != null) {
+            appSubtitle = androidAttributes.getText(7).toString();
+        }
 
         androidAttributes.recycle();
 
@@ -253,13 +247,15 @@ class NStackLayoutInflater extends LayoutInflater {
         // Get our typed array
         TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.nstack, 0, 0);
         // Custom nstack:* attributes
-        key = null;
-        text = null;
-        hint = null;
-        description = null;
-        textOn = null;
-        textOff = null;
-        contentDescription = null;
+        String key;
+        String text;
+        String hint;
+        String description;
+        String textOn;
+        String textOff;
+        String contentDescription;
+        String title;
+        String subtitle;
 
         try {
             key = typedArray.getString(R.styleable.nstack_key);
@@ -269,6 +265,8 @@ class NStackLayoutInflater extends LayoutInflater {
             textOn = typedArray.getString(R.styleable.nstack_textOn);
             textOff = typedArray.getString(R.styleable.nstack_textOff);
             contentDescription = typedArray.getString(R.styleable.nstack_contentDescription);
+            title = typedArray.getString(R.styleable.nstack_title);
+            subtitle = typedArray.getString(R.styleable.nstack_subtitle);
         } finally {
             typedArray.recycle();
         }
@@ -292,6 +290,12 @@ class NStackLayoutInflater extends LayoutInflater {
         if (androidContentDescription != null) {
             contentDescription = androidContentDescription;
         }
+        if (appTitle != null) {
+            title = appTitle;
+        }
+        if (appSubtitle != null) {
+            subtitle = appSubtitle;
+        }
 
         key = cleanKeyName(key);
         text = cleanKeyName(text);
@@ -300,6 +304,8 @@ class NStackLayoutInflater extends LayoutInflater {
         textOn = cleanKeyName(textOn);
         textOff = cleanKeyName(textOff);
         contentDescription = cleanKeyName(contentDescription);
+        title = cleanKeyName(title);
+        subtitle = cleanKeyName(subtitle);
 
         if (
                 key == null &&
@@ -308,13 +314,15 @@ class NStackLayoutInflater extends LayoutInflater {
                         description == null &&
                         textOn == null &&
                         textOff == null &&
-                        contentDescription == null
-                ) {
+                        contentDescription == null &&
+                        title == null &&
+                        subtitle == null
+        ) {
             NLog.INSTANCE.d(this, "processView -> Found no valid NStack keys " + name);
             return;
         }
 
-        TranslationData translationData = new TranslationData(key, text, hint, description, textOn, textOff, contentDescription);
+        TranslationData translationData = new TranslationData(key, text, hint, description, textOn, textOff, contentDescription, title, subtitle);
 
         NStack.INSTANCE.addCachedView(new WeakReference<>(view), translationData);
     }
@@ -395,5 +403,4 @@ class NStackLayoutInflater extends LayoutInflater {
             return layoutInflater.createCustomViewInternal(parent, factory2.onCreateView(parent, name, context, attrs), name, context, attrs);
         }
     }
-
 }
