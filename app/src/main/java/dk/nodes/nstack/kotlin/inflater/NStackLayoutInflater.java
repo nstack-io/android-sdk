@@ -41,27 +41,7 @@ class NStackLayoutInflater extends LayoutInflater {
             android.R.attr.contentDescription,
             R.attr.title,
             R.attr.subtitle
-
     };
-
-    String androidText = null;
-    String androidHint = null;
-    String androidDescription = null;
-    String androidTextOn = null;
-    String androidTextOff = null;
-    String androidContentDescription = null;
-    String appTitle = null;
-    String appSubtitle = null;
-
-    String key;
-    String text;
-    String hint;
-    String description;
-    String textOn;
-    String textOff;
-    String contentDescription;
-    String title;
-    String subtitle;
 
     private static HashMap<String, Class<? extends View>> classLookup = new HashMap<>();
 
@@ -225,14 +205,14 @@ class NStackLayoutInflater extends LayoutInflater {
 
         // try to pull our value from it
 
-        androidText = null;
-        androidHint = null;
-        androidDescription = null;
-        androidTextOn = null;
-        androidTextOff = null;
-        androidContentDescription = null;
-        appTitle = null;
-        appSubtitle = null;
+        String androidText = null;
+        String androidHint = null;
+        String androidDescription = null;
+        String androidTextOn = null;
+        String androidTextOff = null;
+        String androidContentDescription = null;
+        String appTitle = null;
+        String appSubtitle = null;
 
         TypedArray androidAttributes = context.obtainStyledAttributes(attrs, set);
 
@@ -267,15 +247,15 @@ class NStackLayoutInflater extends LayoutInflater {
         // Get our typed array
         TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.nstack, 0, 0);
         // Custom nstack:* attributes
-        key = null;
-        text = null;
-        hint = null;
-        description = null;
-        textOn = null;
-        textOff = null;
-        contentDescription = null;
-        title = null;
-        subtitle = null;
+        String key;
+        String text;
+        String hint;
+        String description;
+        String textOn;
+        String textOff;
+        String contentDescription;
+        String title;
+        String subtitle;
 
         try {
             key = typedArray.getString(R.styleable.nstack_key);
