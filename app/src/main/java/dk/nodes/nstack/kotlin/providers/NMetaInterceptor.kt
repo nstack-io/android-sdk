@@ -3,7 +3,7 @@ package dk.nodes.nstack.kotlin.providers
 import android.os.Build
 import dk.nodes.nstack.kotlin.NStack
 
-class NMetaInterceptor(private val environment: String = "development") : okhttp3.Interceptor {
+class NMetaInterceptor(private val environment: String = NStack.env) : okhttp3.Interceptor {
     @Throws(java.io.IOException::class)
     override fun intercept(chain: okhttp3.Interceptor.Chain): okhttp3.Response {
         val originalRequest = chain.request()

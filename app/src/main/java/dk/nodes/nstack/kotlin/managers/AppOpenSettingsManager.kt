@@ -6,11 +6,12 @@ import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.Constants
 import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.parseFromISO8601
-import dk.nodes.nstack.kotlin.util.toFormattedString
+import dk.nodes.nstack.kotlin.util.formatted
+import dk.nodes.nstack.kotlin.util.iso8601Date
 import java.util.*
 
 class AppOpenSettingsManager(private val context: Context) {
+
     private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     fun getAppOpenSettings(): AppOpenSettings {
@@ -30,7 +31,7 @@ class AppOpenSettingsManager(private val context: Context) {
 
     fun setUpdateDate() {
         val version = getAppVersion()
-        val updateDate = Date().toFormattedString()
+        val updateDate = Date().formatted
 
         setString(Constants.spk_nstack_last_updated, updateDate)
         setString(Constants.spk_nstack_old_version, version)
@@ -67,13 +68,7 @@ class AppOpenSettingsManager(private val context: Context) {
     private fun getAppUpdateDate(): Date {
         val dateString = getString(Constants.spk_nstack_last_updated)
 
-        return if (dateString == null) {
-            Date(0)
-        } else {
-            val date = Date()
-            date.parseFromISO8601(dateString)
-            date
-        }
+        return dateString?.iso8601Date ?: Date(0)
     }
 
     /**

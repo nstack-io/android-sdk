@@ -11,8 +11,8 @@ class NStackInterceptor : Interceptor {
         val newRequest = originalRequest.newBuilder()
                 //Commented this out because it was causing issues with the cached languageHeader
                 //.header("Accept-Language", NStack.getStack().getSelectedLanguageHeader())
-                .header("X-Application-Id", NStack.getAppIdKey())
-                .header("X-Rest-Api-Key", NStack.getAppApiKey())
+                .header("X-Application-Id", NStack.appIdKey)
+                .header("X-Rest-Api-Key", NStack.appApiKey)
                 .build()
 
         return chain.proceed(newRequest)

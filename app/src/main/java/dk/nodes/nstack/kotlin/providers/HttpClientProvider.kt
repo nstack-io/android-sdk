@@ -25,8 +25,8 @@ object HttpClientProvider {
     }
 
     private fun providesHttpLoggingInterceptor(): HttpLoggingInterceptor {
-        val logging = okhttp3.logging.HttpLoggingInterceptor()
-        logging.level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+        val logging = HttpLoggingInterceptor()
+        logging.level = HttpLoggingInterceptor.Level.BODY
         return logging
     }
 
@@ -43,6 +43,7 @@ object HttpClientProvider {
 
         client.addInterceptor(nStackInterceptor)
         client.addInterceptor(loggingInterceptor)
+        client.addInterceptor(NMetaInterceptor())
         client.cache(cache)
 
         return client.build()
