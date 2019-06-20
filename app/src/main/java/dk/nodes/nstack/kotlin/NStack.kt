@@ -39,7 +39,7 @@ object NStack {
 
     // Cache Maps
     private var networkLanguages: HashMap<Locale, JSONObject>? = null
-    private var cacheLanguages: HashMap<Locale, JSONObject> = hashMapOf()
+    private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
 
     // Internal Variables
     private var refreshPeriod: Long = TimeUnit.HOURS.toMillis(1)
@@ -66,7 +66,7 @@ object NStack {
      * Will return the network languages if available if not it will return the
      * asset cache languages (Will typically be the oldest version of the language)
      */
-    var languages: HashMap<Locale, JSONObject>
+    var languages: Map<Locale, JSONObject>
         set(value) {
         }
         get() {

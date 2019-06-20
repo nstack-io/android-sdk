@@ -81,13 +81,20 @@ fun String.toLanguageMap(): HashMap<Locale, JSONObject> {
     }
 
     jsonRoot?.keys()
-            ?.forEach { key ->
-                val language = jsonRoot[key]
-                if (language is JSONObject) {
-                    val localeKey = key.toLocale()
-                    languageMap[localeKey] = language
-                }
+        ?.forEach { key ->
+            val language = jsonRoot[key]
+            if (language is JSONObject) {
+                val localeKey = key.toLocale()
+                languageMap[localeKey] = language
             }
+        }
 
     return languageMap
 }
+
+val String.asJsonObject: JSONObject?
+    get() = try {
+        JSONObject(this)
+    } catch (e: Exception) {
+        null
+    }
