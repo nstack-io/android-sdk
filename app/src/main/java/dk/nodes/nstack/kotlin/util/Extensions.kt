@@ -93,3 +93,10 @@ val JSONArray.localizeIndices: List<LocalizeIndex>
             listOf()
         }
     }
+
+val Locale.languageCode: String
+    get() {
+        val regex = "([a-z]+)([_\\-][A-Za-z]+)?".toRegex()
+        val result = regex.find(language)
+        return result?.groupValues?.get(1) ?: ""
+    }
