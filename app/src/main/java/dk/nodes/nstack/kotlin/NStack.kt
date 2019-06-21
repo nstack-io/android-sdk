@@ -331,10 +331,10 @@ object NStack {
     private fun loadCacheTranslations() {
         NLog.e(this, "loadCacheTranslations")
 
-        // Load our network cached date
+        // Load our network cached data
         networkLanguages = prefManager.getTranslations()
 
-        // Load our asset cached date
+        // Load our asset cached data
         cacheLanguages = assetCacheManager.loadTranslations()
 
         // Broadcast our languages changed
