@@ -10,15 +10,16 @@ import java.util.*
 
 // Extension
 
+private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ"
+
 val Date.formatted: String
     get() {
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault())
-        return format.format(this)
+        return SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(this)
     }
 
 val String.iso8601Date: Date
     get() {
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault())
+        val format = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
 
         return try {
             format.parse(this)
