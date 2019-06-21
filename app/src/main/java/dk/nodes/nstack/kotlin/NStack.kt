@@ -232,6 +232,9 @@ object NStack {
                                 NLog.e(this, "Could not load translations for ${localizeIndex.language.locale}", it)
                             })
                         }
+                        if (localizeIndex.language.isDefault) {
+                            defaultLanguage = localizeIndex.language.locale
+                        }
                     }
 
                     runUiAction {
@@ -413,13 +416,14 @@ object NStack {
     }
 
     private fun searchForLocale(locale: Locale): JSONObject? {
+        println("searching for $locale")
         return if (languages.containsKey(language)) {
             languages[language]
         } else {
             // Search our available languages for any keys that might match
             availableLanguages
                 // Do our languages match
-                .filter { it.language == locale.language }
+                .filter { it.languageCode == locale.languageCode }
                 // Find the value for that language
                 .map { languages[it] }
                 // Return the first value or null
