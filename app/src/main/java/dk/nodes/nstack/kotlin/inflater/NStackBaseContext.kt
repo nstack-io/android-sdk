@@ -5,8 +5,6 @@ import android.content.ContextWrapper
 import android.view.LayoutInflater
 
 
-
-
 class NStackBaseContext(context: Context) : ContextWrapper(context) {
 
     /**
