@@ -24,7 +24,7 @@ internal class NStackLayoutInflater internal constructor(
     cloned: Boolean
 ) : LayoutInflater(original, newContext) {
 
-    private var mSetPrivateFactory = false
+    private var isPrivateFactorySet = false
     private var mConstructorArgs: Field? = null
 
     init {
@@ -71,12 +71,12 @@ internal class NStackLayoutInflater internal constructor(
 
     private fun setPrivateFactoryInternal() {
         // Already tried to set the factory.
-        if (mSetPrivateFactory) {
+        if (isPrivateFactorySet) {
             return
         }
         // Skip if not attached to an activity.
         if (context !is Factory2) {
-            mSetPrivateFactory = true
+            isPrivateFactorySet = true
             return
         }
 
@@ -86,7 +86,7 @@ internal class NStackLayoutInflater internal constructor(
             ReflectionUtils.invokeMethod(this, setPrivateFactoryMethod, PrivateWrapperFactory2(context as Factory2, this))
         }
 
-        mSetPrivateFactory = true
+        isPrivateFactorySet = true
     }
 
     @Throws(ClassNotFoundException::class)
@@ -374,6 +374,7 @@ internal class NStackLayoutInflater internal constructor(
         )
 
         private val classLookup = HashMap<String, Class<out View>>()
+
         private val constructorSignature = arrayOf(Context::class.java, AttributeSet::class.java)
     }
 }

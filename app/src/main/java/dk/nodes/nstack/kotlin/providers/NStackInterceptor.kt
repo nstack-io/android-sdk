@@ -4,6 +4,7 @@ import dk.nodes.nstack.kotlin.NStack
 import okhttp3.Interceptor
 
 class NStackInterceptor : Interceptor {
+
     @Throws(java.io.IOException::class)
     override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
         val originalRequest = chain.request()
