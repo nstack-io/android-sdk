@@ -7,9 +7,9 @@ object ReflectionUtils {
 
     fun getField(clazz: Class<*>, fieldName: String): Field? {
         try {
-            val f = clazz.getDeclaredField(fieldName)
-            f.isAccessible = true
-            return f
+            val field = clazz.getDeclaredField(fieldName)
+            field.isAccessible = true
+            return field
         } catch (ignored: NoSuchFieldException) {
         }
         return null

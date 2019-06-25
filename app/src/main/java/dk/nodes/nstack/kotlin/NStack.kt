@@ -213,7 +213,7 @@ object NStack {
         NLog.d(this, "onAppOpened -> $localeString $appOpenSettings")
 
         // If we aren't connected we should just send the app open call back as none
-        if (!connectionManager.isConnected()) {
+        if (!connectionManager.isConnected) {
             NLog.e(this, "No internet skipping appOpen")
             onAppUpdateListener?.invoke(AppUpdateData())
             return
