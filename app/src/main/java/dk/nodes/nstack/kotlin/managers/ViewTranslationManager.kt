@@ -1,9 +1,8 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.view.View
-import android.widget.CompoundButton
-import android.widget.TextView
-import android.widget.ToggleButton
+import android.view.*
+import android.widget.*
+import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
@@ -72,6 +71,40 @@ class ViewTranslationManager {
         translatedContentDescription?.let {
             view.contentDescription = it
         }
+
+
+            view.isClickable = true
+            view.setOnLongClickListener {
+                NLog.d(this, "key: $translatedKey - $translatedText")
+
+                val dialogBuilder = androidx.appcompat.app.AlertDialog.Builder(view.context, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog)
+                val dialogView = LayoutInflater.from(view.context).inflate(R.layout.bottomsheet_translation_change, null)
+                val edittext = dialogView.findViewById<EditText>(R.id.zzz_nstack_translation_et)
+                val btn = dialogView.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
+                edittext.setText(translatedText ?: translatedHint ?: "")
+                dialogBuilder.setView(dialogView)
+                val dialog = dialogBuilder.create()
+                btn.setOnClickListener {
+                    when(view) {
+                        is EditText -> {
+                            view.hint = edittext.text.toString()
+                            view.hintTextColors
+                        }
+                        is TextView -> {
+                            view.text = edittext.text.toString()
+                        }
+                        is CompoundButton -> {
+                            view.text = edittext.text.toString()
+                        }
+                    }
+                    dialog.dismiss()
+                }
+                dialog.show()
+
+
+                true
+            }
+
 
         when (view) {
             is androidx.appcompat.widget.Toolbar -> {
