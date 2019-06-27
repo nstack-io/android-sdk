@@ -344,7 +344,7 @@ object NStack {
                     )
 
                     NLog.i(this, "Saving when we updated translations at -> ${Date()}")
-                    //appOpenSettingsManager.setUpdateDate()
+                    appOpenSettingsManager.setUpdateDate()
 
                     runUiAction {
                         prefManager.setTranslations(it)
