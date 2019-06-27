@@ -143,6 +143,19 @@ object NStack {
         }
 
     /**
+     * Enable/Disable live editing
+     */
+    var liveEditEnabled: Boolean = false
+        set(value) {
+            field = value
+            if (value) {
+                viewTranslationManager.enableLiveEdit()
+            } else {
+                viewTranslationManager.disableLiveEdit()
+            }
+        }
+
+    /**
      * If flag is set to true this will auto change NStack's language when the device's locale is changed
      */
     var autoChangeLanguage: Boolean = false
