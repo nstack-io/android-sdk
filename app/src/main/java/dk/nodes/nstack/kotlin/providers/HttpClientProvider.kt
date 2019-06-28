@@ -1,6 +1,7 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
+import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.util.NLog
 import okhttp3.Cache
 import okhttp3.Interceptor
@@ -29,7 +30,7 @@ object HttpClientProvider {
 
     private fun provideHttpLoggingInterceptor(): Interceptor {
         val logging = HttpLoggingInterceptor()
-        logging.level = HttpLoggingInterceptor.Level.BODY
+        logging.level = if(NStack.debugMode) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         return logging
     }
 
