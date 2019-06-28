@@ -1,6 +1,7 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
+import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.util.NLog
 import okhttp3.Cache
 import okhttp3.Interceptor
@@ -9,43 +10,44 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 object HttpClientProvider {
 
-    private fun providesCache(context: Context): Cache? {
+    private const val CACHE_SIZE = 10L * 1024L * 1024L // 10 MiB
+    private const val CONNECT_TIMEOUT_SECONDS = 10L
+    private const val WRITE_TIMEOUT_SECONDS = 10L
+    private const val READ_TIMEOUT_SECONDS = 10L
+
+    private fun provideCache(context: Context): Cache? {
         return try {
-            val cacheDirectory = context.cacheDir
-            val cacheSize = 10 * 1024 * 1024 // 10 MiB
-            Cache(cacheDirectory, cacheSize.toLong())
+            Cache(context.cacheDir, CACHE_SIZE)
         } catch (e: Exception) {
             NLog.e(this, "Error", e)
             null
         }
     }
 
-    private fun providesNStackInterceptor(): Interceptor {
+    private fun provideNStackInterceptor(): Interceptor {
         return NStackInterceptor()
     }
 
-    private fun providesHttpLoggingInterceptor(): HttpLoggingInterceptor {
-        val logging = okhttp3.logging.HttpLoggingInterceptor()
-        logging.level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+    private fun provideHttpLoggingInterceptor(): Interceptor {
+        val logging = HttpLoggingInterceptor()
+        logging.level = if(NStack.debugMode) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         return logging
     }
 
-    fun getHttpClient(context: Context): OkHttpClient {
-        val client = OkHttpClient()
-                .newBuilder()
-                .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .writeTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-
-        val cache = providesCache(context)
-        val nStackInterceptor = providesNStackInterceptor()
-        val loggingInterceptor = providesHttpLoggingInterceptor()
-
-        client.addInterceptor(nStackInterceptor)
-        client.addInterceptor(loggingInterceptor)
-        client.cache(cache)
-
-        return client.build()
+    private fun provideNMetaInterceptor(): Interceptor {
+        return NMetaInterceptor()
     }
 
+    fun getHttpClient(context: Context): OkHttpClient {
+        return OkHttpClient()
+            .newBuilder()
+            .connectTimeout(CONNECT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(WRITE_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .addInterceptor(provideNStackInterceptor())
+            .addInterceptor(provideHttpLoggingInterceptor())
+            .addInterceptor(provideNMetaInterceptor())
+            .cache(provideCache(context))
+            .build()
+    }
 }
