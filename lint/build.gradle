@@ -1,4 +1,5 @@
 apply plugin: 'java-library'
+apply plugin: "kotlin"
 
 dependencies {
     // For a description of the below dependencies, see the main project README
