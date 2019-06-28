@@ -231,6 +231,8 @@ object NStack {
                             }, {
                                 NLog.e(this, "Could not load translations for ${localizeIndex.language.locale}", it)
                             })
+
+                            appOpenSettingsManager.setUpdateDate()
                         }
                         if (localizeIndex.language.isDefault) {
                             defaultLanguage = localizeIndex.language.locale
