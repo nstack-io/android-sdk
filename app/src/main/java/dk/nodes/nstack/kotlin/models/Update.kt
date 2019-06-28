@@ -2,7 +2,7 @@ package dk.nodes.nstack.kotlin.models
 
 import org.json.JSONObject
 
-data class UpdateNewerVersion(
+data class Update(
     val state: String,
     val lastId: Int,
     val version: String,
@@ -11,10 +11,10 @@ data class UpdateNewerVersion(
 ) {
 
     constructor(jsonObject: JSONObject) : this(
-        state = jsonObject.getString("state"),
+        state = jsonObject.optString("state", "none"),
         lastId = jsonObject.getInt("last_id"),
         version = jsonObject.getString("version"),
-        link = jsonObject.getString("link"),
+        link = jsonObject.optString("link", "empty"),
         translate = UpdateTranslate(jsonObject.getJSONObject("translate"))
     )
 }
