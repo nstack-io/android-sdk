@@ -12,6 +12,12 @@ android {
         versionName "2.3.0"
         manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder"]
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -21,12 +27,17 @@ android {
 }
 
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    lintChecks project(':lint')
+    lintPublish project(':lint')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
     implementation 'com.google.android.material:material:1.0.0'
+
+
 }
 
 apply plugin: 'maven'
@@ -39,7 +50,7 @@ task installArchives(type: Upload) {
         mavenDeployer {
             pom.groupId = 'dk.nodes.nstack'
             pom.artifactId = 'nstack-kotlin'
-            pom.version = '2.0.14-LOCAL'
+            pom.version = '2.5.3-LOCAL'
             repository url: repositories.mavenLocal().url
         }
     }

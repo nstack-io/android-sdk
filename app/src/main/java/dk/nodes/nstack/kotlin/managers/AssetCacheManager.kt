@@ -27,6 +27,8 @@ class AssetCacheManager(private val context: Context) {
             e.message
         }
 
+        println("Hello lint there")
+
         return string
     }
 }
