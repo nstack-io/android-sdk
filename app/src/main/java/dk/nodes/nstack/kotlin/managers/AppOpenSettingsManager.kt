@@ -1,18 +1,18 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.Constants
 import dk.nodes.nstack.kotlin.util.NLog
+import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.formatted
 import dk.nodes.nstack.kotlin.util.iso8601Date
 import java.util.*
 
-class AppOpenSettingsManager(private val context: Context) {
-
-    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+class AppOpenSettingsManager(
+    private val context: Context,
+    private val preferences: Preferences
+) {
 
     fun getAppOpenSettings(): AppOpenSettings {
         val uuid = appUUID
@@ -33,22 +33,20 @@ class AppOpenSettingsManager(private val context: Context) {
         val version = appVersion
         val updateDate = Date().formatted
 
-        setString(Constants.spk_nstack_last_updated, updateDate)
-        setString(Constants.spk_nstack_old_version, version)
+        preferences.saveString(Constants.spk_nstack_last_updated, updateDate)
+        preferences.saveString(Constants.spk_nstack_old_version, version)
     }
-
-    /** App Settings Stuff **/
 
     private val appUUID: String
         get() {
             NLog.d(this, "Getting UUID")
 
-            var uuid = getString(Constants.spk_nstack_guid)
+            var uuid = preferences.loadString(Constants.spk_nstack_guid)
 
-            if (uuid == null) {
+            if (uuid.isEmpty()) {
                 NLog.d(this, "UUID missing -> Generating!")
                 uuid = UUID.randomUUID().toString()
-                setString(Constants.spk_nstack_guid, uuid)
+                preferences.saveString(Constants.spk_nstack_guid, uuid)
             }
 
             return uuid
@@ -65,25 +63,12 @@ class AppOpenSettingsManager(private val context: Context) {
 
     private val appOldVersion: String?
         get() {
-            return getString(Constants.spk_nstack_old_version)
+            return preferences.loadString(Constants.spk_nstack_old_version)
         }
 
     private val appUpdateDate: Date
         get() {
-            return getString(Constants.spk_nstack_last_updated)?.iso8601Date ?: Date(0)
+            return preferences.loadString(Constants.spk_nstack_last_updated).iso8601Date
         }
 
-    /**
-     * Helper Functions
-     */
-
-    private fun setString(key: String, value: String) {
-        prefs.edit()
-            .putString(key, value)
-            .apply()
-    }
-
-    private fun getString(key: String): String? {
-        return prefs.getString(key, null)
-    }
 }

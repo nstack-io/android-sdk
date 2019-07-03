@@ -12,6 +12,7 @@ import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.*
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -169,6 +170,8 @@ object NStack {
             return
         }
 
+        val nstackModule = NStackModule(context)
+
         getApplicationInfo(context)
         registerLocaleChangeBroadcastListener(context)
 
@@ -176,8 +179,8 @@ object NStack {
         connectionManager = ConnectionManager(context)
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
-        appOpenSettingsManager = AppOpenSettingsManager(context)
-        prefManager = PrefManager(context)
+        appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
+        prefManager = nstackModule.providePrefManager()
 
         loadCacheTranslations()
 
@@ -418,7 +421,6 @@ object NStack {
     }
 
     private fun searchForLocale(locale: Locale): JSONObject? {
-        println("searching for $locale")
         return if (languages.containsKey(language)) {
             languages[language]
         } else {

@@ -27,6 +27,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
     implementation 'com.google.android.material:material:1.0.0'
+
+    testImplementation "junit:junit:4.12"
 }
 
 apply plugin: 'maven'
