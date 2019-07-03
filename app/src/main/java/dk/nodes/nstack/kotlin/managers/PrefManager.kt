@@ -1,9 +1,7 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.content.Context
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.models.Constants
+import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.asJsonObject
 import dk.nodes.nstack.kotlin.util.formatted
 import dk.nodes.nstack.kotlin.util.iso8601Date
@@ -11,41 +9,33 @@ import org.json.JSONObject
 import java.util.*
 
 
-class PrefManager(context: Context) {
-
-    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+class PrefManager(private val preferences: Preferences) {
 
     private fun setLastUpdateDate() {
         val updateString = Date().formatted
-        setString(Constants.spk_nstack_network_update_time, updateString)
+        preferences.saveString(Constants.spk_nstack_network_update_time, updateString)
     }
 
     fun getLastUpdateDate(): Date? {
-        val updateString = getString(Constants.spk_nstack_network_update_time) ?: return null
+        val updateString = preferences.loadString(Constants.spk_nstack_network_update_time)
 
-        return updateString.iso8601Date
+        return if (updateString.isEmpty()) {
+            null
+        } else {
+            updateString.iso8601Date
+        }
     }
 
     fun setTranslations(locale: Locale, translations: String) {
         setLastUpdateDate()
-        setString("${Constants.spk_nstack_language_cache}_$locale", translations)
+        preferences.saveString("${Constants.spk_nstack_language_cache}_$locale", translations)
     }
 
     fun getTranslations(): Map<Locale, JSONObject> {
-        return prefs.all
-            .filterKeys { it.startsWith(Constants.spk_nstack_language_cache) }
+        return preferences
+            .loadStringsWhereKey { it.startsWith(Constants.spk_nstack_languages_cache) }
             .mapKeys { it.key.localeFromKey }
-            .mapValues { (it.value as String).asJsonObject!! }
-    }
-
-    private fun setString(key: String, value: String) {
-        prefs.edit()
-            .putString(key, value)
-            .apply()
-    }
-
-    private fun getString(key: String): String? {
-        return prefs.getString(key, null)
+            .mapValues { it.value.asJsonObject!! }
     }
 
     private val String.localeFromKey: Locale

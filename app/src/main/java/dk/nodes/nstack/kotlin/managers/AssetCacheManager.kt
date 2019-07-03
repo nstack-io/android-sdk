@@ -19,7 +19,7 @@ class AssetCacheManager(private val context: Context) {
     }
 
     private fun loadTranslation(translationFile: String): Translation? {
-        val pattern = "^translations_(\\d+)_(\\w{2}-\\w{2})\\.json$".toRegex()
+        val pattern = "^translations_(\\d+)_(\\w{2}[-_]\\w{2})\\.json$".toRegex()
         val result = pattern.find(translationFile) ?: return null
         val groups = result.groupValues
         val index = groups[1]
