@@ -9,6 +9,9 @@ import dk.nodes.nstack.kotlin.util.formatted
 import dk.nodes.nstack.kotlin.util.iso8601Date
 import java.util.*
 
+/**
+ * Manages app open settings
+ */
 class AppOpenSettingsManager(
     private val context: Context,
     private val preferences: Preferences
