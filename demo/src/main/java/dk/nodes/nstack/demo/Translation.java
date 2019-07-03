@@ -15,6 +15,7 @@ public class Translation {
 		public static String next = "Next";
 		public static String on = "On";
 		public static String off = "Off";
+		public static String ok = "Ok";
 	}
 	public final static class error {
 		public static String errorRandom = "Totally random error";
