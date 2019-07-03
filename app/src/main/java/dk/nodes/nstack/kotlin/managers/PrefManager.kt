@@ -38,7 +38,7 @@ class PrefManager(private val preferences: Preferences) {
         return preferences
             .loadStringsWhereKey { it.startsWith(Constants.spk_nstack_languages_cache) }
             .mapKeys { it.key.localeFromKey }
-            .mapValues { it.value.asJsonObject!! }
+            .mapValues { it.value.asJsonObject ?: JSONObject() }
     }
 
     private val String.localeFromKey: Locale
