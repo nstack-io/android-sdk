@@ -9,6 +9,9 @@ import org.json.JSONObject
 import java.util.*
 
 
+/**
+ * Manages last update date and translations
+ */
 class PrefManager(private val preferences: Preferences) {
 
     private fun setLastUpdateDate() {

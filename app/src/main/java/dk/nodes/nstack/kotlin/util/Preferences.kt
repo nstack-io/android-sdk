@@ -4,13 +4,33 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 
+
+/**
+ * An interface for shared preferences
+ */
 interface Preferences {
 
+    /**
+     * Saves value with key
+     */
     fun saveString(key: String, value: String)
+
+    /**
+     * Gets string by key
+     */
     fun loadString(key: String): String
+
+    /**
+     * Loads all strings with key which satisfies predicate
+     * @return map of keys to resulting strings
+     */
     fun loadStringsWhereKey(predicate: (String) -> Boolean): Map<String, String>
 }
 
+
+/**
+ * Preferences implementation
+ */
 class PreferencesImpl(context: Context) : Preferences {
 
     private val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -24,6 +44,6 @@ class PreferencesImpl(context: Context) : Preferences {
     }
 
     override fun loadStringsWhereKey(predicate: (String) -> Boolean): Map<String, String> {
-        return preferences.all.filterKeys(predicate).mapValues { it.value as String }
+        return preferences.all.filterKeys(predicate).mapValues { (it.value as? String) ?: "" }
     }
 }
