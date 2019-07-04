@@ -266,6 +266,15 @@ object NStack {
         networkManager.postMessageSeen(appOpenSettings.guid, message.id)
     }
 
+    /**
+     * Call it to notify that the rate reminder was seen and doesn't need to appear any more
+     * @param rated - true if user pressed Yes, false if user pressed No, not called if user pressed Later
+     */
+    fun onRateReminderAction(rated: Boolean) {
+        val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
+        networkManager.postRateReminderSeen(appOpenSettings, rated)
+    }
+
     fun setRefreshPeriod(duration: Long, timeUnit: TimeUnit) {
         this.refreshPeriod = timeUnit.toMillis(duration)
     }
