@@ -11,6 +11,7 @@ import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.*
@@ -255,6 +256,14 @@ object NStack {
                     onAppUpdateListener?.invoke(AppUpdateData())
                 }
             )
+    }
+
+    /**
+     * Call it to notify that the message was seen and doesn't need to appear anymore
+     */
+    fun messageSeen(message: Message) {
+        val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
+        networkManager.postMessageSeen(appOpenSettings.guid, message.id)
     }
 
     fun setRefreshPeriod(duration: Long, timeUnit: TimeUnit) {
