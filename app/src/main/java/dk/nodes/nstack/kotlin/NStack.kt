@@ -11,6 +11,7 @@ import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.*
@@ -255,6 +256,23 @@ object NStack {
                     onAppUpdateListener?.invoke(AppUpdateData())
                 }
             )
+    }
+
+    /**
+     * Call it to notify that the message was seen and doesn't need to appear anymore
+     */
+    fun messageSeen(message: Message) {
+        val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
+        networkManager.postMessageSeen(appOpenSettings.guid, message.id)
+    }
+
+    /**
+     * Call it to notify that the rate reminder was seen and doesn't need to appear any more
+     * @param rated - true if user pressed Yes, false if user pressed No, not called if user pressed Later
+     */
+    fun onRateReminderAction(rated: Boolean) {
+        val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
+        networkManager.postRateReminderSeen(appOpenSettings, rated)
     }
 
     fun setRefreshPeriod(duration: Long, timeUnit: TimeUnit) {
