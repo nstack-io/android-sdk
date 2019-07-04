@@ -2,6 +2,9 @@ package dk.nodes.nstack.kotlin.models
 
 import org.json.JSONObject
 
+/**
+ * Info for rate reminder dialog
+ */
 data class RateReminder(
     val title: String,
     val body: String,
