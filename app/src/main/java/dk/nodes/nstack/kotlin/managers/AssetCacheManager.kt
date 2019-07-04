@@ -30,14 +30,7 @@ class AssetCacheManager(private val context: Context) {
         } catch (e: Exception) {
             null
         }
-<<<<<<< HEAD
-
-        println("Hello lint there")
-
-        return string
-=======
         return Translation(index = index, locale = locale, translations = translations)
->>>>>>> master
     }
 
     private data class Translation(

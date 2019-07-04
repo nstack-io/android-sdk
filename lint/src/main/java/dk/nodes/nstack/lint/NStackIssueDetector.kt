@@ -1,33 +1,69 @@
 package dk.nodes.nstack.lint
 
 import com.android.tools.lint.client.api.UElementHandler
+import com.android.tools.lint.detector.api.Context
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.Location
 import com.intellij.psi.PsiMethod
-import org.jetbrains.uast.UElement
-import org.jetbrains.uast.ULiteralExpression
+import dk.nodes.nstack.lint.issues.AppOpenMissingIssue
 import dk.nodes.nstack.lint.issues.NStackTestIssue
 import dk.nodes.nstack.lint.issues.TextViewSetterIssue
-import org.jetbrains.uast.UCallExpression
-import org.jetbrains.uast.getValueIfStringLiteral
+import org.jetbrains.uast.*
 
 class NStackIssueDetector : Detector(), Detector.UastScanner {
 
+
+    private var appOpenCalled: Boolean = false
+    private var nstackInitLocation: Location? = null
+
+
+    override fun beforeCheckRootProject(context: Context) {
+        appOpenCalled = false
+        nstackInitLocation = null
+    }
+
+
+    override fun afterCheckRootProject(context: Context) {
+        // When all methods/classes visited check if we met appOpen()
+        if (!appOpenCalled && nstackInitLocation != null) {
+            context.report(AppOpenMissingIssue.ISSUE, nstackInitLocation!!, "NStack was initilized, appOpen() not found")
+        } else if (nstackInitLocation != null) {
+            context.report(NStackTestIssue.ISSUE, nstackInitLocation!!, "AppOpensiize")
+        } else {
+
+        }
+    }
 
     override fun getApplicableUastTypes(): List<Class<out UElement>>? {
         return listOf<Class<out UElement>>(ULiteralExpression::class.java)
     }
 
     override fun getApplicableMethodNames(): List<String>? {
-        return listOf("setText")
+        return listOf(METHOD_APP_OPEN, METHOD_SET_TEXT, METHOD_INIT)
     }
+
 
     override fun visitMethodCall(context: JavaContext, node: UCallExpression, method: PsiMethod) {
         val methodName = node.methodName
-        if (methodName == "setText") {
-            val caller = node.receiverType ?: return
-            if (caller.canonicalText == "android.widget.TextView") {
-                context.report(TextViewSetterIssue.ISSUE, context.getLocation(node), "Found text view, fix setter")
+        when (methodName) {
+            METHOD_SET_TEXT -> {
+                val caller = node.receiverType ?: return
+                if (caller.canonicalText == "android.widget.TextView") {
+                    context.report(TextViewSetterIssue.ISSUE, context.getLocation(node), "Found text view, fixsss setter")
+                }
+            }
+            METHOD_APP_OPEN -> {
+                if (method.isFromNStack(context.evaluator)) {
+                    appOpenCalled = true
+                }
+            }
+
+            METHOD_INIT -> {
+                if (method.isFromNStack(context.evaluator)) {
+                     nstackInitLocation = context.getLocation(node)
+                }
+
             }
         }
     }
@@ -55,7 +91,10 @@ class NStackIssueDetector : Detector(), Detector.UastScanner {
     }
 
     companion object {
-        val ISSUES = listOf(NStackTestIssue.ISSUE, TextViewSetterIssue.ISSUE)
+        val ISSUES = listOf(NStackTestIssue.ISSUE, TextViewSetterIssue.ISSUE, AppOpenMissingIssue.ISSUE)
+        private const val METHOD_SET_TEXT = "setText"
+        private const val METHOD_APP_OPEN = "appOpen"
+        private const val METHOD_INIT = "init"
     }
 
 }
