@@ -6,6 +6,7 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
+import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.asJsonObject
 import dk.nodes.nstack.kotlin.util.formatted
 import okhttp3.*
@@ -69,6 +70,63 @@ class NetworkManager(context: Context) {
                     } catch (e: Exception) {
                         onError(e)
                     }
+                }
+            })
+    }
+
+    /**
+     * Notifies the backend that the message has been seen
+     */
+    fun postMessageSeen(guid: String, messageId: Int) {
+        val formBuilder = FormBody.Builder()
+            .add("guid", guid)
+            .add("message_id", messageId.toString())
+
+        val request = Request.Builder()
+            .url("${NStack.baseUrl}/api/v1/notify/messages/views")
+            .post(formBuilder.build())
+            .build()
+
+        client
+            .newCall(request)
+            .enqueue(object : Callback {
+
+                override fun onFailure(call: Call, e: IOException) {
+                    NLog.e(this, "Failure posting message seen", e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    NLog.v(this, "Message seen")
+                }
+            })
+    }
+
+    /**
+     * Notifies the backend that the rate reminder has been seen
+     */
+    fun postRateReminderSeen(appOpenSettings: AppOpenSettings, rated: Boolean) {
+        val answer = if (rated) "yes" else "no"
+
+        val formBuilder = FormBody.Builder()
+            .add("guid", appOpenSettings.guid)
+            .add("platform", appOpenSettings.platform)
+            .add("answer", answer)
+
+        val request = Request.Builder()
+            .url("${NStack.baseUrl}/api/v1/notify/rate_reminder/views")
+            .post(formBuilder.build())
+            .build()
+
+        client
+            .newCall(request)
+            .enqueue(object : Callback {
+
+                override fun onFailure(call: Call, e: IOException) {
+                    NLog.e(this, "Failure posting rate reminder seen", e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    NLog.v(this, "Rate reminder seen")
                 }
             })
     }

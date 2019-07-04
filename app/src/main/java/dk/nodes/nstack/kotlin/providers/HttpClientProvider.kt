@@ -45,8 +45,8 @@ object HttpClientProvider {
             .writeTimeout(WRITE_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
             .addInterceptor(provideNStackInterceptor())
-            .addInterceptor(provideHttpLoggingInterceptor())
             .addInterceptor(provideNMetaInterceptor())
+            .addInterceptor(provideHttpLoggingInterceptor())
             .cache(provideCache(context))
             .build()
     }
