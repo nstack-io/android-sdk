@@ -8,7 +8,7 @@ data class AppUpdateResponse(
 ) {
 
     constructor(jsonObject: JSONObject) : this(
-        data = AppUpdateData(jsonObject.getJSONObject("data")),
+        data = jsonObject.getJSONObject("data").appUpdateData,
         meta = AppUpdateMeta(jsonObject.getJSONObject("meta"))
     )
 }
