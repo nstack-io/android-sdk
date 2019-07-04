@@ -9,7 +9,7 @@ import java.util.List;
 public class NStackIssueRegistry extends IssueRegistry {
     @Override
     public List<Issue> getIssues() {
-        return NStackIssueDetector.Companion.getISSUES();
+        return NStackIssuesDetector.Companion.getISSUES();
     }
 
     @Override

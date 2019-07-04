@@ -1,73 +1,72 @@
 package dk.nodes.nstack.lint
 
 import com.android.tools.lint.client.api.UElementHandler
-import com.android.tools.lint.detector.api.Context
-import com.android.tools.lint.detector.api.Detector
-import com.android.tools.lint.detector.api.JavaContext
-import com.android.tools.lint.detector.api.Location
+import com.android.tools.lint.detector.api.*
 import com.intellij.psi.PsiMethod
 import dk.nodes.nstack.lint.issues.AppOpenMissingIssue
 import dk.nodes.nstack.lint.issues.NStackTestIssue
 import dk.nodes.nstack.lint.issues.TextViewSetterIssue
 import org.jetbrains.uast.*
 
-class NStackIssueDetector : Detector(), Detector.UastScanner {
+class NStackIssuesDetector : Detector(), Detector.UastScanner {
 
 
     private var appOpenCalled: Boolean = false
     private var nstackInitLocation: Location? = null
-
+    private var versionControlUsed: Boolean = false
 
     override fun beforeCheckRootProject(context: Context) {
         appOpenCalled = false
+        versionControlUsed = false
         nstackInitLocation = null
     }
 
 
     override fun afterCheckRootProject(context: Context) {
-        // When all methods/classes visited check if we met appOpen()
-        if (!appOpenCalled && nstackInitLocation != null) {
-            context.report(AppOpenMissingIssue.ISSUE, nstackInitLocation!!, "NStack was initilized, appOpen() not found")
-        } else if (nstackInitLocation != null) {
-            context.report(NStackTestIssue.ISSUE, nstackInitLocation!!, "AppOpensiize")
-        } else {
-
+        // When all methods/classes visited check if we required methods were implemented
+        nstackInitLocation?.let { initLocation ->
+            when {
+                !appOpenCalled -> context.report(AppOpenMissingIssue.ISSUE, initLocation, "AppOpen")
+                !versionControlUsed -> context.report(AppOpenMissingIssue.ISSUE, initLocation, "VersionControl")
+            }
         }
     }
+
 
     override fun getApplicableUastTypes(): List<Class<out UElement>>? {
         return listOf<Class<out UElement>>(ULiteralExpression::class.java)
     }
 
+
     override fun getApplicableMethodNames(): List<String>? {
-        return listOf(METHOD_APP_OPEN, METHOD_SET_TEXT, METHOD_INIT)
+        return listOf(METHOD_APP_OPEN, METHOD_SET_TEXT, METHOD_INIT, METHOD_VERSION_CONTROL)
     }
 
 
     override fun visitMethodCall(context: JavaContext, node: UCallExpression, method: PsiMethod) {
         val methodName = node.methodName
-        when (methodName) {
-            METHOD_SET_TEXT -> {
-                val caller = node.receiverType ?: return
-                if (caller.canonicalText == "android.widget.TextView") {
-                    context.report(TextViewSetterIssue.ISSUE, context.getLocation(node), "Found text view, fixsss setter")
+        if (method.isFromNStack(context.evaluator)) {
+            when (methodName) {
+                METHOD_SET_TEXT -> {
+                    val caller = node.receiverType ?: return
+                    if (caller.canonicalText == "android.widget.TextView") {
+                        context.report(TextViewSetterIssue.ISSUE, context.getLocation(node), "Found text view, fixsss setter")
+                    }
                 }
-            }
-            METHOD_APP_OPEN -> {
-                if (method.isFromNStack(context.evaluator)) {
+                METHOD_APP_OPEN -> {
                     appOpenCalled = true
                 }
-            }
 
-            METHOD_INIT -> {
-                if (method.isFromNStack(context.evaluator)) {
-                     nstackInitLocation = context.getLocation(node)
+                METHOD_INIT -> {
+                    nstackInitLocation = context.getLocation(node)
+
                 }
-
+                METHOD_VERSION_CONTROL -> {
+                    versionControlUsed = true
+                }
             }
         }
     }
-
 
     override fun createUastHandler(context: JavaContext): UElementHandler? {
         // Note: Visiting UAST nodes is a pretty general purpose mechanism;
@@ -95,6 +94,8 @@ class NStackIssueDetector : Detector(), Detector.UastScanner {
         private const val METHOD_SET_TEXT = "setText"
         private const val METHOD_APP_OPEN = "appOpen"
         private const val METHOD_INIT = "init"
+        private const val METHOD_VERSION_CONTROL = "onAppUpdateListener"
+
     }
 
 }

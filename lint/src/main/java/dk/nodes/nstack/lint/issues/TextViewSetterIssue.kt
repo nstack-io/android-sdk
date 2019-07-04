@@ -6,7 +6,7 @@ import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 
-import dk.nodes.nstack.lint.NStackIssueDetector
+import dk.nodes.nstack.lint.NStackIssuesDetector
 
 object TextViewSetterIssue {
 
@@ -27,7 +27,7 @@ object TextViewSetterIssue {
             PRIORITY,
             SEVERITY,
             Implementation(
-                    NStackIssueDetector::class.java,
+                    NStackIssuesDetector::class.java,
                     Scope.JAVA_FILE_SCOPE))
 
 }

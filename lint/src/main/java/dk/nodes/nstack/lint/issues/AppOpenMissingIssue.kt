@@ -1,7 +1,7 @@
 package dk.nodes.nstack.lint.issues
 
 import com.android.tools.lint.detector.api.*
-import dk.nodes.nstack.lint.NStackIssueDetector
+import dk.nodes.nstack.lint.NStackIssuesDetector
 
 object AppOpenMissingIssue {
 
@@ -21,7 +21,7 @@ object AppOpenMissingIssue {
             PRIORITY,
             SEVERITY,
             Implementation(
-                    NStackIssueDetector::class.java,
+                    NStackIssuesDetector::class.java,
                     Scope.JAVA_FILE_SCOPE))
 
 
