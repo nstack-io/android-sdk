@@ -4,6 +4,7 @@ import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
 
 class ClassTranslationManager {
+
     fun parseTranslations(jsonObject: JSONObject) {
         val keys = jsonObject.keys()
 
@@ -13,7 +14,6 @@ class ClassTranslationManager {
             if (sectionObject is JSONObject) {
                 updateSection(it, sectionObject)
             }
-
         }
     }
 
@@ -37,7 +37,7 @@ class ClassTranslationManager {
                 }
             }
         } catch (e: Exception) {
-            NLog.d("", "Parsing failed for section -> " + sectionKey + " | " + e.toString())
+            NLog.d("", "Parsing failed for section -> $sectionKey | $e")
         }
     }
 

@@ -1,92 +1,77 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.Constants
 import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.parseFromISO8601
-import dk.nodes.nstack.kotlin.util.toFormattedString
+import dk.nodes.nstack.kotlin.util.Preferences
+import dk.nodes.nstack.kotlin.util.formatted
+import dk.nodes.nstack.kotlin.util.iso8601Date
 import java.util.*
 
-class AppOpenSettingsManager(private val context: Context) {
-    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+/**
+ * Manages app open settings
+ */
+class AppOpenSettingsManager(
+    private val context: Context,
+    private val preferences: Preferences
+) {
 
     fun getAppOpenSettings(): AppOpenSettings {
-        val uuid = getAppUUID()
-        val version = getAppVersion()
-        val oldVersion = getAppOldVersion() ?: version
-        val updateDate = getAppUpdateDate()
+        val uuid = appUUID
+        val version = appVersion
+        val oldVersion = appOldVersion ?: version
+        val updateDate = appUpdateDate
 
         return AppOpenSettings(
-                "android",
-                uuid,
-                version,
-                oldVersion,
-                updateDate
+            "android",
+            uuid,
+            version,
+            oldVersion,
+            updateDate
         )
     }
 
     fun setUpdateDate() {
-        val version = getAppVersion()
-        val updateDate = Date().toFormattedString()
+        val version = appVersion
+        val updateDate = Date().formatted
 
-        setString(Constants.spk_nstack_last_updated, updateDate)
-        setString(Constants.spk_nstack_old_version, version)
+        preferences.saveString(Constants.spk_nstack_last_updated, updateDate)
+        preferences.saveString(Constants.spk_nstack_old_version, version)
     }
 
-    /** App Settings Stuff **/
+    private val appUUID: String
+        get() {
+            NLog.d(this, "Getting UUID")
 
-    private fun getAppUUID(): String {
-        NLog.d(this, "Getting UUID")
+            var uuid = preferences.loadString(Constants.spk_nstack_guid)
 
-        var uuid = getString(Constants.spk_nstack_guid)
+            if (uuid.isEmpty()) {
+                NLog.d(this, "UUID missing -> Generating!")
+                uuid = UUID.randomUUID().toString()
+                preferences.saveString(Constants.spk_nstack_guid, uuid)
+            }
 
-        if (uuid == null) {
-            NLog.d(this, "UUID missing -> Generating!")
-            uuid = UUID.randomUUID().toString()
-            setString(Constants.spk_nstack_guid, uuid)
+            return uuid
         }
 
-        return uuid
-    }
-
-    private fun getAppVersion(): String {
-        return try {
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        } catch (e: Exception) {
-            ""
+    private val appVersion: String
+        get() {
+            return try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            } catch (e: Exception) {
+                ""
+            }
         }
-    }
 
-    private fun getAppOldVersion(): String? {
-        return getString(Constants.spk_nstack_old_version)
-    }
-
-    private fun getAppUpdateDate(): Date {
-        val dateString = getString(Constants.spk_nstack_last_updated)
-
-        return if (dateString == null) {
-            Date(0)
-        } else {
-            val date = Date()
-            date.parseFromISO8601(dateString)
-            date
+    private val appOldVersion: String?
+        get() {
+            return preferences.loadString(Constants.spk_nstack_old_version)
         }
-    }
 
-    /**
-     * Helper Functions
-     */
+    private val appUpdateDate: Date
+        get() {
+            return preferences.loadString(Constants.spk_nstack_last_updated).iso8601Date
+        }
 
-    private fun setString(key: String, value: String) {
-        prefs.edit()
-                .putString(key, value)
-                .apply()
-    }
-
-    private fun getString(key: String): String? {
-        return prefs.getString(key, null)
-    }
 }

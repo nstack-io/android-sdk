@@ -36,8 +36,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
     implementation 'com.google.android.material:material:1.0.0'
-
-
+    testImplementation "junit:junit:4.12"
 }
 
 apply plugin: 'maven'
@@ -50,7 +49,7 @@ task installArchives(type: Upload) {
         mavenDeployer {
             pom.groupId = 'dk.nodes.nstack'
             pom.artifactId = 'nstack-kotlin'
-            pom.version = '2.4.0-LOCAL'
+            pom.version = '3.0.2-LOCAL'
             repository url: repositories.mavenLocal().url
         }
     }
