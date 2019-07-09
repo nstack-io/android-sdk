@@ -7,7 +7,8 @@ data class Update(
     val lastId: Int,
     val version: String,
     val link: String,
-    val translate: UpdateTranslate
+    val translate: UpdateTranslate,
+    val fileUrl: String?
 ) {
 
     constructor(jsonObject: JSONObject) : this(
@@ -15,6 +16,7 @@ data class Update(
         lastId = jsonObject.getInt("last_id"),
         version = jsonObject.getString("version"),
         link = jsonObject.optString("link", "empty"),
-        translate = UpdateTranslate(jsonObject.getJSONObject("translate"))
+        translate = UpdateTranslate(jsonObject.getJSONObject("translate")),
+        fileUrl = jsonObject.optString("file_url")
     )
 }
