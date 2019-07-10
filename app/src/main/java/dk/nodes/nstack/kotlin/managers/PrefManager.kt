@@ -1,6 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
-import dk.nodes.nstack.kotlin.models.Constants
+import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.asJsonObject
 import dk.nodes.nstack.kotlin.util.formatted

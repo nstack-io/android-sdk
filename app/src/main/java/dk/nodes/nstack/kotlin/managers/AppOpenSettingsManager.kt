@@ -2,7 +2,7 @@ package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.Constants
+import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.formatted
