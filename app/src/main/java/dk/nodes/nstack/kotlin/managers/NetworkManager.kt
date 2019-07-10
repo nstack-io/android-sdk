@@ -2,6 +2,7 @@ package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
 import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
@@ -32,6 +33,15 @@ class NetworkManager(context: Context) {
                     }
                 }
             })
+    }
+
+    suspend fun loadTranslation(url: String): String? {
+        val response = client.newCall(Request.Builder().url(url).build()).execute()
+        val responseBody = response.body()
+        return when {
+            response.isSuccessful && responseBody != null -> responseBody.string().asJsonObject?.getJSONObject("data").toString()
+            else -> null
+        }
     }
 
     fun postAppOpen(
@@ -72,6 +82,37 @@ class NetworkManager(context: Context) {
                     }
                 }
             })
+    }
+
+    suspend fun postAppOpen(
+            settings: AppOpenSettings,
+            acceptLanguage: String
+    ): AppOpenResult {
+        val formBuilder = FormBody.Builder()
+                .add("guid", settings.guid)
+                .add("version", settings.version)
+                .add("old_version", settings.oldVersion)
+                .add("platform", settings.platform)
+                .add("last_updated", settings.lastUpdated.formatted)
+                .add("dev", NStack.debugMode.toString())
+
+        val request = Request.Builder()
+                .url("${NStack.baseUrl}/api/v2/open")
+                .header("Accept-Language", acceptLanguage)
+                .post(formBuilder.build())
+                .build()
+
+        try {
+            val response = client
+                    .newCall(request)
+                    .execute()
+
+            val responseString = response?.body()?.string() ?: return AppOpenResult.Failure
+            val appUpdate = AppUpdateResponse(responseString.asJsonObject  ?: return AppOpenResult.Failure)
+            return AppOpenResult.Success(appUpdate)
+        } catch (e: Exception) {
+            return AppOpenResult.Failure
+        }
     }
 
     /**
@@ -129,5 +170,55 @@ class NetworkManager(context: Context) {
                     NLog.v(this, "Rate reminder seen")
                 }
             })
+    }
+
+    /**
+     * Get a Collection Response (as String) from NStack collections
+     */
+    fun getResponse(slug: String,
+                    onSuccess: (String) -> Unit,
+                    onError: (Exception) -> Unit) {
+        val request = Request.Builder()
+                .url("${NStack.baseUrl}/api/v1/content/responses/$slug")
+                .get()
+                .build()
+
+        client
+                .newCall(request)
+                .enqueue(object : Callback {
+
+                    override fun onFailure(call: Call, e: IOException) {
+                        NLog.e(this, "Failure getting slug: $slug", e)
+                        onError.invoke(e)
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        val responseBody = response.body()
+                        when {
+                            response.isSuccessful && responseBody != null -> onSuccess.invoke(responseBody.string())
+                            else -> onError.invoke(RuntimeException("$slug returned: ${response.code()}"))
+                        }
+                    }
+                })
+    }
+
+    /**
+     * Get a Collection Response (as String) synchronously in a coroutine from NStack collections
+     */
+    suspend fun getResponseSync(slug: String): String? {
+        val request = Request.Builder()
+                .url("${NStack.baseUrl}/api/v1/content/responses/$slug")
+                .get()
+                .build()
+
+        val response = client
+                .newCall(request)
+                .execute()
+        val responseBody = response.body()
+
+        return when {
+            response.isSuccessful && responseBody != null -> responseBody.string()
+            else -> null
+        }
     }
 }

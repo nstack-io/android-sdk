@@ -9,10 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
-import dk.nodes.nstack.kotlin.models.AppUpdateData
-import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.Message
-import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.*
 import org.json.JSONObject
@@ -52,9 +49,6 @@ object NStack {
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
-
-    // Internal Variables
-    private var refreshPeriod: Long = TimeUnit.HOURS.toMillis(1)
 
     private var handler: Handler = Handler()
 
@@ -204,7 +198,6 @@ object NStack {
     /**
      * Callback method for when the app is first opened
      */
-
     fun appOpen(callback: AppOpenCallback = {}) {
         if (!isInitialized) {
             throw IllegalStateException("init() has not been called")
@@ -259,6 +252,55 @@ object NStack {
     }
 
     /**
+     * Coroutine version of AppOpen: Callback method for when the app is first opened
+     *
+     */
+    suspend fun appOpen(): AppOpenResult {
+        if (!isInitialized) {
+            throw IllegalStateException("init() has not been called")
+        }
+
+        val localeString = language.toString()
+        val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
+
+        NLog.d(this, "onAppOpened -> $localeString $appOpenSettings")
+
+        // If we aren't connected we should just send the app open call back as none
+        if (!connectionManager.isConnected) {
+            NLog.e(this, "No internet skipping appOpen")
+            return AppOpenResult.NoInternet
+        }
+
+        try {
+            when(val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
+                is AppOpenResult.Success -> {
+                    NLog.d(this, "NStack appOpen")
+
+                    result.appUpdateResponse.data.localize.forEach { localizeIndex ->
+                        if (localizeIndex.shouldUpdate) {
+                            val translation = networkManager.loadTranslation(localizeIndex.url) ?: return@forEach
+                            prefManager.setTranslations(localizeIndex.language.locale, translation)
+                            appOpenSettingsManager.setUpdateDate()
+                        }
+                        if (localizeIndex.language.isDefault) {
+                            defaultLanguage = localizeIndex.language.locale
+                        }
+                    }
+
+                    return result
+                }
+                else -> {
+                    NLog.e(this, "Error: onAppOpened")
+                    return result
+                }
+            }
+        } catch (e: Exception) {
+            NLog.e(this, "Error: onAppOpened - network request probably failed")
+            return AppOpenResult.Failure
+        }
+    }
+
+    /**
      * Call it to notify that the message was seen and doesn't need to appear anymore
      */
     fun messageSeen(message: Message) {
@@ -275,14 +317,29 @@ object NStack {
         networkManager.postRateReminderSeen(appOpenSettings, rated)
     }
 
-    fun setRefreshPeriod(duration: Long, timeUnit: TimeUnit) {
-        this.refreshPeriod = timeUnit.toMillis(duration)
+    /**
+     * Call it to get a Response created in Collection in the given NStack application
+     * @param slug - copy paste the text slug from the list of responses
+     */
+    fun getCollectionResponse(slug: String,
+                              onSuccess: (String) -> Unit,
+                              onError: (Exception) -> Unit) {
+        networkManager.getResponse(slug, onSuccess, onError)
     }
+
+    /**
+     * Call it to get a Response created in Collection in the given NStack application
+     * This is the coroutine version for Kotlin
+     * @param slug - copy paste the text slug from the list of responses
+     */
+    suspend fun getCollectionResponse(slug: String): String? {
+        return networkManager.getResponseSync(slug)
+    }
+
 
     /**
      * Triggers a translation of all currently cached views
      */
-
     fun translate() {
         viewTranslationManager.translate()
     }
@@ -290,7 +347,6 @@ object NStack {
     /**
      * Clears all cached views
      */
-
     fun clearViewCache() {
         viewTranslationManager.clear()
     }
@@ -305,7 +361,6 @@ object NStack {
     /**
      * Gets the app ID & Api Key using the app context to access the manifest
      */
-
     private fun getApplicationInfo(context: Context) {
         NLog.i(this, "getApplicationInfo")
 
@@ -408,7 +463,6 @@ object NStack {
      *
      * Provides both a perfect match or a fallback language and a default language
      */
-
     private fun searchForLanguageByLocale(locale: Locale): JSONObject? {
         NLog.d(this, "searchForLanguageByLocale: $locale")
 
