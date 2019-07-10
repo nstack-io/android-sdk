@@ -24,7 +24,10 @@ val String.iso8601Date: Date
         return try {
             format.parse(this)
         } catch (e: Exception) {
-            Date()
+            // We need to return some time in the past to get new translations on first run
+            Calendar.getInstance().apply {
+                set(Calendar.YEAR, 1971)
+            }.time
         }
     }
 
@@ -96,7 +99,11 @@ val JSONArray.localizeIndices: List<LocalizeIndex>
 
 val Locale.languageCode: String
     get() {
-        val regex = "([a-z]+)([_\\-][A-Za-z]+)?".toRegex()
-        val result = regex.find(language)
-        return result?.groupValues?.get(1) ?: ""
+        return try {
+            val regex = "([a-z]+)([_\\-][A-Za-z]+)?".toRegex()
+            val result = regex.find(language)
+            result?.groupValues?.get(1) ?: ""
+        } catch (e: Exception) {
+            ""
+        }
     }
