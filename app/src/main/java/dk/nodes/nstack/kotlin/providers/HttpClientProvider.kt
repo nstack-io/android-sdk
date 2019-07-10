@@ -10,19 +10,9 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 object HttpClientProvider {
 
-    private const val CACHE_SIZE = 10L * 1024L * 1024L // 10 MiB
     private const val CONNECT_TIMEOUT_SECONDS = 10L
     private const val WRITE_TIMEOUT_SECONDS = 10L
     private const val READ_TIMEOUT_SECONDS = 10L
-
-    private fun provideCache(context: Context): Cache? {
-        return try {
-            Cache(context.cacheDir, CACHE_SIZE)
-        } catch (e: Exception) {
-            NLog.e(this, "Error", e)
-            null
-        }
-    }
 
     private fun provideNStackInterceptor(): Interceptor {
         return NStackInterceptor()
@@ -47,7 +37,6 @@ object HttpClientProvider {
             .addInterceptor(provideNStackInterceptor())
             .addInterceptor(provideNMetaInterceptor())
             .addInterceptor(provideHttpLoggingInterceptor())
-            .cache(provideCache(context))
             .build()
     }
 }
