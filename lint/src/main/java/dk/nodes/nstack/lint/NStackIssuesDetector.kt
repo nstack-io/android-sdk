@@ -1,15 +1,19 @@
 package dk.nodes.nstack.lint
 
 import com.android.tools.lint.client.api.UElementHandler
-import com.android.tools.lint.detector.api.*
+import com.android.tools.lint.detector.api.Context
+import com.android.tools.lint.detector.api.Detector
+import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.Location
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 import dk.nodes.nstack.lint.issues.AppOpenMissingIssue
 import dk.nodes.nstack.lint.issues.NStackTestIssue
 import dk.nodes.nstack.lint.issues.TextViewSetterIssue
+import dk.nodes.nstack.lint.issues.VersionControlIssue
 import org.jetbrains.uast.*
 
 class NStackIssuesDetector : Detector(), Detector.UastScanner {
-
 
     private var appOpenCalled: Boolean = false
     private var nstackInitLocation: Location? = null
@@ -21,27 +25,25 @@ class NStackIssuesDetector : Detector(), Detector.UastScanner {
         nstackInitLocation = null
     }
 
-
     override fun afterCheckRootProject(context: Context) {
         // When all methods/classes visited check if we required methods were implemented
         nstackInitLocation?.let { initLocation ->
             when {
-                !appOpenCalled -> context.report(AppOpenMissingIssue.ISSUE, initLocation, "AppOpen")
-                !versionControlUsed -> context.report(AppOpenMissingIssue.ISSUE, initLocation, "VersionControl")
+                !appOpenCalled -> context.report(AppOpenMissingIssue.ISSUE, initLocation, "AppOpen is not called")
+                !versionControlUsed -> {
+                    context.report(VersionControlIssue.ISSUE, initLocation, "onAppUpdateListener is not called")
+                }
             }
         }
     }
-
 
     override fun getApplicableUastTypes(): List<Class<out UElement>>? {
         return listOf<Class<out UElement>>(ULiteralExpression::class.java)
     }
 
-
     override fun getApplicableMethodNames(): List<String>? {
-        return listOf(METHOD_APP_OPEN, METHOD_SET_TEXT, METHOD_INIT, METHOD_VERSION_CONTROL)
+        return listOf(METHOD_APP_OPEN, METHOD_SET_TEXT, METHOD_INIT)
     }
-
 
     override fun visitMethodCall(context: JavaContext, node: UCallExpression, method: PsiMethod) {
         val methodName = node.methodName
@@ -61,9 +63,19 @@ class NStackIssuesDetector : Detector(), Detector.UastScanner {
                     nstackInitLocation = context.getLocation(node)
 
                 }
-                METHOD_VERSION_CONTROL -> {
-                    versionControlUsed = true
-                }
+            }
+        }
+    }
+
+    override fun getApplicableReferenceNames(): List<String>? {
+        return listOf(REFERENCE_VERSION_CONTROL)
+    }
+
+
+    override fun visitReference(context: JavaContext, reference: UReferenceExpression, referenced: PsiElement) {
+        when (reference.resolvedName) {
+            REFERENCE_VERSION_CONTROL -> {
+                versionControlUsed = true
             }
         }
     }
@@ -90,11 +102,11 @@ class NStackIssuesDetector : Detector(), Detector.UastScanner {
     }
 
     companion object {
-        val ISSUES = listOf(NStackTestIssue.ISSUE, TextViewSetterIssue.ISSUE, AppOpenMissingIssue.ISSUE)
+        val ISSUES = listOf(NStackTestIssue.ISSUE, TextViewSetterIssue.ISSUE, AppOpenMissingIssue.ISSUE, VersionControlIssue.ISSUE)
         private const val METHOD_SET_TEXT = "setText"
         private const val METHOD_APP_OPEN = "appOpen"
         private const val METHOD_INIT = "init"
-        private const val METHOD_VERSION_CONTROL = "onAppUpdateListener"
+        private const val REFERENCE_VERSION_CONTROL = "onAppUpdateListener"
 
     }
 
