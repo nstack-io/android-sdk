@@ -1,7 +1,7 @@
 package dk.nodes.nstack.kotlin.managers
 
 import dk.nodes.nstack.kotlin.util.Constants
-import dk.nodes.nstack.kotlin.util.ContextInfo
+import dk.nodes.nstack.kotlin.util.ContextWrapper
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.formatted
 import io.mockk.every
@@ -14,7 +14,7 @@ import java.util.*
 class AppOpenSettingsManagerTest {
 
     private val preferencesMock = mockk<Preferences>(relaxed = true)
-    private val contextInfoMock = mockk<ContextInfo>()
+    private val contextInfoMock = mockk<ContextWrapper>()
 
     private val version = "version"
 
