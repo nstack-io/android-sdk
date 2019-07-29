@@ -3,7 +3,7 @@ package dk.nodes.nstack.kotlin.managers
 import android.content.Context
 import android.net.ConnectivityManager
 
-class ConnectionManager(private val context: Context) {
+internal class ConnectionManager(private val context: Context) {
 
     val isConnected: Boolean
         get() {

@@ -6,7 +6,7 @@ import org.json.JSONObject
 import java.util.*
 
 
-class AssetCacheManager(private val contextWrapper: ContextWrapper) {
+internal class AssetCacheManager(private val contextWrapper: ContextWrapper) {
 
     fun loadTranslations(): Map<Locale, JSONObject> {
         return contextWrapper.assets

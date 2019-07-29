@@ -1,20 +1,19 @@
 package dk.nodes.nstack.kotlin.managers
 
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.util.*
 import java.util.*
 
-/**
- * Manages app open settings
- */
-class AppOpenSettingsManager(
-    private val contextWrapper: ContextWrapper,
+
+internal class AppOpenSettingsManager(
+    private val clientAppInfo: ClientAppInfo,
     private val preferences: Preferences
 ) {
 
     fun getAppOpenSettings(): AppOpenSettings {
         val uuid = appUUID
-        val version = contextWrapper.version
+        val version = clientAppInfo.versionName
         val oldVersion = appOldVersion ?: version
         val updateDate = appUpdateDate
 
@@ -28,7 +27,7 @@ class AppOpenSettingsManager(
     }
 
     fun setUpdateDate() {
-        val version = contextWrapper.version
+        val version = clientAppInfo.versionName
         val updateDate = Date().formatted
 
         preferences.saveString(Constants.spk_nstack_last_updated, updateDate)

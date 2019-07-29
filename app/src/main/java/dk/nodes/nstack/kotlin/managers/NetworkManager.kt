@@ -13,7 +13,7 @@ import dk.nodes.nstack.kotlin.util.formatted
 import okhttp3.*
 import java.io.IOException
 
-class NetworkManager(context: Context) {
+internal class NetworkManager(context: Context) {
 
     private val client = HttpClientProvider.getHttpClient(context)
 
