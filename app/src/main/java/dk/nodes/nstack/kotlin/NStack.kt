@@ -225,33 +225,65 @@ object NStack {
 
         networkManager
                 .postAppOpen(appOpenSettings, localeString,
-                             {
-                                 NLog.d(
-                                         this,
-                                         "NStack appOpen -> translation updated: ${it.translationsUpdated}"
-                                 )
+                        {
+                            NLog.d(
+                                    this,
+                                    "NStack appOpen -> translation updated: ${it.translationsUpdated}"
+                            )
 
-                                 if (it.translationsUpdated) {
-                                     loadNetworkTranslations()
-                                 }
+                            if (it.translationsUpdated) {
+                                loadNetworkTranslations()
+                            }
 
-                                 runUiAction {
-                                     callback.invoke(true)
-                                     onAppUpdateListener?.invoke(it)
-                                 }
-                             },
-                             {
-                                 NLog.e(this, "Error: onAppOpened", it)
+                            runUiAction {
+                                callback.invoke(true)
+                                onAppUpdateListener?.invoke(it)
+                            }
+                        },
+                        {
+                            NLog.e(this, "Error: onAppOpened", it)
 
-                                 // If our update failed for whatever reason we should still send an no update start
-                                 callback.invoke(false)
-                                 onAppUpdateListener?.invoke(AppUpdate())
-                             }
+                            // If our update failed for whatever reason we should still send an no update start
+                            callback.invoke(false)
+                            onAppUpdateListener?.invoke(AppUpdate())
+                        }
                 )
     }
 
     fun setRefreshPeriod(duration: Long, timeUnit: TimeUnit) {
         this.refreshPeriod = timeUnit.toMillis(duration)
+    }
+
+    /**
+     * Triggers translation and add view to cached views
+     */
+    fun setTranslation(
+            view: View,
+            section: String,
+            key: String,
+            hint: String? = null,
+            description: String? = null,
+            textOn: String? = null,
+            textOff: String? = null,
+            contentDescription: String? = null,
+            title: String? = null,
+            subtitle: String? = null
+    ) {
+        val nstackKey = "${section}_$key"
+
+        if (!viewTranslationManager.hasKey(nstackKey)) return
+
+        val translationData = TranslationData(
+                key = nstackKey,
+                hint = hint,
+                description = description,
+                textOn = textOn,
+                textOff = textOff,
+                contentDescription = contentDescription,
+                title = title,
+                subtitle = subtitle
+        )
+        viewTranslationManager.addView(WeakReference(view), translationData)
     }
 
     /**
@@ -542,4 +574,6 @@ object NStack {
     fun addCachedView(weakView: WeakReference<View>, translationData: TranslationData) {
         viewTranslationManager.addView(weakView, translationData)
     }
+
+
 }

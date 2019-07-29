@@ -238,4 +238,11 @@ class ViewTranslationManager {
     fun clear() {
         viewMap.clear()
     }
+
+    /**
+     * Check if the key exists
+     */
+    fun hasKey(nstackKey: String): Boolean {
+        return language.has(nstackKey)
+    }
 }
