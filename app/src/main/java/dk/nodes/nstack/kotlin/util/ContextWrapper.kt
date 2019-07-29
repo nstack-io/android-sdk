@@ -5,21 +5,9 @@ import android.content.Context
 /**
  * Use context indirectly for testing
  */
-class ContextWrapper(
+internal class ContextWrapper(
     private val context: Context
 ) {
-
-    /**
-     * Version from package info
-     */
-    val version: String
-        get() {
-            return try {
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            } catch (e: Exception) {
-                ""
-            }
-        }
 
     /**
      * List of files in assets

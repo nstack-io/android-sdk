@@ -8,7 +8,7 @@ import android.preference.PreferenceManager
 /**
  * An interface for shared preferences
  */
-interface Preferences {
+internal interface Preferences {
 
     /**
      * Saves value with key
@@ -31,7 +31,7 @@ interface Preferences {
 /**
  * Preferences implementation
  */
-class PreferencesImpl(context: Context) : Preferences {
+internal class PreferencesImpl(context: Context) : Preferences {
 
     private val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 

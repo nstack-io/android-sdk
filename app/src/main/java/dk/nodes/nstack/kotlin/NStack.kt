@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.Handler
 import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
@@ -16,8 +15,9 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
 
-@SuppressLint("StaticFieldLeak", "LogNotTimber")
+@SuppressLint("StaticFieldLeak")
 object NStack {
+
     // Has our app been started yet?
     private var isInitialized: Boolean = false
 
@@ -35,12 +35,15 @@ object NStack {
             field = value
         }
 
+    val appClientInfo: ClientAppInfo
+        get() = appInfo
+
     // Internally used classes
     private var classTranslationManager = ClassTranslationManager()
     private var viewTranslationManager = ViewTranslationManager()
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
-    private lateinit var clientAppInfo: ClientAppInfo
+    private lateinit var appInfo: ClientAppInfo
     private lateinit var networkManager: NetworkManager
     private lateinit var appOpenSettingsManager: AppOpenSettingsManager
     private lateinit var prefManager: PrefManager
@@ -101,6 +104,7 @@ object NStack {
         get() {
             return ClassTranslationManager.translationClass
         }
+
     /**
      * Custom Request URL
      * Used for settings a custom end point for us to pull our NStack Translations from
@@ -110,6 +114,7 @@ object NStack {
     var baseUrl = "https://nstack.io"
 
     var defaultLanguage: Locale = Locale.US
+
     /**
      * Used for settings or getting the current locale selected for language
      */
@@ -128,6 +133,7 @@ object NStack {
         }
 
     var skipNetworkLoading: Boolean = false
+
     /**
      * Enable/Disable debug mode
      */
@@ -136,6 +142,7 @@ object NStack {
         set(value) {
             NLog.enableLogging = value
         }
+
     /**
      * Set the level at which the debug log should output
      */
@@ -155,7 +162,6 @@ object NStack {
     /**
      * Class Start
      */
-
     fun init(context: Context) {
         NLog.i(this, "NStack initializing")
 
@@ -166,13 +172,17 @@ object NStack {
 
         val nstackModule = NStackModule(context)
 
-        getApplicationInfo(context)
+        val nstackMeta = nstackModule.provideNStackMeta()
+        appIdKey = nstackMeta.appIdKey
+        appApiKey = nstackMeta.apiKey
+        env = nstackMeta.env
+
         registerLocaleChangeBroadcastListener(context)
 
-        networkManager = NetworkManager(context)
-        connectionManager = ConnectionManager(context)
+        networkManager = nstackModule.provideNetworkManager()
+        connectionManager = nstackModule.provideConnectionManager()
         assetCacheManager = nstackModule.provideAssetCacheManager()
-        clientAppInfo = ClientAppInfo(context)
+        appInfo = nstackModule.provideClientAppInfo()
         appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
         prefManager = nstackModule.providePrefManager()
 
@@ -189,7 +199,6 @@ object NStack {
      *
      *  This method will only care about the first front letters
      */
-
     fun setLanguageByString(localeString: String) {
         language = localeString.locale
     }
@@ -271,13 +280,14 @@ object NStack {
         }
 
         try {
-            when(val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
+            when (val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
                 is AppOpenResult.Success -> {
                     NLog.d(this, "NStack appOpen")
 
                     result.appUpdateResponse.data.localize.forEach { localizeIndex ->
                         if (localizeIndex.shouldUpdate) {
-                            val translation = networkManager.loadTranslation(localizeIndex.url) ?: return@forEach
+                            val translation = networkManager.loadTranslation(localizeIndex.url)
+                                ?: return@forEach
                             prefManager.setTranslations(localizeIndex.language.locale, translation)
                             appOpenSettingsManager.setUpdateDate()
                         }
@@ -357,57 +367,14 @@ object NStack {
         context.unregisterReceiver(broadcastReceiver)
     }
 
-    /**
-     * Gets the app ID & Api Key using the app context to access the manifest
-     */
-    private fun getApplicationInfo(context: Context) {
-        NLog.i(this, "getApplicationInfo")
-
-        val applicationInfo = context.packageManager.getApplicationInfo(
-            context.packageName,
-            PackageManager.GET_META_DATA
-        )
-
-        val applicationMetaData = applicationInfo.metaData
-
-        if (applicationMetaData.containsKey("dk.nodes.nstack.appId")) {
-            appIdKey = applicationMetaData?.getString("dk.nodes.nstack.appId") ?: ""
-        }
-
-        if (applicationMetaData.containsKey("dk.nodes.nstack.apiKey")) {
-            appApiKey = applicationMetaData?.getString("dk.nodes.nstack.apiKey") ?: ""
-        }
-
-        if (applicationMetaData.containsKey("dk.nodes.nstack.env")) {
-            env = applicationMetaData?.getString("dk.nodes.nstack.env") ?: ""
-        }
-
-        if (appIdKey.isEmpty()) {
-            NLog.e(this, "Missing dk.nodes.nstack.appId")
-        }
-
-        if (appApiKey.isEmpty()) {
-            NLog.e(this, "Missing dk.nodes.nstack.apiKey")
-        }
-
-        if (env.isEmpty()) {
-            NLog.e(this, "Missing dk.nodes.nstack.env")
-        }
-    }
-
     private fun registerLocaleChangeBroadcastListener(context: Context) {
         val filter = IntentFilter(Intent.ACTION_LOCALE_CHANGED)
         context.registerReceiver(broadcastReceiver, filter)
     }
 
     /**
-     * Loaders
-     */
-
-    /**
      * Loads our languages from the asset cache
      */
-
     private fun loadCacheTranslations() {
         NLog.e(this, "loadCacheTranslations")
 
@@ -452,10 +419,6 @@ object NStack {
             it?.onLanguagesChangedFunction?.invoke()
         }
     }
-
-    /**
-     * Helper Methods
-     */
 
     /**
      * Searches the available languages for any language matching the provided locale
@@ -509,7 +472,6 @@ object NStack {
     /**
      * Run Ui Action
      */
-
     private fun runUiAction(action: () -> Unit) {
         handler.post {
             action()
@@ -568,14 +530,6 @@ object NStack {
         val listenerContainer = onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedFunction == listener }
             ?: return
         onLanguagesChangedList.remove(listenerContainer)
-    }
-
-    /**
-     * Exposed Getters
-     */
-
-    fun getAppClientInfo(): ClientAppInfo {
-        return clientAppInfo
     }
 
     /**

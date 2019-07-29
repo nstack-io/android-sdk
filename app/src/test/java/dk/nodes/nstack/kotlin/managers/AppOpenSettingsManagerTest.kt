@@ -1,7 +1,7 @@
 package dk.nodes.nstack.kotlin.managers
 
+import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.util.Constants
-import dk.nodes.nstack.kotlin.util.ContextWrapper
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.formatted
 import io.mockk.every
@@ -14,14 +14,14 @@ import java.util.*
 class AppOpenSettingsManagerTest {
 
     private val preferencesMock = mockk<Preferences>(relaxed = true)
-    private val contextInfoMock = mockk<ContextWrapper>()
+    private val clientAppInfoMock = mockk<ClientAppInfo>()
 
     private val version = "version"
 
-    private val appOpenSettingsManager = AppOpenSettingsManager(contextInfoMock, preferencesMock)
+    private val appOpenSettingsManager = AppOpenSettingsManager(clientAppInfoMock, preferencesMock)
 
     init {
-        every { contextInfoMock.version } returns version
+        every { clientAppInfoMock.versionName } returns version
     }
 
     @Test
