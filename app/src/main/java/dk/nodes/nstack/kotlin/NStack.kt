@@ -15,7 +15,6 @@ import dk.nodes.nstack.kotlin.util.*
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 @SuppressLint("StaticFieldLeak", "LogNotTimber")
 object NStack {
@@ -172,7 +171,7 @@ object NStack {
 
         networkManager = NetworkManager(context)
         connectionManager = ConnectionManager(context)
-        assetCacheManager = AssetCacheManager(context)
+        assetCacheManager = nstackModule.provideAssetCacheManager()
         clientAppInfo = ClientAppInfo(context)
         appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
         prefManager = nstackModule.providePrefManager()

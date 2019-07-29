@@ -8,13 +8,13 @@ import java.util.*
  * Manages app open settings
  */
 class AppOpenSettingsManager(
-    private val contextInfo: ContextInfo,
+    private val contextWrapper: ContextWrapper,
     private val preferences: Preferences
 ) {
 
     fun getAppOpenSettings(): AppOpenSettings {
         val uuid = appUUID
-        val version = contextInfo.version
+        val version = contextWrapper.version
         val oldVersion = appOldVersion ?: version
         val updateDate = appUpdateDate
 
@@ -28,7 +28,7 @@ class AppOpenSettingsManager(
     }
 
     fun setUpdateDate() {
-        val version = contextInfo.version
+        val version = contextWrapper.version
         val updateDate = Date().formatted
 
         preferences.saveString(Constants.spk_nstack_last_updated, updateDate)
