@@ -1,6 +1,6 @@
 package dk.nodes.nstack.kotlin.models
 
-import dk.nodes.nstack.kotlin.util.iso8601Date
+import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
 import org.json.JSONObject
 import java.util.*
 

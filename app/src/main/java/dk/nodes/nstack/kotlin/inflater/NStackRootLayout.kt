@@ -12,7 +12,7 @@ import android.widget.TextView
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.children
+import dk.nodes.nstack.kotlin.util.extensions.children
 
 class NStackRootLayout @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
