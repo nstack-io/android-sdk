@@ -6,8 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.hardware.SensorManager
 import android.os.Handler
 import android.view.View
+import dk.nodes.nstack.BuildConfig
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
@@ -29,7 +31,7 @@ object NStack {
 
     // Internally used classes
     private var classTranslationManager = ClassTranslationManager()
-    private var viewTranslationManager = ViewTranslationManager()
+    private lateinit var viewTranslationManager: ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
     private lateinit var clientAppInfo: ClientAppInfo
@@ -175,15 +177,26 @@ object NStack {
         registerLocaleChangeBroadcastListener(context)
 
         networkManager = NetworkManager(context)
+        appOpenSettingsManager = AppOpenSettingsManager(context)
+        viewTranslationManager = ViewTranslationManager(networkManager, appOpenSettingsManager)
         connectionManager = ConnectionManager(context)
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
-        appOpenSettingsManager = AppOpenSettingsManager(context)
         prefManager = PrefManager(context)
 
         loadCacheTranslations()
 
         isInitialized = true
+        if (BuildConfig.DEBUG) {
+            val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
+                override fun hearShake() {
+                    liveEditEnabled = !liveEditEnabled
+                }
+
+            })
+            shakeDetector.start(sensorManager)
+        }
     }
 
     /**
