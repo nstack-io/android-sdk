@@ -1,6 +1,7 @@
 package dk.nodes.nstack.demo
 
 import android.app.Application
+import android.util.Log
 import dk.nodes.nstack.kotlin.NStack
 
 class Application : Application() {
@@ -14,5 +15,8 @@ class Application : Application() {
             NStack.debugMode = true
         }
         NStack.init(this)
+        NStack.appOpen {
+            Log.d("AppOpen", it.toString())
+        }
     }
 }
