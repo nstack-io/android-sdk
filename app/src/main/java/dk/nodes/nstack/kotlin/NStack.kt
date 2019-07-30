@@ -6,8 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.CountDownTimer
 import android.os.Handler
+import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.StringRes
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
@@ -258,8 +261,7 @@ object NStack {
      */
     fun setTranslation(
             view: View,
-            section: String,
-            key: String,
+            nstackKey: String,
             hint: String? = null,
             description: String? = null,
             textOn: String? = null,
@@ -268,9 +270,7 @@ object NStack {
             title: String? = null,
             subtitle: String? = null
     ) {
-        val nstackKey = "${section}_$key"
-
-        if (!viewTranslationManager.hasKey(nstackKey)) return
+        if (!hasKey(nstackKey)) return
 
         val translationData = TranslationData(
                 key = nstackKey,
@@ -283,6 +283,10 @@ object NStack {
                 subtitle = subtitle
         )
         viewTranslationManager.addView(WeakReference(view), translationData)
+    }
+
+    fun hasKey(nstackKey: String): Boolean {
+        return viewTranslationManager.hasKey(nstackKey)
     }
 
     /**
@@ -576,5 +580,13 @@ object NStack {
 
     fun addView(view: View, translationData: TranslationData) {
         viewTranslationManager.addView(WeakReference(view), translationData)
+    }
+
+    fun hasKey(@StringRes resId: Int, context: Context) : Boolean{
+        return hasKey(context.getString(resId))
+    }
+
+    fun getTranslation(@StringRes resId: Int, context: Context): String? {
+        return getTranslationFromKey(context.getString(resId))
     }
 }

@@ -20,7 +20,7 @@ operator fun CompoundButton.plusAssign(key: String) {
 }
 
 private fun setTranslation(view: View, key: String) {
-    if (NStack.getTranslationFromKey(key).isNullOrEmpty()) return
+    if (!NStack.hasKey(key)) return
     NStack.addView(view, TranslationData(key = key))
 }
 
