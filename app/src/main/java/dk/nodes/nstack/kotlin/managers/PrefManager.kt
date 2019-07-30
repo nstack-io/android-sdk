@@ -5,9 +5,9 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.models.Constants
 import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.parseFromISO8601
-import dk.nodes.nstack.kotlin.util.toFormattedString
-import dk.nodes.nstack.kotlin.util.toLanguageMap
+import dk.nodes.nstack.kotlin.util.extensions.parseFromISO8601
+import dk.nodes.nstack.kotlin.util.extensions.toFormattedString
+import dk.nodes.nstack.kotlin.util.extensions.toLanguageMap
 import org.json.JSONObject
 import java.util.*
 

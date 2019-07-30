@@ -11,6 +11,7 @@ import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
+import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
@@ -54,7 +55,7 @@ class ViewTranslationManager(
                 it.remove()
             } else {
                 view.background = view.tag as? Drawable
-                view.setOnLongClickListener(null)
+                view.setOnTouchListener(null)
             }
         }
     }
@@ -110,9 +111,8 @@ class ViewTranslationManager(
             // Storing background drawable to view's tag
             view.tag = view.background
             view.background = ColorDrawable(Color.RED)
-            view.setOnLongClickListener {
+            view.setOnVeryLongClickListener {
                 showEditDialog(view, translationData, translatedKey, translatedText, translatedHint)
-                true
             }
         }
 

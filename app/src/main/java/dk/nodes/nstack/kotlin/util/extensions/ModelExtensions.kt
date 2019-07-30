@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.util
+package dk.nodes.nstack.kotlin.util.extensions
 
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.AppUpdateState

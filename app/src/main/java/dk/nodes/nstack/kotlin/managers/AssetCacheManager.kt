@@ -1,7 +1,7 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
-import dk.nodes.nstack.kotlin.util.toLanguageMap
+import dk.nodes.nstack.kotlin.util.extensions.toLanguageMap
 import org.json.JSONObject
 import java.util.*
 

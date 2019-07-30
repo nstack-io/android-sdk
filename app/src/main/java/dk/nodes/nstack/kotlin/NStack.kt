@@ -15,6 +15,9 @@ import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.*
+import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
+import dk.nodes.nstack.kotlin.util.extensions.toLanguageMap
+import dk.nodes.nstack.kotlin.util.extensions.toLocale
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
