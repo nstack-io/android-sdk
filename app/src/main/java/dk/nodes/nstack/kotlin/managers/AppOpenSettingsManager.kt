@@ -5,9 +5,10 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.Preferences
-import dk.nodes.nstack.kotlin.util.formatted
-import dk.nodes.nstack.kotlin.util.iso8601Date
-import java.util.*
+import dk.nodes.nstack.kotlin.util.extensions.formatted
+import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
+import java.util.Date
+import java.util.UUID
 
 /**
  * Manages app open settings
@@ -73,5 +74,4 @@ class AppOpenSettingsManager(
         get() {
             return preferences.loadString(Constants.spk_nstack_last_updated).iso8601Date
         }
-
 }

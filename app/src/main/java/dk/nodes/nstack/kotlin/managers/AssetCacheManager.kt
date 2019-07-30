@@ -1,10 +1,9 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
-import dk.nodes.nstack.kotlin.util.asJsonObject
+import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import org.json.JSONObject
-import java.util.*
-
+import java.util.Locale
 
 class AssetCacheManager(private val context: Context) {
 

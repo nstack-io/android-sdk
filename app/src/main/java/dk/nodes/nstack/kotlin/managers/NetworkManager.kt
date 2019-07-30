@@ -8,9 +8,14 @@ import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.asJsonObject
-import dk.nodes.nstack.kotlin.util.formatted
-import okhttp3.*
+import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
+import dk.nodes.nstack.kotlin.util.extensions.formatted
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.FormBody
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONObject
 import java.io.IOException
 
 class NetworkManager(context: Context) {
@@ -26,7 +31,8 @@ class NetworkManager(context: Context) {
 
                 override fun onResponse(call: Call, response: Response) {
                     try {
-                        val translations = response.body()!!.string().asJsonObject!!.getJSONObject("data")
+                        val translations =
+                            response.body()!!.string().asJsonObject!!.getJSONObject("data")
                         onSuccess(translations.toString())
                     } catch (e: Exception) {
                         onError(e)
@@ -39,7 +45,9 @@ class NetworkManager(context: Context) {
         val response = client.newCall(Request.Builder().url(url).build()).execute()
         val responseBody = response.body()
         return when {
-            response.isSuccessful && responseBody != null -> responseBody.string().asJsonObject?.getJSONObject("data").toString()
+            response.isSuccessful && responseBody != null -> responseBody.string().asJsonObject?.getJSONObject(
+                "data"
+            ).toString()
             else -> null
         }
     }
@@ -85,30 +93,31 @@ class NetworkManager(context: Context) {
     }
 
     suspend fun postAppOpen(
-            settings: AppOpenSettings,
-            acceptLanguage: String
+        settings: AppOpenSettings,
+        acceptLanguage: String
     ): AppOpenResult {
         val formBuilder = FormBody.Builder()
-                .add("guid", settings.guid)
-                .add("version", settings.version)
-                .add("old_version", settings.oldVersion)
-                .add("platform", settings.platform)
-                .add("last_updated", settings.lastUpdated.formatted)
-                .add("dev", NStack.debugMode.toString())
+            .add("guid", settings.guid)
+            .add("version", settings.version)
+            .add("old_version", settings.oldVersion)
+            .add("platform", settings.platform)
+            .add("last_updated", settings.lastUpdated.formatted)
+            .add("dev", NStack.debugMode.toString())
 
         val request = Request.Builder()
-                .url("${NStack.baseUrl}/api/v2/open")
-                .header("Accept-Language", acceptLanguage)
-                .post(formBuilder.build())
-                .build()
+            .url("${NStack.baseUrl}/api/v2/open")
+            .header("Accept-Language", acceptLanguage)
+            .post(formBuilder.build())
+            .build()
 
         try {
             val response = client
-                    .newCall(request)
-                    .execute()
+                .newCall(request)
+                .execute()
 
             val responseString = response?.body()?.string() ?: return AppOpenResult.Failure
-            val appUpdate = AppUpdateResponse(responseString.asJsonObject  ?: return AppOpenResult.Failure)
+            val appUpdate =
+                AppUpdateResponse(responseString.asJsonObject ?: return AppOpenResult.Failure)
             return AppOpenResult.Success(appUpdate)
         } catch (e: Exception) {
             return AppOpenResult.Failure
@@ -175,31 +184,35 @@ class NetworkManager(context: Context) {
     /**
      * Get a Collection Response (as String) from NStack collections
      */
-    fun getResponse(slug: String,
-                    onSuccess: (String) -> Unit,
-                    onError: (Exception) -> Unit) {
+    fun getResponse(
+        slug: String,
+        onSuccess: (String) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
         val request = Request.Builder()
-                .url("${NStack.baseUrl}/api/v1/content/responses/$slug")
-                .get()
-                .build()
+            .url("${NStack.baseUrl}/api/v1/content/responses/$slug")
+            .get()
+            .build()
 
         client
-                .newCall(request)
-                .enqueue(object : Callback {
+            .newCall(request)
+            .enqueue(object : Callback {
 
-                    override fun onFailure(call: Call, e: IOException) {
-                        NLog.e(this, "Failure getting slug: $slug", e)
-                        onError.invoke(e)
-                    }
+                override fun onFailure(call: Call, e: IOException) {
+                    NLog.e(this, "Failure getting slug: $slug", e)
+                    onError.invoke(e)
+                }
 
-                    override fun onResponse(call: Call, response: Response) {
-                        val responseBody = response.body()
-                        when {
-                            response.isSuccessful && responseBody != null -> onSuccess.invoke(responseBody.string())
-                            else -> onError.invoke(RuntimeException("$slug returned: ${response.code()}"))
-                        }
+                override fun onResponse(call: Call, response: Response) {
+                    val responseBody = response.body()
+                    when {
+                        response.isSuccessful && responseBody != null -> onSuccess.invoke(
+                            responseBody.string()
+                        )
+                        else -> onError.invoke(RuntimeException("$slug returned: ${response.code()}"))
                     }
-                })
+                }
+            })
     }
 
     /**
@@ -207,18 +220,58 @@ class NetworkManager(context: Context) {
      */
     suspend fun getResponseSync(slug: String): String? {
         val request = Request.Builder()
-                .url("${NStack.baseUrl}/api/v1/content/responses/$slug")
-                .get()
-                .build()
+            .url("${NStack.baseUrl}/api/v1/content/responses/$slug")
+            .get()
+            .build()
 
         val response = client
-                .newCall(request)
-                .execute()
+            .newCall(request)
+            .execute()
         val responseBody = response.body()
 
         return when {
             response.isSuccessful && responseBody != null -> responseBody.string()
             else -> null
         }
+    }
+
+    fun postProposal(
+        settings: AppOpenSettings,
+        locale: String,
+        key: String,
+        section: String,
+        newValue: String,
+        onSuccess: () -> Unit,
+        onError: (IOException) -> Unit
+    ) {
+
+        val formBuilder = FormBody.Builder()
+            .add("key", key)
+            .add("section", section)
+            .add("value", newValue)
+            .add("locale", locale)
+            .add("guid", settings.guid)
+            .add("platform", "mobile")
+
+        val request = Request.Builder()
+            .url("https://nstack.io//api/v2/content/localize/proposals")
+            .post(formBuilder.build())
+            .build()
+
+        client.newCall(request)
+            .enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    onError.invoke(e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val jsonObject = JSONObject(response.body()?.string())
+                    if (jsonObject.has("data")) {
+                        onSuccess.invoke()
+                    } else {
+                        onError.invoke(IOException())
+                    }
+                }
+            })
     }
 }

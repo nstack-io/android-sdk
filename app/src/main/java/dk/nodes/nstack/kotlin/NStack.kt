@@ -22,7 +22,6 @@ import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.providers.NStackModule
-import dk.nodes.nstack.kotlin.util.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
 import dk.nodes.nstack.kotlin.util.NLog
@@ -30,8 +29,8 @@ import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
-import dk.nodes.nstack.kotlin.util.languageCode
-import dk.nodes.nstack.kotlin.util.locale
+import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
+import dk.nodes.nstack.kotlin.util.extensions.locale
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.ArrayList
