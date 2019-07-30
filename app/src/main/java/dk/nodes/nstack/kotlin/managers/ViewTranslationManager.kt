@@ -2,7 +2,11 @@ package dk.nodes.nstack.kotlin.managers
 
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.CompoundButton
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
@@ -18,7 +22,8 @@ class ViewTranslationManager {
      *
      * We shouldn't need a lock when using the ConcurrentHashMap
      */
-    private var viewMap: ConcurrentHashMap<WeakReference<View>, TranslationData> = ConcurrentHashMap()
+    private var viewMap: ConcurrentHashMap<WeakReference<View>, TranslationData> =
+        ConcurrentHashMap()
 
     /**
      * Contains a flat map of the current selected language (Format -> sectionName_stringKey)
@@ -42,7 +47,8 @@ class ViewTranslationManager {
      * and removes garbage collected views
      */
     private fun updateViews() {
-        val it: MutableIterator<Map.Entry<WeakReference<View>, TranslationData>> = viewMap.iterator()
+        val it: MutableIterator<Map.Entry<WeakReference<View>, TranslationData>> =
+            viewMap.iterator()
 
         while (it.hasNext()) {
             val entry = it.next()
@@ -87,8 +93,10 @@ class ViewTranslationManager {
             view.setOnLongClickListener {
                 NLog.d(this, "key: $translatedKey - $translatedText")
 
-                val dialogBuilder = AlertDialog.Builder(view.context, R.style.Theme_AppCompat_Light_Dialog)
-                val dialogView = LayoutInflater.from(view.context).inflate(R.layout.bottomsheet_translation_change, null)
+                val dialogBuilder =
+                    AlertDialog.Builder(view.context, R.style.Theme_AppCompat_Light_Dialog)
+                val dialogView = LayoutInflater.from(view.context)
+                    .inflate(R.layout.bottomsheet_translation_change, null)
                 val edittext = dialogView.findViewById<EditText>(R.id.zzz_nstack_translation_et)
                 val btn = dialogView.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
 
@@ -176,11 +184,11 @@ class ViewTranslationManager {
      * Can return a null so we need to cast it to a nullable string
      * (This is because of JSONObject)
      */
-    private fun getTranslationByKey(key: String?): String? {
+    fun getTranslationByKey(key: String?): String? {
         if (key == null) {
             return null
         }
-        return language.optString(key, null)
+        return language.optString(cleanKeyName(key), null)
     }
 
     /**
@@ -218,7 +226,6 @@ class ViewTranslationManager {
             val sectionValue = jsonSection.getString(sectionKey)
             language.put(newSectionKey, sectionValue)
         }
-
     }
 
     /**
@@ -244,5 +251,12 @@ class ViewTranslationManager {
      */
     fun hasKey(nstackKey: String): Boolean {
         return language.has(nstackKey)
+    }
+
+    private fun cleanKeyName(keyName: String?): String? {
+        val key = keyName ?: return null
+        return if (key.startsWith("{") && key.endsWith("}")) {
+            key.substring(1, key.length - 1)
+        } else key
     }
 }
