@@ -250,7 +250,7 @@ class ViewTranslationManager {
      * Check if the key exists
      */
     fun hasKey(nstackKey: String): Boolean {
-        return language.has(nstackKey)
+        return language.has(cleanKeyName(nstackKey))
     }
 
     private fun cleanKeyName(keyName: String?): String? {

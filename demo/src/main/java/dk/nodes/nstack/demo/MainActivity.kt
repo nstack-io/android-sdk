@@ -1,7 +1,6 @@
 package dk.nodes.nstack.demo
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.inflater.NStackRootLayout
@@ -17,7 +16,11 @@ class MainActivity : AppCompatActivity() {
         layoutInflater.inflate(R.layout.activity_main, nStackRootLayout)
         setContentView(nStackRootLayout)
 
-        NStack.setTranslation(toolbar, "test", "title", title = "test_title")
+        NStack.setTranslation(
+            toolbar,
+            nstackKey = getString(R.string.nstack_test_title),
+            title = "test_title"
+        )
 
         messageTextView += getString(R.string.nstack_test_message)
         yesButton += getString(R.string.nstack_default_yes)
