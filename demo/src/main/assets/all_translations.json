@@ -1,98 +1,116 @@
 {
   "da-DK": {
     "default": {
-      "hi": "Hej",
-      "cancel": "hej der",
-      "no": "nej",
+      "ok": "Ok",
+      "cancel": "Annuller",
+      "no": "Nej",
       "yes": "Ja",
-      "edit": "Redigere",
+      "retry": "Pr\u00f8v igen",
+      "edit": "Rediger",
+      "save": "Gem",
+      "back": "Tilbage",
+      "settings": "Indstillinger",
+      "later": "Senere",
       "next": "N\u00e6ste",
-      "on": "T\u00e6ndt",
-      "off": "af",
-      "ok": "Ok"
+      "previous": "Forrige",
+      "skip": "Spring over"
+    },
+    "versionControl": {
+      "updateHeader": "Ny version er ude",
+      "forceHeader": "Ny version er ude, du skal opdatere!",
+      "negativeBtn": "Annuller",
+      "positiveBtn": "Opdater",
+      "newInVersionHeader": "Nyt i denne version",
+      "okBtn": "Ok"
+    },
+    "rateReminder": {
+      "title": "__title",
+      "body": "__body",
+      "yesBtn": "__yesBtn",
+      "laterBtn": "__laterBtn",
+      "noBtn": "__noBtn"
     },
     "error": {
-      "errorRandom": "Helt tilf\u00e6ldig fejl",
-      "errorTitle": "Fejl",
       "authenticationError": "Login er udl\u00f8bet, login venligst ind igen.",
-      "connectionError": "\tIngen eller d\u00e5rlig forbindelse, pr\u00f8v igen.",
+      "connectionError": "Ingen eller d\u00e5rlig forbindelse, pr\u00f8v igen.",
+      "errorTitle": "Fejl",
       "unknownError": "Ukendt fejl, pr\u00f8v igen."
-    },
-    "test": {
-      "title": "NStack Demo",
-      "message": "Bacon ipsum dolor amet magna meatball jerky in, shank sunt do burgdoggen spare ribs. Lorem boudin eiusmod short ribs pastrami. Sausage bresaola do turkey, dolor qui tail ground round culpa boudin nulla minim sunt beef ribs ham. Cillum in pastrami adipisicing swine lorem, velit sunt meatloaf bresaola short loin fugiat tri-tip boudin."
     }
   },
   "en-GB": {
     "default": {
-      "hi": "Hi",
-      "cancel": "Canceler",
-      "no": "No",
-      "yes": "Yes",
-      "edit": "Edit",
-      "next": "Next",
-      "on": "On",
-      "off": "Off",
-      "ok": "Ok"
+      "ok": "Ok",
+      "cancel": "__cancel",
+      "no": "__no",
+      "yes": "__yes",
+      "retry": "__retry",
+      "edit": "__edit",
+      "save": "__save",
+      "back": "__back",
+      "settings": "__settings",
+      "later": "__later",
+      "next": "__next",
+      "previous": "__previous",
+      "skip": "__skip"
+    },
+    "versionControl": {
+      "updateHeader": "New version is out, please update",
+      "forceHeader": "New version is out, you have to update!",
+      "negativeBtn": "Cancel",
+      "positiveBtn": "Update",
+      "newInVersionHeader": "New in this version",
+      "okBtn": "Ok"
+    },
+    "rateReminder": {
+      "title": "Rate the app",
+      "body": "We can see you like the application. Would you like to rate it?",
+      "yesBtn": "Yes",
+      "laterBtn": "Later",
+      "noBtn": "No"
     },
     "error": {
-      "errorRandom": "Totally random error",
-      "errorTitle": "Error",
-      "authenticationError": "Login expired, please login again.",
-      "connectionError": "No or bad connection, please try again.",
-      "unknownError": "Unknown error, please try again."
-    },
-    "test": {
-      "title": "NStack Demo",
-      "message": "Bacon ipsum dolor amet magna meatball jerky in, shank sunt do burgdoggen spare ribs. Lorem boudin eiusmod short ribs pastrami. Sausage bresaola do turkey, dolor qui tail ground round culpa boudin nulla minim sunt beef ribs ham. Cillum in pastrami adipisicing swine lorem, velit sunt meatloaf bresaola short loin fugiat tri-tip boudin."
-    }
-  },
-  "es-MX": {
-    "default": {
-      "hi": "Hola",
-      "cancel": "Cancelar",
-      "no": "no",
-      "yes": "Si",
-      "edit": "Editar",
-      "next": "Siguiente",
-      "on": "Apprendido",
-      "off": "Apagado",
-      "ok": "__ok"
-    },
-    "error": {
-      "errorRandom": "__errorRandom",
-      "errorTitle": "__errorTitle",
       "authenticationError": "__authenticationError",
       "connectionError": "__connectionError",
+      "errorTitle": "__errorTitle",
       "unknownError": "__unknownError"
-    },
-    "test": {
-      "title": "__title",
-      "message": "__message"
     }
   },
-  "fr-FR": {
+  "es-ES": {
     "default": {
-      "hi": "Salut",
-      "cancel": "Annuler",
-      "no": "Non",
-      "yes": "Oui",
-      "edit": "Modifier",
-      "next": "Prochain",
-      "on": "Allumez",
-      "off": "\u00c9teins",
-      "ok": "__ok"
+      "ok": "Ok",
+      "cancel": "__cancel",
+      "no": "__no",
+      "yes": "__yes",
+      "retry": "__retry",
+      "edit": "__edit",
+      "save": "__save",
+      "back": "__back",
+      "settings": "__settings",
+      "later": "__later",
+      "next": "__next",
+      "previous": "__previous",
+      "skip": "__skip"
+    },
+    "versionControl": {
+      "updateHeader": "Nueva version disponible, por favor actualiza",
+      "forceHeader": "Nueva version disponible, tienes que actualizar!",
+      "negativeBtn": "Cancelar",
+      "positiveBtn": "Actualizar",
+      "newInVersionHeader": "Nuevo en esta version",
+      "okBtn": "Ok"
+    },
+    "rateReminder": {
+      "title": "Valora la app",
+      "body": "Vemos que te gusta la aplicaci\u00f3n.\r\nQuieres valorarla?",
+      "yesBtn": "Si",
+      "laterBtn": "Despu\u00e9s",
+      "noBtn": "No"
     },
     "error": {
-      "errorRandom": "__errorRandom",
-      "errorTitle": "__errorTitle",
       "authenticationError": "__authenticationError",
       "connectionError": "__connectionError",
+      "errorTitle": "__errorTitle",
       "unknownError": "__unknownError"
-    },
-    "test": {
-      "title": "__title",
-      "message": "__message"
     }
   }
 }
