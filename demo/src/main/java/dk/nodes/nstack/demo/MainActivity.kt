@@ -18,7 +18,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(nStackRootLayout)
 
         NStack.setTranslation(toolbar, "test", "title", title = "test_title")
-        Log.d("MainActivity", getString(R.string.app_name))
 
         messageTextView += getString(R.string.nstack_test_message)
         yesButton += getString(R.string.nstack_default_yes)
