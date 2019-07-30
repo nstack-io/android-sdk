@@ -248,7 +248,7 @@ class NetworkManager(context: Context) {
             .add("platform", "mobile")
 
         val request = Request.Builder()
-                .url("https://nstack.io/api/v2/content/localize/proposals")
+                .url("${NStack.baseUrl}/api/v2/content/localize/proposals")
                 .post(formBuilder.build())
                 .build()
 

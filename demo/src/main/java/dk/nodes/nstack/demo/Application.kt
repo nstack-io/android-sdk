@@ -10,6 +10,9 @@ class Application : Application() {
 
         NStack.translationClass = Translation::class.java
         // NStack.liveEditEnabled = true
+        if (BuildConfig.DEBUG) {
+            NStack.debugMode = true
+        }
         NStack.init(this)
     }
 }
