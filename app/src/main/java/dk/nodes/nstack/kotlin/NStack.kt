@@ -6,36 +6,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.hardware.SensorManager
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
-import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
-import dk.nodes.nstack.kotlin.managers.AssetCacheManager
-import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
-import dk.nodes.nstack.kotlin.managers.ConnectionManager
-import dk.nodes.nstack.kotlin.managers.NetworkManager
-import dk.nodes.nstack.kotlin.managers.PrefManager
-import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenResult
-import dk.nodes.nstack.kotlin.models.AppUpdateData
-import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.Message
-import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.BuildConfig
+import dk.nodes.nstack.kotlin.managers.*
+import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.NStackModule
-import dk.nodes.nstack.kotlin.util.LanguageListener
-import dk.nodes.nstack.kotlin.util.LanguagesListener
-import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
+import dk.nodes.nstack.kotlin.util.*
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import org.json.JSONObject
 import java.lang.ref.WeakReference
-import java.util.ArrayList
-import java.util.Locale
+import java.util.*
 
 @SuppressLint("StaticFieldLeak", "LogNotTimber")
 object NStack {
@@ -58,7 +43,7 @@ object NStack {
 
     // Internally used classes
     private var classTranslationManager = ClassTranslationManager()
-    private lateinit var viewTranslationManager :ViewTranslationManager
+    private lateinit var viewTranslationManager: ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
     private lateinit var clientAppInfo: ClientAppInfo
@@ -213,6 +198,17 @@ object NStack {
         loadCacheTranslations()
 
         isInitialized = true
+
+        if (BuildConfig.DEBUG) {
+            val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
+                override fun hearShake() {
+                    liveEditEnabled = !liveEditEnabled
+                }
+
+            })
+            shakeDetector.start(sensorManager)
+        }
     }
 
     /**
@@ -250,45 +246,45 @@ object NStack {
         }
 
         networkManager
-            .postAppOpen(appOpenSettings, localeString,
-                { appUpdate ->
-                    NLog.d(
-                        this,
-                        "NStack appOpen "
-                    )
-
-                    appUpdate.localize.forEach { localizeIndex ->
-                        if (localizeIndex.shouldUpdate) {
-                            networkManager.loadTranslation(localizeIndex.url, {
-                                prefManager.setTranslations(localizeIndex.language.locale, it)
-                            }, {
-                                NLog.e(
+                .postAppOpen(appOpenSettings, localeString,
+                        { appUpdate ->
+                            NLog.d(
                                     this,
-                                    "Could not load translations for ${localizeIndex.language.locale}",
-                                    it
-                                )
-                            })
+                                    "NStack appOpen "
+                            )
 
-                            appOpenSettingsManager.setUpdateDate()
+                            appUpdate.localize.forEach { localizeIndex ->
+                                if (localizeIndex.shouldUpdate) {
+                                    networkManager.loadTranslation(localizeIndex.url, {
+                                        prefManager.setTranslations(localizeIndex.language.locale, it)
+                                    }, {
+                                        NLog.e(
+                                                this,
+                                                "Could not load translations for ${localizeIndex.language.locale}",
+                                                it
+                                        )
+                                    })
+
+                                    appOpenSettingsManager.setUpdateDate()
+                                }
+                                if (localizeIndex.language.isDefault) {
+                                    defaultLanguage = localizeIndex.language.locale
+                                }
+                            }
+
+                            runUiAction {
+                                callback.invoke(true)
+                                onAppUpdateListener?.invoke(appUpdate)
+                            }
+                        },
+                        {
+                            NLog.e(this, "Error: onAppOpened", it)
+
+                            // If our update failed for whatever reason we should still send an no update start
+                            callback.invoke(false)
+                            onAppUpdateListener?.invoke(AppUpdateData())
                         }
-                        if (localizeIndex.language.isDefault) {
-                            defaultLanguage = localizeIndex.language.locale
-                        }
-                    }
-
-                    runUiAction {
-                        callback.invoke(true)
-                        onAppUpdateListener?.invoke(appUpdate)
-                    }
-                },
-                {
-                    NLog.e(this, "Error: onAppOpened", it)
-
-                    // If our update failed for whatever reason we should still send an no update start
-                    callback.invoke(false)
-                    onAppUpdateListener?.invoke(AppUpdateData())
-                }
-            )
+                )
     }
 
     /**
@@ -319,7 +315,8 @@ object NStack {
                     result.appUpdateResponse.data.localize.forEach { localizeIndex ->
                         if (localizeIndex.shouldUpdate) {
                             val translation =
-                                networkManager.loadTranslation(localizeIndex.url) ?: return@forEach
+                                    networkManager.loadTranslation(localizeIndex.url)
+                                            ?: return@forEach
                             prefManager.setTranslations(localizeIndex.language.locale, translation)
                             appOpenSettingsManager.setUpdateDate()
                         }
@@ -363,9 +360,9 @@ object NStack {
      * @param slug - copy paste the text slug from the list of responses
      */
     fun getCollectionResponse(
-        slug: String,
-        onSuccess: (String) -> Unit,
-        onError: (Exception) -> Unit
+            slug: String,
+            onSuccess: (String) -> Unit,
+            onError: (Exception) -> Unit
     ) {
         networkManager.getResponse(slug, onSuccess, onError)
     }
@@ -383,27 +380,27 @@ object NStack {
      * Triggers translation and add view to cached views
      */
     fun setTranslation(
-        view: View,
-        nstackKey: String,
-        hint: String? = null,
-        description: String? = null,
-        textOn: String? = null,
-        textOff: String? = null,
-        contentDescription: String? = null,
-        title: String? = null,
-        subtitle: String? = null
+            view: View,
+            nstackKey: String,
+            hint: String? = null,
+            description: String? = null,
+            textOn: String? = null,
+            textOff: String? = null,
+            contentDescription: String? = null,
+            title: String? = null,
+            subtitle: String? = null
     ) {
         if (!hasKey(nstackKey)) return
 
         val translationData = TranslationData(
-            key = nstackKey,
-            hint = hint,
-            description = description,
-            textOn = textOn,
-            textOff = textOff,
-            contentDescription = contentDescription,
-            title = title,
-            subtitle = subtitle
+                key = nstackKey,
+                hint = hint,
+                description = description,
+                textOn = textOn,
+                textOff = textOff,
+                contentDescription = contentDescription,
+                title = title,
+                subtitle = subtitle
         )
         viewTranslationManager.addView(WeakReference(view), translationData)
     }
@@ -440,8 +437,8 @@ object NStack {
         NLog.i(this, "getApplicationInfo")
 
         val applicationInfo = context.packageManager.getApplicationInfo(
-            context.packageName,
-            PackageManager.GET_META_DATA
+                context.packageName,
+                PackageManager.GET_META_DATA
         )
 
         val applicationMetaData = applicationInfo.metaData
@@ -573,12 +570,12 @@ object NStack {
         } else {
             // Search our available languages for any keys that might match
             availableLanguages
-                // Do our languages match
-                .filter { it.languageCode == locale.languageCode }
-                // Find the value for that language
-                .map { languages[it] }
-                // Return the first value or null
-                .firstOrNull()
+                    // Do our languages match
+                    .filter { it.languageCode == locale.languageCode }
+                    // Find the value for that language
+                    .map { languages[it] }
+                    // Return the first value or null
+                    .firstOrNull()
         }
     }
 
@@ -604,8 +601,8 @@ object NStack {
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedListener) {
         val listenerContainer =
-            onLanguageChangedList.firstOrNull { it?.onLanguageChangedListener == listener }
-                ?: return
+                onLanguageChangedList.firstOrNull { it?.onLanguageChangedListener == listener }
+                        ?: return
         onLanguageChangedList.remove(listenerContainer)
     }
 
@@ -617,8 +614,8 @@ object NStack {
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedFunction) {
         val listenerContainer =
-            onLanguageChangedList.firstOrNull { it?.onLanguageChangedFunction == listener }
-                ?: return
+                onLanguageChangedList.firstOrNull { it?.onLanguageChangedFunction == listener }
+                        ?: return
         onLanguageChangedList.remove(listenerContainer)
     }
 
@@ -632,8 +629,8 @@ object NStack {
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedListener) {
         val listenerContainer =
-            onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedListener == listener }
-                ?: return
+                onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedListener == listener }
+                        ?: return
         onLanguagesChangedList.remove(listenerContainer)
     }
 
@@ -645,8 +642,8 @@ object NStack {
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
         val listenerContainer =
-            onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedFunction == listener }
-                ?: return
+                onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedFunction == listener }
+                        ?: return
         onLanguagesChangedList.remove(listenerContainer)
     }
 
