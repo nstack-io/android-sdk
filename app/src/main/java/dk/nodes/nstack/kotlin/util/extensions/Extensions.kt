@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.util
+package dk.nodes.nstack.kotlin.util.extensions
 
 import android.view.View
 import android.view.ViewGroup

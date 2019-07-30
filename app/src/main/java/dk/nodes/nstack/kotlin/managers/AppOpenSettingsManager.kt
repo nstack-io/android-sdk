@@ -6,8 +6,8 @@ import android.preference.PreferenceManager
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.Constants
 import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.parseFromISO8601
-import dk.nodes.nstack.kotlin.util.toFormattedString
+import dk.nodes.nstack.kotlin.util.extensions.parseFromISO8601
+import dk.nodes.nstack.kotlin.util.extensions.toFormattedString
 import java.util.*
 
 class AppOpenSettingsManager(private val context: Context) {

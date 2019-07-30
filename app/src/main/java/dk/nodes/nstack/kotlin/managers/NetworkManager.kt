@@ -5,8 +5,8 @@ import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
-import dk.nodes.nstack.kotlin.util.parseFromString
-import dk.nodes.nstack.kotlin.util.toFormattedString
+import dk.nodes.nstack.kotlin.util.extensions.parseFromString
+import dk.nodes.nstack.kotlin.util.extensions.toFormattedString
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
