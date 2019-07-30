@@ -13,10 +13,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        val nStackRootLayout = NStackRootLayout(this)
-//        layoutInflater.inflate(R.layout.activity_main, nStackRootLayout)
-
-        setContentView(R.layout.activity_main)
+        val nStackRootLayout = NStackRootLayout(this)
+        layoutInflater.inflate(R.layout.activity_main, nStackRootLayout)
+        setContentView(nStackRootLayout)
 
         NStack.setTranslation(toolbar, "test", "title", title = "test_title")
         Log.d("MainActivity", getString(R.string.app_name))
