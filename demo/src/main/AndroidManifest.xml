@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="dk.nodes.nstack.demo">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".Application"
         android:allowBackup="true"
@@ -14,12 +16,13 @@
         tools:ignore="GoogleAppIndexingWarning">
         <meta-data
             android:name="dk.nodes.nstack.appId"
-            tools:replace="android:value"
-            android:value="${appId}" />
+            android:value="${appId}"
+            tools:replace="android:value" />
         <meta-data
             android:name="dk.nodes.nstack.apiKey"
-            tools:replace="android:value"
-            android:value="${apiKey}" />
+            android:value="${apiKey}"
+            tools:replace="android:value" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
