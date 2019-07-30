@@ -6,10 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.hardware.SensorManager
+import android.os.CountDownTimer
 import android.os.Handler
+import android.view.MotionEvent
 import android.view.View
-import dk.nodes.nstack.BuildConfig
+import androidx.annotation.StringRes
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
@@ -34,7 +35,7 @@ object NStack {
 
     // Internally used classes
     private var classTranslationManager = ClassTranslationManager()
-    private lateinit var viewTranslationManager: ViewTranslationManager
+    private var viewTranslationManager = ViewTranslationManager()
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
     private lateinit var clientAppInfo: ClientAppInfo
@@ -180,26 +181,15 @@ object NStack {
         registerLocaleChangeBroadcastListener(context)
 
         networkManager = NetworkManager(context)
-        appOpenSettingsManager = AppOpenSettingsManager(context)
-        viewTranslationManager = ViewTranslationManager(networkManager, appOpenSettingsManager)
         connectionManager = ConnectionManager(context)
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
+        appOpenSettingsManager = AppOpenSettingsManager(context)
         prefManager = PrefManager(context)
 
         loadCacheTranslations()
 
         isInitialized = true
-        if (BuildConfig.DEBUG) {
-            val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
-                override fun hearShake() {
-                    liveEditEnabled = !liveEditEnabled
-                }
-
-            })
-            shakeDetector.start(sensorManager)
-        }
     }
 
     /**
@@ -274,8 +264,7 @@ object NStack {
      */
     fun setTranslation(
             view: View,
-            section: String,
-            key: String,
+            nstackKey: String,
             hint: String? = null,
             description: String? = null,
             textOn: String? = null,
@@ -284,9 +273,7 @@ object NStack {
             title: String? = null,
             subtitle: String? = null
     ) {
-        val nstackKey = "${section}_$key"
-
-        if (!viewTranslationManager.hasKey(nstackKey)) return
+        if (!hasKey(nstackKey)) return
 
         val translationData = TranslationData(
                 key = nstackKey,
@@ -299,6 +286,10 @@ object NStack {
                 subtitle = subtitle
         )
         viewTranslationManager.addView(WeakReference(view), translationData)
+    }
+
+    fun hasKey(nstackKey: String): Boolean {
+        return viewTranslationManager.hasKey(nstackKey)
     }
 
     /**
@@ -592,5 +583,13 @@ object NStack {
 
     fun addView(view: View, translationData: TranslationData) {
         viewTranslationManager.addView(WeakReference(view), translationData)
+    }
+
+    fun hasKey(@StringRes resId: Int, context: Context) : Boolean{
+        return hasKey(context.getString(resId))
+    }
+
+    fun getTranslation(@StringRes resId: Int, context: Context): String? {
+        return getTranslationFromKey(context.getString(resId))
     }
 }

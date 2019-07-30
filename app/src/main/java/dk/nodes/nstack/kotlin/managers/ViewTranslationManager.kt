@@ -5,7 +5,11 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.CompoundButton
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
@@ -293,7 +297,7 @@ class ViewTranslationManager(
      * Check if the key exists
      */
     fun hasKey(nstackKey: String): Boolean {
-        return language.has(nstackKey)
+        return language.has(cleanKeyName(nstackKey))
     }
 
     private fun cleanKeyName(keyName: String?): String? {

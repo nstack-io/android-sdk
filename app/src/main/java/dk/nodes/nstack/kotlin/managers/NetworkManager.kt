@@ -8,7 +8,6 @@ import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.extensions.parseFromString
 import dk.nodes.nstack.kotlin.util.extensions.toFormattedString
 import okhttp3.*
-import org.json.JSONObject
 import java.io.IOException
 
 class NetworkManager(context: Context) {
@@ -73,47 +72,6 @@ class NetworkManager(context: Context) {
                         val responseString = response?.body()?.string()
                         appUpdate.parseFromString(responseString ?: "")
                         onSuccess.invoke(appUpdate)
-                    }
-                })
-    }
-
-
-    fun postProposal(
-            settings: AppOpenSettings,
-            locale: String,
-            key: String,
-            section: String,
-            newValue: String,
-            onSuccess: () -> Unit,
-            onError: (IOException) -> Unit
-    ) {
-
-        val formBuilder = FormBody.Builder()
-                .add("key", key)
-                .add("section", section)
-                .add("value", newValue)
-                .add("locale", locale)
-                .add("guid", settings.guid)
-                .add("platform", "mobile")
-
-        val request = Request.Builder()
-                .url("https://nstack.io//api/v2/content/localize/proposals")
-                .post(formBuilder.build())
-                .build()
-
-        client.newCall(request)
-                .enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        onError.invoke(e)
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        val jsonObject = JSONObject(response.body()?.string())
-                        if (jsonObject.has("data")) {
-                            onSuccess.invoke()
-                        } else {
-                            onError.invoke(IOException())
-                        }
                     }
                 })
     }
