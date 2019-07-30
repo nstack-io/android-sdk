@@ -1,23 +1,25 @@
 package dk.nodes.nstack.kotlin.managers
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
-import android.widget.CompoundButton
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.ToggleButton
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
+import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
-class ViewTranslationManager {
-
+class ViewTranslationManager(
+        private val networkManager: NetworkManager,
+        private val appOpenSettingsManager: AppOpenSettingsManager
+) {
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
      *
@@ -39,8 +41,23 @@ class ViewTranslationManager {
         updateViews()
     }
 
+    /**
+     * Removes background and long click listener
+     */
     fun disableLiveEdit() {
-        // TODO
+        val it: MutableIterator<Map.Entry<WeakReference<View>, TranslationData>> = viewMap.iterator()
+
+        while (it.hasNext()) {
+            val entry = it.next()
+            val view = entry.key.get()
+            // If our view is null we should remove it from the map and return
+            if (view == null) {
+                it.remove()
+            } else {
+                view.background = view.tag as? Drawable
+                view.setOnTouchListener(null)
+            }
+        }
     }
 
     /**
@@ -91,37 +108,11 @@ class ViewTranslationManager {
         }
 
         if (NStack.liveEditEnabled) {
-            view.setOnLongClickListener {
-                NLog.d(this, "key: $translatedKey - $translatedText")
-
-                val dialogBuilder =
-                    AlertDialog.Builder(view.context, R.style.Theme_AppCompat_Light_Dialog)
-                val dialogView = LayoutInflater.from(view.context)
-                    .inflate(R.layout.bottomsheet_translation_change, null)
-                val edittext = dialogView.findViewById<EditText>(R.id.zzz_nstack_translation_et)
-                val btn = dialogView.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
-
-                edittext.setText(translatedText ?: translatedHint ?: "")
-                dialogBuilder.setView(dialogView)
-
-                val dialog = dialogBuilder.create()
-                btn.setOnClickListener {
-                    when (view) {
-                        is EditText -> {
-                            view.hint = edittext.text.toString()
-                            view.hintTextColors
-                        }
-                        is TextView -> {
-                            view.text = edittext.text.toString()
-                        }
-                        is CompoundButton -> {
-                            view.text = edittext.text.toString()
-                        }
-                    }
-                    dialog.dismiss()
-                }
-                dialog.show()
-                true
+            // Storing background drawable to view's tag
+            view.tag = view.background
+            view.background = ColorDrawable(Color.RED)
+            view.setOnVeryLongClickListener {
+                showEditDialog(view, translationData, translatedKey, translatedText, translatedHint)
             }
         }
 
@@ -177,6 +168,57 @@ class ViewTranslationManager {
                 }
             }
         }
+    }
+
+    private fun showEditDialog(
+            view: View,
+            translationData: TranslationData,
+            translatedKey: String?,
+            translatedText: String?,
+            translatedHint: String?
+    ) {
+        NLog.d(this, "key: $translatedKey - $translatedText")
+
+        val dialogBuilder = AlertDialog.Builder(view.context, R.style.Theme_AppCompat_Light_Dialog)
+        val dialogView = LayoutInflater.from(view.context).inflate(R.layout.bottomsheet_translation_change, null)
+        val editText = dialogView.findViewById<EditText>(R.id.zzz_nstack_translation_et)
+        val btn = dialogView.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
+
+        editText.setText(translatedText ?: translatedHint ?: "")
+        dialogBuilder.setView(dialogView)
+
+        val dialog = dialogBuilder.create()
+        btn.setOnClickListener {
+            val array = translationData.key?.split("_")
+            networkManager.postProposal(
+                    appOpenSettingsManager.getAppOpenSettings(),
+                    NStack.language.toString().replace("_", "-"),
+                    array?.last() ?: "",
+                    array?.first() ?: "",
+                    editText.text.toString(),
+                    onSuccess = {
+                        when (view) {
+                            is EditText -> {
+                                view.hint = editText.text.toString()
+                            }
+                            is TextView -> {
+                                view.text = editText.text.toString()
+                            }
+                            is CompoundButton -> {
+                                view.text = editText.text.toString()
+                            }
+                            is androidx.appcompat.widget.Toolbar -> {
+                                view.title = editText.text.toString()
+                            }
+                        }
+                    },
+                    onError = {
+                        Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show();
+                    }
+            )
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     /**
