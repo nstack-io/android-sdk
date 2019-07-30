@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.inflater;
+package dk.nodes.nstack.kotlin.inflater
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi

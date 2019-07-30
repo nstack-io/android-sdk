@@ -17,6 +17,7 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
 class ViewTranslationManager {
+
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
      *
