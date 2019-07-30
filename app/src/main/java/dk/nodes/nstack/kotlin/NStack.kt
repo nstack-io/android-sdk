@@ -30,6 +30,7 @@ import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
+import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -57,7 +58,7 @@ object NStack {
 
     // Internally used classes
     private var classTranslationManager = ClassTranslationManager()
-    private var viewTranslationManager = ViewTranslationManager()
+    private lateinit var viewTranslationManager :ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
     private lateinit var clientAppInfo: ClientAppInfo
@@ -206,6 +207,7 @@ object NStack {
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
         appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
+        viewTranslationManager = ViewTranslationManager(networkManager, appOpenSettingsManager)
         prefManager = nstackModule.providePrefManager()
 
         loadCacheTranslations()

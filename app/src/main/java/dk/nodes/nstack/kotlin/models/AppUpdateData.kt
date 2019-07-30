@@ -1,9 +1,9 @@
 package dk.nodes.nstack.kotlin.models
 
-import dk.nodes.nstack.kotlin.util.iso8601Date
-import dk.nodes.nstack.kotlin.util.localizeIndices
+import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
+import dk.nodes.nstack.kotlin.util.extensions.localizeIndices
 import org.json.JSONObject
-import java.util.*
+import java.util.Date
 
 data class AppUpdateData(
     val count: Int = 0,
