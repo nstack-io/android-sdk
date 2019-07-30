@@ -7,8 +7,8 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: "dk.nstack.translation.plugin"
 
 translation {
-    appId = "BmZHmoKuU99A5ZnOByOiRxMVSmAWC2yBz3OW"
-    apiKey = "yw9go00oCWt6zPhfbdjRYXiHRWmkQZQSuRke"
+    appId = "bOdrNuZd4syxuAz6gyCb3xwBCjA8U4h4IcQI"
+    apiKey = "X0ENl5QpKI51tS9CzKSt1PGwfZeq2gBMTU58"
     acceptHeader = "en-GB"
 }
 

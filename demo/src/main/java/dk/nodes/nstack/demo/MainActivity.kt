@@ -16,10 +16,14 @@ class MainActivity : AppCompatActivity() {
         layoutInflater.inflate(R.layout.activity_main, nStackRootLayout)
         setContentView(nStackRootLayout)
 
-        NStack.setTranslation(toolbar, "rateReminder", "title", title = getString(R.string.nstack_rateReminder_title))
+        NStack.setTranslation(
+            toolbar,
+            nstackKey = getString(R.string.nstack_test_title),
+            title = "test_title"
+        )
 
-        messageTextView += getString(R.string.nstack_rateReminder_body)
-        yesButton += getString(R.string.nstack_rateReminder_yesBtn)
-        noButton += getString(R.string.nstack_rateReminder_noBtn)
+        messageTextView += getString(R.string.nstack_test_message)
+        yesButton += getString(R.string.nstack_default_yes)
+        noButton += getString(R.string.nstack_default_no)
     }
 }
