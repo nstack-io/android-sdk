@@ -12,7 +12,7 @@ import android.widget.TextView
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.getChildrenViews
+import dk.nodes.nstack.kotlin.util.children
 
 class NStackRootLayout @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -24,7 +24,7 @@ class NStackRootLayout @JvmOverloads constructor(
         // TODO: Look into performance of this vs current solution
 
         if (changed) {
-            getChildrenViews().forEach {
+            children.forEach {
                 processView(it)
             }
         }
@@ -47,7 +47,7 @@ class NStackRootLayout @JvmOverloads constructor(
         val viewsBelowPosition = ArrayList<View>()
 
         if (parent is ViewGroup) {
-            parent.getChildrenViews().forEach {
+            parent.children.forEach {
                 it.getGlobalVisibleRect(rect)
                 if (rect.contains(x, y)) {
                     viewsBelowPosition.add(it)
