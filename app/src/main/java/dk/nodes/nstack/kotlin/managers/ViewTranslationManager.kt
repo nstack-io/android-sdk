@@ -3,6 +3,7 @@ package dk.nodes.nstack.kotlin.managers
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
@@ -40,6 +41,8 @@ class ViewTranslationManager(
     fun enableLiveEdit() {
         updateViews()
     }
+
+    private var handler: Handler = Handler()
 
     /**
      * Removes background and long click listener
@@ -197,23 +200,27 @@ class ViewTranslationManager(
                     array?.first() ?: "",
                     editText.text.toString(),
                     onSuccess = {
-                        when (view) {
-                            is EditText -> {
-                                view.hint = editText.text.toString()
-                            }
-                            is TextView -> {
-                                view.text = editText.text.toString()
-                            }
-                            is CompoundButton -> {
-                                view.text = editText.text.toString()
-                            }
-                            is androidx.appcompat.widget.Toolbar -> {
-                                view.title = editText.text.toString()
+                        runUiAction {
+                            when (view) {
+                                is EditText -> {
+                                    view.hint = editText.text.toString()
+                                }
+                                is TextView -> {
+                                    view.text = editText.text.toString()
+                                }
+                                is CompoundButton -> {
+                                    view.text = editText.text.toString()
+                                }
+                                is androidx.appcompat.widget.Toolbar -> {
+                                    view.title = editText.text.toString()
+                                }
                             }
                         }
                     },
                     onError = {
-                        Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show();
+                        runUiAction {
+                            Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show();
+                        }
                     }
             )
             dialog.dismiss()
@@ -301,5 +308,11 @@ class ViewTranslationManager(
         return if (key.startsWith("{") && key.endsWith("}")) {
             key.substring(1, key.length - 1)
         } else key
+    }
+
+    private fun runUiAction(action: () -> Unit) {
+        handler.post {
+            action()
+        }
     }
 }
