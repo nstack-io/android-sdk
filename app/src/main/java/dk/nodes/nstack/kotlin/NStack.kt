@@ -39,8 +39,8 @@ object NStack {
         get() = appInfo
 
     // Internally used classes
-    private var classTranslationManager = ClassTranslationManager()
-    private var viewTranslationManager = ViewTranslationManager()
+    private lateinit var classTranslationManager: ClassTranslationManager
+    private lateinit var viewTranslationManager: ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
     private lateinit var appInfo: ClientAppInfo
@@ -176,6 +176,9 @@ object NStack {
         appIdKey = nstackMeta.appIdKey
         appApiKey = nstackMeta.apiKey
         env = nstackMeta.env
+
+        viewTranslationManager = nstackModule.provideViewTranslationManager()
+        classTranslationManager = nstackModule.provideClassTranslationManager()
 
         registerLocaleChangeBroadcastListener(context)
 
