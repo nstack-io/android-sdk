@@ -77,7 +77,6 @@ object NStack {
             }
         }
 
-
     // Listener Lists
     private var onLanguageChangedList: ArrayList<LanguageListener?> = arrayListOf()
     private var onLanguagesChangedList: ArrayList<LanguagesListener?> = arrayListOf()
@@ -338,7 +337,6 @@ object NStack {
         if (appApiKey.isEmpty()) {
             NLog.e(this, "Missing dk.nodes.nstack.apiKey")
         }
-
     }
 
     private fun registerLocaleChangeBroadcastListener(context: Context) {
@@ -571,9 +569,12 @@ object NStack {
     /**
      * Exposed Adders(?)
      */
-    fun addCachedView(weakView: WeakReference<View>, translationData: TranslationData) {
-        viewTranslationManager.addView(weakView, translationData)
+
+    fun getTranslationFromKey(key: String): String? {
+        return viewTranslationManager.getTranslationByKey(key)
     }
 
-
+    fun addView(view: View, translationData: TranslationData) {
+        viewTranslationManager.addView(WeakReference(view), translationData)
+    }
 }
