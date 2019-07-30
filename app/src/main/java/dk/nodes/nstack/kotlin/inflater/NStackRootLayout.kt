@@ -13,8 +13,6 @@ import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.getChildrenViews
-import java.lang.ref.WeakReference
-
 
 class NStackRootLayout @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -74,7 +72,7 @@ class NStackRootLayout @JvmOverloads constructor(
         // TODO: Add support for other Views (Button, Toolbar, ...)
 
         if (translationData.isValid()) {
-            NStack.addCachedView(WeakReference(view), translationData)
+            NStack.addView(view, translationData)
         } else {
             NLog.d(this, "processView -> Found no valid NStack keys ${view.javaClass.name}")
         }
