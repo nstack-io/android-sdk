@@ -50,6 +50,6 @@ operator fun CompoundButton.plusAssign(key: String) {
 
 private fun setTranslation(view: View, key: String) {
     if (getNstackTranslationFromKey(key)?.isEmpty() == true) return
-    lazyManager.addView(WeakReference(view), TranslationData(key = key))
+    lazyManager.addView(WeakReference(view), TranslationData(key = cleanKeyName(key)))
 }
 
