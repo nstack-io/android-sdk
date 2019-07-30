@@ -10,7 +10,6 @@ import android.hardware.SensorManager
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
-import dk.nodes.nstack.BuildConfig
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.NStackModule
@@ -114,7 +113,7 @@ object NStack {
 
     var baseUrl = "https://nstack.io"
 
-    var defaultLanguage: Locale = Locale.US
+    var defaultLanguage: Locale = Locale.UK
     /**
      * Used for settings or getting the current locale selected for language
      */
@@ -199,11 +198,14 @@ object NStack {
 
         isInitialized = true
 
-        if (BuildConfig.DEBUG) {
+        if (debugMode) {
             val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
             val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
                 override fun hearShake() {
                     liveEditEnabled = !liveEditEnabled
+                    if (!liveEditEnabled) {
+
+                    }
                 }
 
             })
