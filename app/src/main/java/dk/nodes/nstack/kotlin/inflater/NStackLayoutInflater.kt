@@ -292,7 +292,7 @@ internal class NStackLayoutInflater internal constructor(
 
         val translationData = TranslationData(key, text, hint, description, textOn, textOff, contentDescription, title, subtitle)
 
-        NStack.addCachedView(WeakReference(view), translationData)
+        NStack.addView(view, translationData)
     }
 
     private fun cleanKeyName(keyName: String?): String? {
