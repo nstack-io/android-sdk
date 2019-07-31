@@ -1,9 +1,6 @@
 package dk.nodes.nstack.kotlin.providers
 
-import android.content.Context
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.kotlin.util.NLog
-import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -28,7 +25,7 @@ object HttpClientProvider {
         return NMetaInterceptor()
     }
 
-    fun getHttpClient(context: Context): OkHttpClient {
+    fun getHttpClient(): OkHttpClient {
         return OkHttpClient()
             .newBuilder()
             .connectTimeout(CONNECT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
