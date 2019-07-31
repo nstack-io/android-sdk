@@ -37,7 +37,7 @@ class NStackModule(private val context: Context) {
      * Creates Network Manager
      */
     fun provideNetworkManager(): NetworkManager {
-        return getLazyDependency(NetworkManager::class) { NetworkManager(context) }
+        return getLazyDependency(NetworkManager::class) { NetworkManager() }
     }
 
     /**
