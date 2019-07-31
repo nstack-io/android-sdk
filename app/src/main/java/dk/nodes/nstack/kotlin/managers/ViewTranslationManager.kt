@@ -223,7 +223,7 @@ class ViewTranslationManager(
 
         val dialog = dialogBuilder.create()
         btn.setOnClickListener {
-            val pair = getSectionAndKeyPair(translationData.key)
+            val pair = getSectionAndKeyPair(translationData.text ?: translationData.key)
             networkManager.postProposal(
                 appOpenSettingsManager.getAppOpenSettings(),
 
