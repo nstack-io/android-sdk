@@ -47,6 +47,10 @@ internal class NStackModule(private val context: Context) {
         return ClassTranslationManager()
     }
 
+    fun provideContextWrapper(): ContextWrapper {
+        return ContextWrapper(context)
+    }
+
     private fun provideContextInfo(): ContextWrapper {
         return ContextWrapper(context)
     }

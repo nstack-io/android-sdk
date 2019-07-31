@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Handler
 import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.*
@@ -47,12 +46,11 @@ object NStack {
     private lateinit var networkManager: NetworkManager
     private lateinit var appOpenSettingsManager: AppOpenSettingsManager
     private lateinit var prefManager: PrefManager
+    private lateinit var contextWrapper: ContextWrapper
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
-
-    private var handler: Handler = Handler()
 
     /**
      * Device Change Broadcast Listener
@@ -188,6 +186,7 @@ object NStack {
         appInfo = nstackModule.provideClientAppInfo()
         appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
         prefManager = nstackModule.providePrefManager()
+        contextWrapper = nstackModule.provideContextWrapper()
 
         loadCacheTranslations()
 
@@ -247,7 +246,7 @@ object NStack {
                         }
                     }
 
-                    runUiAction {
+                    contextWrapper.runUiAction {
                         callback.invoke(true)
                         onAppUpdateListener?.invoke(appUpdate)
                     }
@@ -469,15 +468,6 @@ object NStack {
                 .map { languages[it] }
                 // Return the first value or null
                 .firstOrNull()
-        }
-    }
-
-    /**
-     * Run Ui Action
-     */
-    private fun runUiAction(action: () -> Unit) {
-        handler.post {
-            action()
         }
     }
 
