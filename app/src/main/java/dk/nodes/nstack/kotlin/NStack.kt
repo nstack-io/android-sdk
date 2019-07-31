@@ -42,6 +42,7 @@ object NStack {
 
     // Internally used classes
     private var classTranslationManager = ClassTranslationManager()
+    private lateinit var liveEditManager: LiveEditManager
     private lateinit var viewTranslationManager: ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
@@ -186,14 +187,21 @@ object NStack {
         getApplicationInfo(context)
         registerLocaleChangeBroadcastListener(context)
 
-        networkManager = NetworkManager(context)
+        networkManager = nstackModule.provideNetworkManager()
         connectionManager = ConnectionManager(context)
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
         appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
-        viewTranslationManager = ViewTranslationManager(networkManager, appOpenSettingsManager)
+        viewTranslationManager = ViewTranslationManager().apply {
+            liveEditDialogListener = { view: View, translationData: TranslationData, translatedKey: String?, translatedText: String?, translatedHint: String? ->
+                liveEditManager.showLiveEditDialog(view, translationData, translatedKey, translatedText, translatedHint)
+            }
+            liveEditProposalsDialogListener = { view ->
+                liveEditManager.showProposalsDialog(view)
+            }
+        }
         prefManager = nstackModule.providePrefManager()
-
+        liveEditManager = nstackModule.provideLiveEditManager()
         loadCacheTranslations()
 
         isInitialized = true
@@ -585,7 +593,7 @@ object NStack {
      * Run Ui Action
      */
 
-    private fun runUiAction(action: () -> Unit) {
+    fun runUiAction(action: () -> Unit) {
         handler.post {
             action()
         }
