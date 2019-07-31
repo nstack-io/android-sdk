@@ -2,6 +2,8 @@ package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
+import dk.nodes.nstack.kotlin.managers.LiveEditManager
+import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.PreferencesImpl
@@ -18,8 +20,8 @@ class NStackModule(private val context: Context) {
     fun provideAppOpenSettingsManager(): AppOpenSettingsManager {
         return getLazyDependency(AppOpenSettingsManager::class) {
             AppOpenSettingsManager(
-                context,
-                providePreferences()
+                    context,
+                    providePreferences()
             )
         }
     }
@@ -31,16 +33,30 @@ class NStackModule(private val context: Context) {
         return getLazyDependency(PrefManager::class) { PrefManager(providePreferences()) }
     }
 
+    /**
+     * Creates Network Manager
+     */
+    fun provideNetworkManager(): NetworkManager {
+        return getLazyDependency(NetworkManager::class) { NetworkManager(context) }
+    }
+
+    /**
+     * Creates LiveEdit Manager
+     */
+    fun provideLiveEditManager(): LiveEditManager {
+        return getLazyDependency(LiveEditManager::class) { LiveEditManager(provideNetworkManager(), provideAppOpenSettingsManager()) }
+    }
+
     private fun providePreferences(): Preferences {
         return getLazyDependency(PreferencesImpl::class) { PreferencesImpl(context) }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> getLazyDependency(klass: KClass<T>, block: () -> T): T {
-        if (!dependenciesMap.containsKey(klass)) {
-            dependenciesMap[klass] = block()
+    private fun <T : Any> getLazyDependency(clazz: KClass<T>, block: () -> T): T {
+        if (!dependenciesMap.containsKey(clazz)) {
+            dependenciesMap[clazz] = block()
         }
-        return dependenciesMap[klass] as T
+        return dependenciesMap[clazz] as T
     }
 
     private val dependenciesMap = mutableMapOf<KClass<*>, Any>()

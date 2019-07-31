@@ -4,30 +4,23 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Handler
-import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
 import android.widget.CompoundButton
-import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import android.widget.ToggleButton
-import androidx.appcompat.app.AlertDialog
-import androidx.recyclerview.widget.RecyclerView
-import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
-import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
-class ViewTranslationManager(
-    private val networkManager: NetworkManager,
-    private val appOpenSettingsManager: AppOpenSettingsManager
-) {
+class ViewTranslationManager {
+
+    var liveEditDialogListener: LiveEditDialogListener? = null
+    var liveEditProposalsDialogListener: LiveEditProposalsDialogListener? = null
+
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
      *
@@ -75,22 +68,8 @@ class ViewTranslationManager(
     }
 
     private fun showProposalsDialog(view: View) {
-        networkManager.fetchProposals({
-            if (it.isNotEmpty()) {
-                runUiAction {
-                    val dialogBuilder =
-                        AlertDialog.Builder(view.context, R.style.Theme_AppCompat_Light_Dialog)
-                    val dialogView = LayoutInflater.from(view.context)
-                        .inflate(R.layout.bottomsheet_translation_proposals, null)
-                    dialogBuilder.setView(dialogView)
-                    val recyclerView = dialogView.findViewById<RecyclerView>(R.id.recyclerView)
-                    dialogBuilder.create().show()
-                    recyclerView.adapter = ProposalsAdapter().apply { update(it) }
-                }
-            }
-        }, {
+        liveEditProposalsDialogListener?.invoke(view)
 
-        })
     }
 
     /**
@@ -145,7 +124,7 @@ class ViewTranslationManager(
             view.tag = view.background
             view.background = ColorDrawable(Color.RED)
             view.setOnVeryLongClickListener {
-                showEditDialog(view, translationData, translatedKey, translatedText, translatedHint)
+                liveEditDialogListener?.invoke(view, translationData, translatedKey, translatedText, translatedHint)
             }
         }
 
@@ -203,63 +182,6 @@ class ViewTranslationManager(
         }
     }
 
-    private fun showEditDialog(
-        view: View,
-        translationData: TranslationData,
-        translatedKey: String?,
-        translatedText: String?,
-        translatedHint: String?
-    ) {
-        NLog.d(this, "key: $translatedKey - $translatedText")
-
-        val dialogBuilder = AlertDialog.Builder(view.context, R.style.Theme_AppCompat_Light_Dialog)
-        val dialogView =
-            LayoutInflater.from(view.context).inflate(R.layout.bottomsheet_translation_change, null)
-        val editText = dialogView.findViewById<EditText>(R.id.zzz_nstack_translation_et)
-        val btn = dialogView.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
-
-        editText.setText(translatedText ?: translatedHint ?: translatedKey ?: "")
-        dialogBuilder.setView(dialogView)
-
-        val dialog = dialogBuilder.create()
-        btn.setOnClickListener {
-            val pair = getSectionAndKeyPair(translationData.text ?: translationData.key)
-            networkManager.postProposal(
-                appOpenSettingsManager.getAppOpenSettings(),
-
-                NStack.language.toString().replace("_", "-"),
-                pair?.second ?: "",
-                pair?.first ?: "",
-                editText.text.toString(),
-                onSuccess = {
-                    runUiAction {
-                        when (view) {
-                            is EditText -> {
-                                view.hint = editText.text.toString()
-                            }
-                            is TextView -> {
-                                view.text = editText.text.toString()
-                            }
-                            is CompoundButton -> {
-                                view.text = editText.text.toString()
-                            }
-                            is androidx.appcompat.widget.Toolbar -> {
-                                view.title = editText.text.toString()
-                            }
-                        }
-                    }
-                },
-                onError = {
-                    runUiAction {
-                        Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            )
-            dialog.dismiss()
-        }
-        dialog.show()
-    }
-
     /**
      * Returns the translation based on the key
      *
@@ -296,12 +218,6 @@ class ViewTranslationManager(
         updateViews()
     }
 
-    private fun getSectionAndKeyPair(key: String?): Pair<String, String>? {
-        val key = cleanKeyName(key) ?: return null
-        val divider = key.indexOfFirst { it == '_' }
-        return key.substring(0, divider) to key.substring(divider + 1, key.length)
-    }
-
     /**
      * Goes through each sub section and adds the value under the new key
      */
@@ -310,7 +226,7 @@ class ViewTranslationManager(
         val sectionKeys = jsonSection.keys()
 
         sectionKeys.forEach { sectionKey ->
-            val newSectionKey = "${sectionName}_${sectionKey}"
+            val newSectionKey = "${sectionName}_$sectionKey"
             val sectionValue = jsonSection.getString(sectionKey)
             language.put(newSectionKey, sectionValue)
         }
