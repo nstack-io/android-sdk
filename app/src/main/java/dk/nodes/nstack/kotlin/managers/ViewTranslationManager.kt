@@ -122,7 +122,7 @@ class ViewTranslationManager {
         if (NStack.liveEditEnabled) {
             // Storing background drawable to view's tag
             view.tag = view.background
-            view.background = ColorDrawable(Color.RED)
+            view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
             view.setOnVeryLongClickListener {
                 liveEditDialogListener?.invoke(view, translationData, translatedKey, translatedText, translatedHint)
             }

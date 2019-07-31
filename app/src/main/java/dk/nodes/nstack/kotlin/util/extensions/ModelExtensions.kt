@@ -6,12 +6,12 @@ import org.json.JSONObject
 
 
 fun MutableList<Proposal>.parseFromString(json: String?) {
-    val jsonRoot: JSONObject? = try {
+    val jsonRoot: JSONObject = try {
         JSONObject(json)
     } catch (e: Exception) {
         JSONObject()
     }
-    val array: JSONArray = jsonRoot?.optJSONArray("data") ?: return
+    val array: JSONArray = jsonRoot.optJSONArray("data") ?: return
 
     for (i in 0 until array.length()) {
         val jsonObject = array.getJSONObject(i)

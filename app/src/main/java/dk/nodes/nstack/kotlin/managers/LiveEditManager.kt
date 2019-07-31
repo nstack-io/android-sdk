@@ -1,14 +1,18 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.view.LayoutInflater
+import android.app.Activity
+import android.content.res.Resources
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.snackbar.Snackbar
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.NStack.runUiAction
 import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.util.KeyboardUtil
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 
@@ -27,18 +31,15 @@ class LiveEditManager(
             translatedHint: String?
     ) {
         NLog.d(this, "key: $translatedKey - $translatedText")
-
-        val dialogBuilder = AlertDialog.Builder(view.context, R.style.Theme_AppCompat_Light_Dialog)
-        val dialogView =
-                LayoutInflater.from(view.context).inflate(R.layout.bottomsheet_translation_change, null)
-        val editText = dialogView.findViewById<EditText>(R.id.zzz_nstack_translation_et)
-        val btn = dialogView.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
-
-        editText.setText(translatedText ?: translatedHint ?: translatedKey ?: "")
-        dialogBuilder.setView(dialogView)
-
-        val dialog = dialogBuilder.create()
-        btn.setOnClickListener {
+        val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+        bottomSheetDialog.setTitle("Test")
+        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_change)
+        val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+        val keyboardUtil = KeyboardUtil(view.context as Activity, bottomSheetInternal!!)
+        val editText = bottomSheetDialog.findViewById<EditText>(R.id.zzz_nstack_translation_et)
+        val btn = bottomSheetDialog.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
+        editText!!.setText(translatedText ?: translatedHint ?: translatedKey ?: "")
+        btn!!.setOnClickListener {
             val pair = getSectionAndKeyPair(translationData.text ?: translationData.key)
             networkManager.postProposal(
                     appOpenSettingsManager.getAppOpenSettings(),
@@ -70,28 +71,49 @@ class LiveEditManager(
                         }
                     }
             )
-            dialog.dismiss()
+            keyboardUtil.disable()
+            bottomSheetDialog.dismiss()
         }
-        dialog.show()
+        bottomSheetDialog.show()
     }
 
     fun showProposalsDialog(view: View) {
-        networkManager.fetchProposals({
-            if (it.isNotEmpty()) {
-                runUiAction {
-                    val dialogBuilder =
-                            AlertDialog.Builder(view.context, R.style.Theme_AppCompat_Light_Dialog)
-                    val dialogView = LayoutInflater.from(view.context)
-                            .inflate(R.layout.bottomsheet_translation_proposals, null)
-                    dialogBuilder.setView(dialogView)
-                    val recyclerView = dialogView.findViewById<RecyclerView>(R.id.recyclerView)
-                    dialogBuilder.create().show()
-                    recyclerView.adapter = ProposalsAdapter().apply { update(it) }
+        val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_proposals)
+        val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+        val recyclerView = bottomSheetDialog.findViewById<RecyclerView>(R.id.recyclerView)
+        BottomSheetBehavior.from(bottomSheetInternal).apply {
+            peekHeight = 400
+            isFitToContents = true
+        }
+        recyclerView!!.layoutParams = recyclerView.layoutParams.apply {
+            height = getWindowHeight() * 2 / 3
+        }
+        networkManager.fetchProposals(
+                { proposals ->
+                    if (proposals.isNotEmpty()) {
+                        runUiAction {
+                            recyclerView.adapter = ProposalsAdapter().apply { update(proposals) }
+                        }
+                        Snackbar.make(view, "Open Proposals", Snackbar.LENGTH_LONG)
+                                .setAction("OPEN") {
+                                    bottomSheetDialog.show()
+                                }
+                                .show()
+                    } else {
+                        Toast.makeText(view.context, "There isn't any proposals", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                {
+                    Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show();
                 }
-            }
-        }, {
+        )
 
-        })
+
+    }
+
+    private fun getWindowHeight(): Int {
+        return Resources.getSystem().displayMetrics.heightPixels
     }
 
     private fun getSectionAndKeyPair(key: String?): Pair<String, String>? {

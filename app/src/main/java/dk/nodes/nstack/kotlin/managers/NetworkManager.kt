@@ -9,7 +9,6 @@ import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.parseFromString
 import okhttp3.*
-import org.json.JSONObject
 import java.io.IOException
 
 class NetworkManager(context: Context) {
@@ -259,8 +258,8 @@ class NetworkManager(context: Context) {
                     }
 
                     override fun onResponse(call: Call, response: Response) {
-                        val jsonObject = JSONObject(response.body()?.string())
-                        if (jsonObject.has("data")) {
+                        val jsonObject = response.body()?.string()?.asJsonObject
+                        if (jsonObject != null && jsonObject.has("data")) {
                             onSuccess.invoke()
                         } else {
                             onError.invoke(IOException())
