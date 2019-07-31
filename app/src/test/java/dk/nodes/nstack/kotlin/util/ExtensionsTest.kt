@@ -3,7 +3,7 @@ package dk.nodes.nstack.kotlin.util
 import org.junit.Test
 import java.util.*
 
-class ExtensionsTest {
+internal class ExtensionsTest {
 
     @Test
     fun `Test extracting language code from locale`() {

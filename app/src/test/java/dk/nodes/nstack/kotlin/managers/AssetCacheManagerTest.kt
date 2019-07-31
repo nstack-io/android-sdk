@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Test
 
-class AssetCacheManagerTest {
+internal class AssetCacheManagerTest {
 
     private val contextWrapperMock = mockk<ContextWrapper>()
 

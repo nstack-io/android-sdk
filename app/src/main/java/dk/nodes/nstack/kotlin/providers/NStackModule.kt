@@ -1,7 +1,10 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
-import dk.nodes.nstack.kotlin.managers.*
+import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
+import dk.nodes.nstack.kotlin.managers.ConnectionManager
+import dk.nodes.nstack.kotlin.managers.NetworkManager
+import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.NStackMeta
 import dk.nodes.nstack.kotlin.util.ContextWrapper
@@ -10,18 +13,6 @@ import dk.nodes.nstack.kotlin.util.PreferencesImpl
 
 
 internal class NStackModule(private val context: Context) {
-
-    fun provideAppOpenSettingsManager(): AppOpenSettingsManager {
-        return AppOpenSettingsManager(provideClientAppInfo(), providePreferences())
-    }
-
-    fun provideAssetCacheManager(): AssetCacheManager {
-        return AssetCacheManager(provideContextInfo())
-    }
-
-    fun providePrefManager(): PrefManager {
-        return PrefManager(providePreferences())
-    }
 
     fun provideClientAppInfo(): ClientAppInfo {
         return ClientAppInfo(context)
@@ -51,11 +42,7 @@ internal class NStackModule(private val context: Context) {
         return ContextWrapper(context)
     }
 
-    private fun provideContextInfo(): ContextWrapper {
-        return ContextWrapper(context)
-    }
-
-    private fun providePreferences(): Preferences {
+    fun providePreferences(): Preferences {
         return PreferencesImpl(context)
     }
 }

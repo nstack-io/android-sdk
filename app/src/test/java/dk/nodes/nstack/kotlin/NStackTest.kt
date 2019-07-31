@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.*
+import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.ContextWrapper
 import io.mockk.*
@@ -13,7 +14,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import java.util.*
 
-class NStackTest {
+internal class NStackTest {
 
     @Test
     fun `Test init`() {
@@ -48,8 +49,6 @@ class NStackTest {
 
     @Test
     fun `Test app open with internet connection`() {
-        val translations1 = "translations1"
-        val translations2 = "translations2"
         var updated = false
 
         val successCallbackSlot = slot<(AppUpdateData) -> Unit>()
@@ -64,6 +63,14 @@ class NStackTest {
         successCallbackSlot.captured(appUpdateDate)
         verify { appOpenSettingsManagerMock.setUpdateDate() }
 
+        verifyLanguageIndecesAreHandled()
+
+        assert(updated)
+    }
+
+    private fun verifyLanguageIndecesAreHandled() {
+        val translations1 = "translations1"
+        val translations2 = "translations2"
         val loadTranslations1Slot = slot<(String) -> Unit>()
         val loadTranslations2Slot = slot<(String) -> Unit>()
 
@@ -82,7 +89,6 @@ class NStackTest {
         uiActionSlot.captured()
 
         assert(NStack.defaultLanguage == language2.locale)
-        assert(updated)
 
         NStack.onAppUpdateListener = null
     }
@@ -227,10 +233,11 @@ class NStackTest {
 
         init {
             mockkConstructor(NStackModule::class)
+            mockkConstructor(ManagersModule::class)
 
-            every { anyConstructed<NStackModule>().provideAssetCacheManager() } returns assetCacheManagerMock
-            every { anyConstructed<NStackModule>().provideAppOpenSettingsManager() } returns appOpenSettingsManagerMock
-            every { anyConstructed<NStackModule>().providePrefManager() } returns prefManagerMock
+            every { anyConstructed<ManagersModule>().provideAssetCacheManager() } returns assetCacheManagerMock
+            every { anyConstructed<ManagersModule>().provideAppOpenSettingsManager() } returns appOpenSettingsManagerMock
+            every { anyConstructed<ManagersModule>().providePrefManager() } returns prefManagerMock
             every { anyConstructed<NStackModule>().provideNStackMeta() } returns nstackMeta
             every { anyConstructed<NStackModule>().provideClientAppInfo() } returns clientAppInfoMock
             every { anyConstructed<NStackModule>().provideViewTranslationManager() } returns viewTranslationManagerMock

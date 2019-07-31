@@ -11,11 +11,10 @@ internal class AssetCacheManager(private val contextWrapper: ContextWrapper) {
     fun loadTranslations(): Map<Locale, JSONObject> {
         return contextWrapper.assets
             .asSequence()
-            .filter { it.startsWith("translations") }
             .mapNotNull { loadTranslation(it) }
             .filter { it.translations != null }
             .sortedBy { it.index }
-            .map { it.locale to it.translations!! }
+            .map { it.locale to it.translations as JSONObject }
             .toList()
             .toMap()
     }
