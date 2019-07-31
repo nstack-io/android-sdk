@@ -11,7 +11,7 @@ import io.mockk.verify
 import org.junit.Test
 import java.util.*
 
-class AppOpenSettingsManagerTest {
+internal class AppOpenSettingsManagerTest {
 
     private val preferencesMock = mockk<Preferences>(relaxed = true)
     private val clientAppInfoMock = mockk<ClientAppInfo>()

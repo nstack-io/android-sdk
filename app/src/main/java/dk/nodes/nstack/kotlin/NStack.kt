@@ -8,12 +8,16 @@ import android.content.IntentFilter
 import android.view.View
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.*
+import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.*
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
 
+/**
+ * NStack
+ */
 @SuppressLint("StaticFieldLeak")
 object NStack {
 
@@ -169,6 +173,7 @@ object NStack {
         }
 
         val nstackModule = NStackModule(context)
+        val managersModule = ManagersModule(nstackModule, context)
 
         val nstackMeta = nstackModule.provideNStackMeta()
         appIdKey = nstackMeta.appIdKey
@@ -182,10 +187,10 @@ object NStack {
 
         networkManager = nstackModule.provideNetworkManager()
         connectionManager = nstackModule.provideConnectionManager()
-        assetCacheManager = nstackModule.provideAssetCacheManager()
+        assetCacheManager = managersModule.provideAssetCacheManager()
         appInfo = nstackModule.provideClientAppInfo()
-        appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
-        prefManager = nstackModule.providePrefManager()
+        appOpenSettingsManager = managersModule.provideAppOpenSettingsManager()
+        prefManager = managersModule.providePrefManager()
         contextWrapper = nstackModule.provideContextWrapper()
 
         loadCacheTranslations()
@@ -282,32 +287,31 @@ object NStack {
         }
 
         try {
-            when (val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
+            return when (val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
                 is AppOpenResult.Success -> {
                     NLog.d(this, "NStack appOpen")
-
-                    result.appUpdateResponse.data.localize.forEach { localizeIndex ->
-                        if (localizeIndex.shouldUpdate) {
-                            val translation = networkManager.loadTranslation(localizeIndex.url)
-                                ?: return@forEach
-                            prefManager.setTranslations(localizeIndex.language.locale, translation)
-                            appOpenSettingsManager.setUpdateDate()
-                        }
-                        if (localizeIndex.language.isDefault) {
-                            defaultLanguage = localizeIndex.language.locale
-                        }
-                    }
-
-                    return result
+                    result.appUpdateResponse.data.localize.forEach { handleLocalizeIndex(it) }
+                    result
                 }
                 else -> {
                     NLog.e(this, "Error: onAppOpened")
-                    return result
+                    result
                 }
             }
         } catch (e: Exception) {
             NLog.e(this, "Error: onAppOpened - network request probably failed")
             return AppOpenResult.Failure
+        }
+    }
+
+    private suspend fun handleLocalizeIndex(index: LocalizeIndex) {
+        if (index.shouldUpdate) {
+            val translation = networkManager.loadTranslation(index.url) ?: return
+            prefManager.setTranslations(index.language.locale, translation)
+            appOpenSettingsManager.setUpdateDate()
+        }
+        if (index.language.isDefault) {
+            defaultLanguage = index.language.locale
         }
     }
 
