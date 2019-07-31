@@ -7,6 +7,7 @@ import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.ContextWrapper
 import io.mockk.*
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.BeforeClass
 import org.junit.Test
@@ -47,15 +48,8 @@ class NStackTest {
 
     @Test
     fun `Test app open with internet connection`() {
-        val language1 = Language(0, "", Locale.ENGLISH, "", isDefault = false, isBestFit = false)
-        val language2 = Language(0, "", Locale.GERMAN, "", isDefault = true, isBestFit = false)
-        val language3 = Language(0, "", Locale.FRENCH, "", isDefault = false, isBestFit = false)
-        val index1 = LocalizeIndex(0, "url1", Date(), shouldUpdate = true, language = language1)
-        val index2 = LocalizeIndex(0, "url2", Date(), shouldUpdate = true, language = language2)
-        val index3 = LocalizeIndex(0, "url3", Date(), shouldUpdate = false, language = language3)
         val translations1 = "translations1"
         val translations2 = "translations2"
-        val appUpdate = AppUpdateData(localize = listOf(index1, index2, index3))
         var updated = false
 
         val successCallbackSlot = slot<(AppUpdateData) -> Unit>()
@@ -67,15 +61,15 @@ class NStackTest {
 
         verify { networkManagerMock.postAppOpen(appOpenSettings, any(), capture(successCallbackSlot), any()) }
 
-        successCallbackSlot.captured(appUpdate)
+        successCallbackSlot.captured(appUpdateDate)
         verify { appOpenSettingsManagerMock.setUpdateDate() }
 
         val loadTranslations1Slot = slot<(String) -> Unit>()
         val loadTranslations2Slot = slot<(String) -> Unit>()
 
-        verify { networkManagerMock.loadTranslation(index1.url, capture(loadTranslations1Slot), any()) }
-        verify { networkManagerMock.loadTranslation(index2.url, capture(loadTranslations2Slot), any()) }
-        verify(exactly = 0) { networkManagerMock.loadTranslation(index3.url, any(), any()) }
+        verify { networkManagerMock.loadTranslation(languageIndex1.url, capture(loadTranslations1Slot), any()) }
+        verify { networkManagerMock.loadTranslation(languageIndex2.url, capture(loadTranslations2Slot), any()) }
+        verify(exactly = 0) { networkManagerMock.loadTranslation(languageIndex3.url, any(), any()) }
 
         loadTranslations1Slot.captured(translations1)
         verify { prefManagerMock.setTranslations(any(), translations1) }
@@ -114,27 +108,63 @@ class NStackTest {
 
     @Test
     fun `Test coroutine app open without internet connection`() {
+        every { connectionManagerMock.isConnected } returns false
 
+        val result = runBlocking { NStack.appOpen() }
+
+        assert(result is AppOpenResult.NoInternet)
     }
 
     @Test
     fun `Test coroutine app open with internet connection`() {
+        val translations1 = "translations1"
+        val translations2 = "translations2"
 
+        val successfulResult = AppOpenResult.Success(appUpdateResponse)
+
+        every { connectionManagerMock.isConnected } returns true
+        coEvery { networkManagerMock.postAppOpen(appOpenSettings, any()) } returns successfulResult
+        coEvery { networkManagerMock.loadTranslation(languageIndex1.url) } returns translations1
+        coEvery { networkManagerMock.loadTranslation(languageIndex2.url) } returns translations2
+
+        val result = runBlocking { NStack.appOpen() }
+
+        assert(result is AppOpenResult.Success)
+        verify { prefManagerMock.setTranslations(language1.locale, translations1) }
+        verify { prefManagerMock.setTranslations(language2.locale, translations2) }
+        verify(exactly = 0) { prefManagerMock.setTranslations(language3.locale, any()) }
+        assert(NStack.defaultLanguage == language2.locale)
     }
 
     @Test
     fun `Test coroutine app open error`() {
+        val errorResult = AppOpenResult.Failure
 
+        every { connectionManagerMock.isConnected } returns true
+        coEvery { networkManagerMock.postAppOpen(any(), any()) } returns errorResult
+
+        val result = runBlocking { NStack.appOpen() }
+
+        assert(result is AppOpenResult.Failure)
     }
 
     @Test
     fun `Test message seen`() {
+        val messageId = 101
+        val message = Message(messageId, 0, "", "", 0, "")
 
+        NStack.messageSeen(message)
+
+        verify { networkManagerMock.postMessageSeen(guid, messageId) }
     }
 
     @Test
     fun `Test rate reminder action`() {
+        val rated = true
 
+        NStack.onRateReminderAction(rated)
+
+        verify { networkManagerMock.postRateReminderSeen(appOpenSettings, rated) }
     }
 
     companion object {
@@ -167,6 +197,15 @@ class NStackTest {
             oldVersion = oldVersion,
             lastUpdated = lastUpdated
         )
+
+        private val language1 = Language(0, "", Locale.ENGLISH, "", isDefault = false, isBestFit = false)
+        private val language2 = Language(0, "", Locale.GERMAN, "", isDefault = true, isBestFit = false)
+        private val language3 = Language(0, "", Locale.FRENCH, "", isDefault = false, isBestFit = false)
+        private val languageIndex1 = LocalizeIndex(0, "url1", Date(), shouldUpdate = true, language = language1)
+        private val languageIndex2 = LocalizeIndex(0, "url2", Date(), shouldUpdate = true, language = language2)
+        private val languageIndex3 = LocalizeIndex(0, "url3", Date(), shouldUpdate = false, language = language3)
+        private val appUpdateDate = AppUpdateData(localize = listOf(languageIndex1, languageIndex2, languageIndex3))
+        private val appUpdateResponse = AppUpdateResponse(appUpdateDate, AppUpdateMeta(language1.locale.toString()))
 
         private val locale1 = Locale("it-IT")
         private val translations1 = mockk<JSONObject>()
