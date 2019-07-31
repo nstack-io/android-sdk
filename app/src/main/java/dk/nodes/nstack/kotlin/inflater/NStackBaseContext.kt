@@ -13,6 +13,9 @@ class NStackBaseContext(context: Context) : ContextWrapper(context) {
      */
     override fun getSystemService(name: String): Any? {
         // apparently sometimes this can be called with null on certain samsung phones
+        if (name == null) {
+            return null
+        }
 
         if (Context.LAYOUT_INFLATER_SERVICE.equals(name, true)) {
             return NStackLayoutInflater(LayoutInflater.from(baseContext), baseContext, false)
