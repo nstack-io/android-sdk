@@ -25,7 +25,7 @@
     <Button
         android:id="@+id/zzz_nstack_translation_change_btn"
         android:text="Change"
-        android:layout_gravity="right"
+        android:layout_gravity="end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
