@@ -30,8 +30,11 @@ class LiveEditManager(
     ) {
         NLog.d(this, "key: $translatedKey - $translatedText")
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
-        bottomSheetDialog.setTitle("Test")
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_change)
+        bottomSheetDialog.setOnShowListener {
+            val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+            BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
+        }
         val editText = bottomSheetDialog.findViewById<EditText>(R.id.zzz_nstack_translation_et)
         val btn = bottomSheetDialog.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
         editText!!.setText(translatedText ?: translatedHint ?: translatedKey ?: "")
@@ -63,7 +66,7 @@ class LiveEditManager(
                     },
                     onError = {
                         runUiAction {
-                            Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show()
                         }
                     }
             )
@@ -96,11 +99,11 @@ class LiveEditManager(
                                 }
                                 .show()
                     } else {
-                        Toast.makeText(view.context, "There isn't any proposals", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(view.context, "There isn't any proposals", Toast.LENGTH_SHORT).show()
                     }
                 },
                 {
-                    Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show()
                 }
         )
 
