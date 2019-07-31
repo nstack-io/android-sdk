@@ -1,6 +1,5 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.app.Activity
 import android.content.res.Resources
 import android.view.View
 import android.widget.*
@@ -12,7 +11,6 @@ import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.NStack.runUiAction
 import dk.nodes.nstack.kotlin.models.TranslationData
-import dk.nodes.nstack.kotlin.util.KeyboardUtil
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 
@@ -34,8 +32,6 @@ class LiveEditManager(
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
         bottomSheetDialog.setTitle("Test")
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_change)
-        val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
-        val keyboardUtil = KeyboardUtil(view.context as Activity, bottomSheetInternal!!)
         val editText = bottomSheetDialog.findViewById<EditText>(R.id.zzz_nstack_translation_et)
         val btn = bottomSheetDialog.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
         editText!!.setText(translatedText ?: translatedHint ?: translatedKey ?: "")
@@ -71,7 +67,6 @@ class LiveEditManager(
                         }
                     }
             )
-            keyboardUtil.disable()
             bottomSheetDialog.dismiss()
         }
         bottomSheetDialog.show()
