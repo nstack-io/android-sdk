@@ -1,6 +1,5 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.content.Context
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
@@ -12,9 +11,9 @@ import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
 
-class NetworkManager(context: Context) {
+class NetworkManager {
 
-    private val client = HttpClientProvider.getHttpClient(context)
+    private val client = HttpClientProvider.getHttpClient()
 
     fun loadTranslation(url: String, onSuccess: (String) -> Unit, onError: (Exception) -> Unit) {
         client.newCall(Request.Builder().url(url).build())
