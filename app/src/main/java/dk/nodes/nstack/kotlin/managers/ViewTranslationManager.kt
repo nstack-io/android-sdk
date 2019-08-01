@@ -69,7 +69,6 @@ class ViewTranslationManager {
 
     private fun showProposalsDialog(view: View) {
         liveEditProposalsDialogListener?.invoke(view)
-
     }
 
     /**
@@ -98,7 +97,7 @@ class ViewTranslationManager {
     /**
      * Apply the translation to the view
      *
-     * Should check if the view is of a type and try to add the translation
+     * Should check if the view is of a stylable and try to add the translation
      */
     private fun updateViewTranslation(view: View?, translationData: TranslationData) {
         if (view == null) {
@@ -124,7 +123,19 @@ class ViewTranslationManager {
             view.tag = view.background
             view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
             view.setOnVeryLongClickListener {
-                liveEditDialogListener?.invoke(view, translationData, translatedKey, translatedText, translatedHint)
+                liveEditDialogListener?.invoke(
+                    view, translationData to TranslationData(
+                        translatedKey,
+                        translatedText,
+                        translatedHint,
+                        translatedDescription,
+                        translatedTextOn,
+                        translatedTextOff,
+                        translatedContentDescription,
+                        translatedTitle,
+                        translatedSubtitle
+                    )
+                )
             }
         }
 
