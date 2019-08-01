@@ -1,39 +1,50 @@
 ![nStack Badge](https://img.shields.io/maven-central/v/dk.nodes.nstack/nstack-kotlin.svg)
+# NStack Kotlin
 
-# nStack Kotlin 2.0
+## Quick  Setup
 
-Updated version of nStack implemented in a more kotlin friendly way
+### 📦 Installation
 
-Developed by 
-- @STPE
-- @BRES
-- @JOSO
-
-## Init
-
-Initialize library
-```
-NStack.translationClass = Translation::class.java
-NStack.init(this)
-```
-
-## Setup
-
-Add this to gradle:
+1. Open `build.gradle` file located in your project folder
+2. Add NStack SDK dependency and sync your project
 ```groovy
-compile "dk.nodes.nstack:nstack-kotlin:2.3.0"
+dependencies {
+    implementation "dk.nodes.nstack:nstack-kotlin:3.0.5"
+}
 ```
+3. After synchronisation is complete, you can start using the SDK
 
-Add this to which ever activity you are trying to use NStack in
+### Configuration
+ In order to use NStack SDK you have to initilize and configure it first.
 
-##### Optional Parameters
 
-` NStack.debugMode = true` - Enables debug mode for the library (Outputs messages to log)
-` NStack.setRefreshPeriod(60, TimeUnit.MINUTES)` - Allows you to set the period for how often NStack should check for updates
+ Best place to initialise SDK will be in you Application `onCreate()` method as it requires your's application `Context`. `Application` is a the class for maintaining global application state. Heres a basic SDK initiation example
 
-*Warning: In almost every instance you want to set these optional methods before NStack is initialized*
+```kotlin
+class MyApplication : Application() {
+   override fun onCreate(){
+     super.onCreate()
+     // Specify your Translation class where translation string will be stored
+     NStack.translationClass = Translation::class.java
+     // initilize the SDK
+     NStack.init(this)
+
+   }
+}
+```
+There also **optional** parameters you could make use of while using NStack SDK:
+
+```kotlin
+NStack.debugMode = true - Enables debug mode for the library (Outputs messages to log)
+NStack.setRefreshPeriod(60, TimeUnit.MINUTES) - Allows you to set the period for how often NStack should check for updates
+```
+> Warning: In almost every instance you want to set these optional methods before NStack is initialized
+
+
+
 
 ## Activity Setup
+Add this to which ever activity you are trying to use NStack in
 
 ```kotlin
 override fun attachBaseContext(newBase: Context) {
@@ -43,24 +54,36 @@ override fun attachBaseContext(newBase: Context) {
 
 Pretty simple you just need to wrap your `BaseContext` with our custom wrapper
 
-## AppOpen
+## App Open
+NStack's have a feature called App open, which enable apps to pull info from several features in one API request, you can learn
+more about it [here](https://nstack-io.github.io/documentation/docs/app-open.html).
 
-Minimal:
+Minimal setup of this feature will only require to add this line:
 ```kotlin
 NStack.appOpen()
 ```
 
-If you care about the outcome or want to run code afterwards:
+Additionaly, if you care about the outcome or want to run code afterwards, you can specify this callback
 ```kotlin
-NStack.appOpen { success ->  }
+NStack.appOpen { success: AppOpenCallback ->
+  // Your handling
+ }
+```
+or take advantage of Kotlin Coroutines using `suspend` function:
+```kotlin
+  val result: AppOpenResult = NStack.appOpen()
+  when (result) {
+    is AppOpenResult.Success -> // handle Success
+    is AppOpenResult.Failure -> // handle failure
+    is AppOpenResult.NoInternet -> // handle when offline
+  }
 ```
 
-## VersionControl
-Version control will send the result from `appOpen` to the listener for the application to handle
+## Version Control
+Version control will send the result from `appOpen` to the listener for the application to handle.
+Now it's up to the app to decide how you want to handle the app update status, meaning you must provide your own way to inform the user about the update (i.e. your custom dialog and e.t.c)
 
-Now it's up to the app to decide how you want to handle the app update status (Meaning you must create your own dialog and what not)
-
-**Note: You should set this before `appOpen`**
+> **Warning: You should set this before `appOpen`**
 
 ```kotlin
 NStack.onAppUpdateListener = { appUpdate ->
@@ -79,6 +102,26 @@ NStack.onAppUpdateListener = { appUpdate ->
         }
     }
 }
+```
+
+
+
+## Collections
+The purpose of the Collections feature in NStack is to enable you, as a client, to be able to control different data sets that are shown in the app. You can learn more about collections [here](https://nstack-io.github.io/documentation/docs/features/collections.html)
+
+In your application, you can obtain your collections either by using method with callback, or use power of Kotlin Coroutines with the `suspend` method.
+
+Example using callback method:
+```kotlin
+  NStack.getCollectionResponse("slug",
+      onSuccess = { response: String -> doSomething(response) },
+      onError = {error: Exception -> handleError(error) }
+  )
+```
+Example with Coroutines:
+```kotlin
+  val response: String? = NStack.getCollectionResponse("slug")
+  doSomething(response)
 ```
 
 ## Language Selection
@@ -135,7 +178,7 @@ nstack:description="sectionName_keyName"
 nstack:textOn="sectionName_keyName"
 nstack:textOff="sectionName_keyName"
 nstack:contentDescription="sectionName_keyName"
-````
+```
 
 The following field should be used to set the nstack key `nstack:key="keyGoesHere"`
 
@@ -151,7 +194,7 @@ Once you have that setup you can trigger the translation via the following metho
 NStack.translate()
 ```
 
-**Note: Running this command is optional as the views get their translation added as they are added**
+> **Note: Running this command is optional as the views get their translation added as they are added**
 
 #### Clearing View Cache
 
@@ -162,9 +205,10 @@ NStack.clearViewCache()
 ```
 
 ## Language Listeners
-
+If you interested in locale changes events NStack allows you set up a `LanguageListener` like follows:
 ```kotlin
-NStack.addLanguageChangeListener{ locale ->
+NStack.addLanguageChangeListener{ locale: Locale ->
+  // Your code
 }
 ```
 
