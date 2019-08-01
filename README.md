@@ -1,4 +1,7 @@
 ![nStack Badge](https://img.shields.io/maven-central/v/dk.nodes.nstack/nstack-kotlin.svg)
+<p align="center">
+  <img src="NStack_Logo.png?raw=true" alt="NStack"/>
+</p>
 # NStack Kotlin
 
 ## Quick  Setup
