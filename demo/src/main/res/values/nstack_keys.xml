@@ -15,4 +15,5 @@
   <string name='nstack_error_unknownError' formatted='false'>{error_unknownError}</string>
   <string name='nstack_test_title' formatted='false'>{test_title}</string>
   <string name='nstack_test_message' formatted='false'>{test_message}</string>
+  <string name='nstack_test_subTitle' formatted='false'>{test_subTitle}</string>
 </resources>

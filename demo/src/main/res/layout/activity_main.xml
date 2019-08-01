@@ -10,6 +10,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:title="@string/nstack_test_title"
+        app:subtitle="@string/nstack_test_subTitle"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
