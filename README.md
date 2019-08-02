@@ -21,9 +21,38 @@ dependencies {
 ```
 3. After synchronisation is complete, you can start using the SDK
 
+
+
 ### ⚒ Configuration
  In order to use NStack SDK you have to initilize and configure it first.
 
+In order to connect your NStack API with your application you will need `ApplicationId`, `REST API Key`. For more information how to get these keys checkout our  [Getting Start Guide](https://nstack-io.github.io/documentation/docs/guides/getting-started.html).
+
+Put these keys as meta-data in your `AndroidManifest.xml` like so:
+```xml
+<application>
+       <meta-data
+           android:name="dk.nodes.nstack.appId"
+           android:value="your application Id"
+           tools:replace="android:value" />
+
+
+       <meta-data
+           android:name="dk.nodes.nstack.apiKey"
+           android:value="your REST API key"
+           tools:replace="android:value" />
+
+       <meta-data
+          android:name="dk.nodes.nstack.env"
+          android:value="staging"
+          tools:replace="android:value" />
+
+          ....
+
+</application/>
+
+           ```
+> You can also put these values into your `build.gradle` and use placeholders in the manifest
 
  Best place to initialise SDK will be in you Application `onCreate()` method as it requires your's application `Context`. `Application` is a the class for maintaining global application state. Heres a basic SDK initiation example
 
