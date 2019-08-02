@@ -26,7 +26,7 @@ dependencies {
 ### ⚒ Configuration
  In order to use NStack SDK you have to initilize and configure it first.
 
-In order to connect your NStack API with your application you will need `ApplicationId`, `REST API Key`. For more information how to get these keys checkout our  [Getting Start Guide](https://nstack-io.github.io/documentation/docs/guides/getting-started.html).
+In order to connect NStack API with your application you will need `ApplicationId`, `REST API Key`. For more information how to get these keys checkout our  [Getting Start Guide](https://nstack-io.github.io/documentation/docs/guides/getting-started.html).
 
 Put these keys as meta-data in your `AndroidManifest.xml` like so:
 ```xml
