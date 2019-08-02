@@ -79,13 +79,15 @@ NStack.appOpen { success: AppOpenCallback ->
 or take advantage of `Kotlin Coroutines` using `suspend` function:
 ```kotlin
   GlobalScope.launch {
-    val result: AppOpenResult = NStack.appOpen()
-    when (result) {
-      is AppOpenResult.Success -> // handle Success
-      is AppOpenResult.Failure -> // handle failure
-      is AppOpenResult.NoInternet -> // handle when offline
+      withContext(Dispatchers.IO) {
+        val result: AppOpenResult = NStack.appOpen()
+        when (result) {
+          is AppOpenResult.Success -> // handle Success
+          is AppOpenResult.Failure -> // handle failure
+          is AppOpenResult.NoInternet -> // handle when offline
+        }
     }
-  }
+}
 ```
 
 ## Version Control
@@ -130,8 +132,10 @@ Example using callback method:
 Example with `Coroutines`:
 ```kotlin
 GlobalScope.launch {
-    val response: String? = NStack.getCollectionResponse("slug")
-    doSomething(response)
+    withContext(Dispatchers.IO) {
+      val response: String? = NStack.getCollectionResponse("slug")
+      doSomething(response)
+  }
 }
 ```
 
