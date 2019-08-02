@@ -4,6 +4,9 @@
 </p>
 
 # NStack Kotlin
+NStackSDK is the companion software development kit to the NStack backend.
+See the [NStack documentation](https://nstack-io.github.io/documentation/index.html) for more information about NStack
+
 
 ## Quick  Setup
 
@@ -18,7 +21,7 @@ dependencies {
 ```
 3. After synchronisation is complete, you can start using the SDK
 
-### Configuration
+### ⚒ Configuration
  In order to use NStack SDK you have to initilize and configure it first.
 
 
