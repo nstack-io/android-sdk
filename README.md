@@ -72,13 +72,15 @@ NStack.appOpen { success: AppOpenCallback ->
   // Your handling
  }
 ```
-or take advantage of Kotlin Coroutines using `suspend` function:
+or take advantage of `Kotlin Coroutines` using `suspend` function:
 ```kotlin
-  val result: AppOpenResult = NStack.appOpen()
-  when (result) {
-    is AppOpenResult.Success -> // handle Success
-    is AppOpenResult.Failure -> // handle failure
-    is AppOpenResult.NoInternet -> // handle when offline
+  GlobalScope.launch {
+    val result: AppOpenResult = NStack.appOpen()
+    when (result) {
+      is AppOpenResult.Success -> // handle Success
+      is AppOpenResult.Failure -> // handle failure
+      is AppOpenResult.NoInternet -> // handle when offline
+    }
   }
 ```
 
@@ -121,10 +123,12 @@ Example using callback method:
       onError = {error: Exception -> handleError(error) }
   )
 ```
-Example with Coroutines:
+Example with `Coroutines`:
 ```kotlin
-  val response: String? = NStack.getCollectionResponse("slug")
-  doSomething(response)
+GlobalScope.launch {
+    val response: String? = NStack.getCollectionResponse("slug")
+    doSomething(response)
+}
 ```
 
 ## Language Selection
