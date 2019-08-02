@@ -50,8 +50,8 @@ Put these keys as meta-data in your `AndroidManifest.xml` like so:
           ....
 
 </application/>
+```
 
-           ```
 > You can also put these values into your `build.gradle` and use placeholders in the manifest
 
  Best place to initialise SDK will be in you Application `onCreate()` method as it requires your's application `Context`. `Application` is a the class for maintaining global application state. Heres a basic SDK initiation example
