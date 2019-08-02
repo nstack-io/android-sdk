@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.models
+package dk.nodes.nstack.models
 
 sealed class AppOpenResult {
     data class Success(val appUpdateResponse: AppUpdateResponse): AppOpenResult()

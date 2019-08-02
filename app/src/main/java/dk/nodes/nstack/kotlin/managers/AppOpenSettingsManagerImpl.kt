@@ -1,24 +1,25 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
+import dk.nodes.nstack.managers.AppOpenSettingsManager
 import java.util.Date
 import java.util.UUID
 
 /**
  * Manages app open settings
  */
-class AppOpenSettingsManager(
+class AppOpenSettingsManagerImpl(
     private val context: Context,
     private val preferences: Preferences
-) {
+): AppOpenSettingsManager {
 
-    fun getAppOpenSettings(): AppOpenSettings {
+    override fun getAppOpenSettings(): AppOpenSettings {
         val uuid = appUUID
         val version = appVersion
         val oldVersion = appOldVersion ?: version
@@ -33,7 +34,7 @@ class AppOpenSettingsManager(
         )
     }
 
-    fun setUpdateDate() {
+    override fun setUpdateDate() {
         val version = appVersion
         val updateDate = Date().formatted
 

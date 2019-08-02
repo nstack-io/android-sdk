@@ -16,8 +16,8 @@ import com.google.android.material.snackbar.Snackbar
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.NStack.runUiAction
-import dk.nodes.nstack.kotlin.models.TranslationData
-import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
+import dk.nodes.nstack.models.TranslationData
+import dk.nodes.nstack.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 
@@ -26,7 +26,7 @@ typealias LiveEditProposalsDialogListener = (View) -> Unit
 
 class LiveEditManager(
     private val networkManager: NetworkManager,
-    private val appOpenSettingsManager: AppOpenSettingsManager
+    private val appOpenSettingsManager: AppOpenSettingsManagerImpl
 ) {
     private fun showLiveEditDialog(
         view: View,

@@ -1,11 +1,10 @@
 package dk.nodes.nstack.kotlin.managers
 
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.kotlin.models.*
+import dk.nodes.nstack.models.*
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
-import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.parseFromString
 import okhttp3.*
 import java.io.IOException

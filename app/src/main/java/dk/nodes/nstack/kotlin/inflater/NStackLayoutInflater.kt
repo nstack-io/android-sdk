@@ -10,7 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import org.xmlpull.v1.XmlPullParser
 import java.lang.reflect.Constructor

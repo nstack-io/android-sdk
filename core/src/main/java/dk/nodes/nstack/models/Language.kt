@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.models
+package dk.nodes.nstack.models
 
 import org.json.JSONObject
 import java.util.*

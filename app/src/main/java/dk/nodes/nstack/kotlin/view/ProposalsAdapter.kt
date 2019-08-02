@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import dk.nodes.nstack.R
-import dk.nodes.nstack.kotlin.models.Proposal
+import dk.nodes.nstack.models.Proposal
 
 class ProposalsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
