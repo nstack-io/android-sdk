@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.models
+package dk.nodes.nstack.models
 
 import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
 import org.json.JSONObject

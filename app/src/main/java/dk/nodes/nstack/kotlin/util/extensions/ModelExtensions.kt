@@ -1,6 +1,6 @@
 package dk.nodes.nstack.kotlin.util.extensions
 
-import dk.nodes.nstack.kotlin.models.Proposal
+import dk.nodes.nstack.models.Proposal
 import org.json.JSONArray
 import org.json.JSONObject
 

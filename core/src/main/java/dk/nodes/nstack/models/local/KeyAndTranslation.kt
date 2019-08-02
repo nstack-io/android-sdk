@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.models.local
+package dk.nodes.nstack.models.local
 
 data class KeyAndTranslation(val key: String, val translation: String, val styleable: Int)
 

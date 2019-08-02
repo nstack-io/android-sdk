@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.models
+package dk.nodes.nstack.models
 
 data class TranslationData(
         var key: String? = null,

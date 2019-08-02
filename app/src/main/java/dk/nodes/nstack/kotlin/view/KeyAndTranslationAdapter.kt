@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import dk.nodes.nstack.R
-import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
+import dk.nodes.nstack.models.local.KeyAndTranslation
 
 class KeyAndTranslationAdapter(
     private val list: List<KeyAndTranslation>,
