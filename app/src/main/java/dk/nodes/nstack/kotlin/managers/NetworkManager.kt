@@ -1,12 +1,21 @@
 package dk.nodes.nstack.kotlin.managers
 
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.models.*
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
+import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.parseFromString
-import okhttp3.*
+import dk.nodes.nstack.models.AppOpenResult
+import dk.nodes.nstack.models.AppOpenSettings
+import dk.nodes.nstack.models.AppUpdateData
+import dk.nodes.nstack.models.AppUpdateResponse
+import dk.nodes.nstack.models.Proposal
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.FormBody
+import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 
 class NetworkManager {
@@ -245,34 +254,36 @@ class NetworkManager {
             .add("platform", "mobile")
 
         val request = Request.Builder()
-                .url("${NStack.baseUrl}/api/v2/content/localize/proposals")
-                .post(formBuilder.build())
-                .build()
+            .url("${NStack.baseUrl}/api/v2/content/localize/proposals")
+            .post(formBuilder.build())
+            .build()
 
         client.newCall(request).enqueue(
-                object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        onError.invoke(e)
-                    }
+            object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    onError.invoke(e)
+                }
 
-                    override fun onResponse(call: Call, response: Response) {
-                        val jsonObject = response.body()?.string()?.asJsonObject
-                        if (jsonObject != null && jsonObject.has("data")) {
-                            onSuccess.invoke()
-                        } else {
-                            onError.invoke(IOException())
-                        }
+                override fun onResponse(call: Call, response: Response) {
+                    val jsonObject = response.body()?.string()?.asJsonObject
+                    if (jsonObject != null && jsonObject.has("data")) {
+                        onSuccess.invoke()
+                    } else {
+                        onError.invoke(IOException())
                     }
                 }
+            }
         )
     }
 
-    fun fetchProposals(onSuccess: (List<Proposal>) -> Unit,
-                       onError: (IOException) -> Unit) {
+    fun fetchProposals(
+        onSuccess: (List<Proposal>) -> Unit,
+        onError: (IOException) -> Unit
+    ) {
         val request = Request.Builder()
-                .url("${NStack.baseUrl}/api/v2/content/localize/proposals")
-                .get()
-                .build()
+            .url("${NStack.baseUrl}/api/v2/content/localize/proposals")
+            .get()
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
