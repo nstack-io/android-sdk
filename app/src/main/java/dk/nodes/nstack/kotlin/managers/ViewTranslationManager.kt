@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.ToggleButton
+import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
@@ -59,7 +60,7 @@ class ViewTranslationManager {
             if (view == null) {
                 it.remove()
             } else {
-                view.background = view.tag as? Drawable
+                view.background = view.getTag(NStackViewBackgroundTag)as? Drawable
                 view.setOnTouchListener(null)
                 closestView = view
             }
@@ -120,22 +121,24 @@ class ViewTranslationManager {
 
         if (NStack.liveEditEnabled) {
             // Storing background drawable to view's tag
-            view.tag = view.background
-            view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
-            view.setOnVeryLongClickListener {
-                liveEditDialogListener?.invoke(
-                    view, translationData to TranslationData(
-                        translatedKey,
-                        translatedText,
-                        translatedHint,
-                        translatedDescription,
-                        translatedTextOn,
-                        translatedTextOff,
-                        translatedContentDescription,
-                        translatedTitle,
-                        translatedSubtitle
+            view.setTag(NStackViewBackgroundTag, view.background)
+            if (view.getTag(NStackViewTag) as? Boolean == true) {
+                view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
+                view.setOnVeryLongClickListener {
+                    liveEditDialogListener?.invoke(
+                        view, translationData to TranslationData(
+                            translatedKey,
+                            translatedText,
+                            translatedHint,
+                            translatedDescription,
+                            translatedTextOn,
+                            translatedTextOff,
+                            translatedContentDescription,
+                            translatedTitle,
+                            translatedSubtitle
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -143,9 +146,11 @@ class ViewTranslationManager {
             is androidx.appcompat.widget.Toolbar -> {
                 translatedTitle?.let {
                     view.title = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedSubtitle?.let {
                     view.subtitle = it
+                    view.setTag(NStackViewTag, true)
                 }
             }
 
@@ -153,41 +158,52 @@ class ViewTranslationManager {
                 NLog.d(this, "Is ToggleButton")
                 (translatedKey ?: translatedText)?.let {
                     view.text = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedHint?.let {
                     view.hint = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedDescription?.let {
                     view.contentDescription = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedTextOn?.let {
                     view.textOn = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedTextOff?.let {
                     view.textOff = it
+                    view.setTag(NStackViewTag, true)
                 }
             }
             is CompoundButton -> {
                 NLog.d(this, "Is CompoundButton")
                 (translatedKey ?: translatedText)?.let {
                     view.text = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedHint?.let {
                     view.hint = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedDescription?.let {
                     view.contentDescription = it
+                    view.setTag(NStackViewTag, true)
                 }
             }
             is TextView -> {
                 (translatedKey ?: translatedText)?.let {
                     view.text = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedHint?.let {
                     view.hint = it
+                    view.setTag(NStackViewTag, true)
                 }
                 translatedDescription?.let {
                     view.contentDescription = it
+                    view.setTag(NStackViewTag, true)
                 }
             }
         }
@@ -279,5 +295,10 @@ class ViewTranslationManager {
         handler.post {
             action()
         }
+    }
+
+    companion object {
+        private val NStackViewTag = R.id.nstack_tag
+        private val NStackViewBackgroundTag = R.id.nstack_background_tag
     }
 }
