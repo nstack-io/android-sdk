@@ -16,8 +16,8 @@ import com.google.android.material.snackbar.Snackbar
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.NStack.runUiAction
-import dk.nodes.nstack.models.TranslationData
-import dk.nodes.nstack.models.local.KeyAndTranslation
+import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 
@@ -220,13 +220,25 @@ class LiveEditManager(
     private fun Pair<TranslationData, TranslationData>.toKeyAndTranslationList(): List<KeyAndTranslation> {
         val mutableList = mutableListOf<KeyAndTranslation>()
         if (first.key != null && second.key != null) {
-            mutableList += KeyAndTranslation(first.key!!, second.key!!, R.styleable.nstack_key)
+            mutableList += KeyAndTranslation(
+                first.key!!,
+                second.key!!,
+                R.styleable.nstack_key
+            )
         }
         if (first.text != null && second.text != null) {
-            mutableList += KeyAndTranslation(first.text!!, second.text!!, R.styleable.nstack_text)
+            mutableList += KeyAndTranslation(
+                first.text!!,
+                second.text!!,
+                R.styleable.nstack_text
+            )
         }
         if (first.hint != null && second.hint != null) {
-            mutableList += KeyAndTranslation(first.hint!!, second.hint!!, R.styleable.nstack_hint)
+            mutableList += KeyAndTranslation(
+                first.hint!!,
+                second.hint!!,
+                R.styleable.nstack_hint
+            )
         }
         if (first.description != null && second.description != null) {
             mutableList += KeyAndTranslation(

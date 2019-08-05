@@ -8,7 +8,7 @@ import android.widget.ToggleButton
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.models.TranslationData
+import dk.nodes.nstack.kotlin.models.TranslationData
 
 operator fun TextView.plusAssign(key: String) {
     setTranslation(this, key)

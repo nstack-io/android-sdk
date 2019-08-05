@@ -6,8 +6,7 @@ import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
-import dk.nodes.nstack.managers.AppOpenSettingsManager
-import dk.nodes.nstack.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import java.util.Date
 import java.util.UUID
 

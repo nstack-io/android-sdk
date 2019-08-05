@@ -9,7 +9,7 @@ import android.widget.TextView
 import android.widget.ToggleButton
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.models.TranslationData
+import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
 import org.json.JSONObject

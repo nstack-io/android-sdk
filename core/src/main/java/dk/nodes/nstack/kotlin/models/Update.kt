@@ -1,4 +1,4 @@
-package dk.nodes.nstack.models
+package dk.nodes.nstack.kotlin.models
 
 data class Update(
     val state: String,

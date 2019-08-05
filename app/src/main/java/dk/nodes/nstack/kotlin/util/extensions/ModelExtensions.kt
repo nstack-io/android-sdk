@@ -1,6 +1,6 @@
 package dk.nodes.nstack.kotlin.util.extensions
 
-import dk.nodes.nstack.models.Proposal
+import dk.nodes.nstack.kotlin.models.Proposal
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -21,7 +21,7 @@ fun MutableList<Proposal>.parseFromString(json: String?) {
         val locale = jsonObject.getString("locale")
         val value = jsonObject.getString("value")
         val proposal = Proposal(
-                id, applicationId, section, key, locale, value
+            id, applicationId, section, key, locale, value
         )
         add(proposal)
     }

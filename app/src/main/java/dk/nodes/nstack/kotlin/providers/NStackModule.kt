@@ -4,6 +4,7 @@ import android.content.Context
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManagerImpl
 import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
+import dk.nodes.nstack.kotlin.managers.NetworkManagerImpl
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.PreferencesImpl
@@ -37,7 +38,7 @@ class NStackModule(private val context: Context) {
      * Creates Network Manager
      */
     fun provideNetworkManager(): NetworkManager {
-        return getLazyDependency(NetworkManager::class) { NetworkManager() }
+        return getLazyDependency(NetworkManagerImpl::class) { NetworkManagerImpl(HttpClientProvider.getHttpClient()) }
     }
 
     /**
