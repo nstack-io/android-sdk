@@ -5,9 +5,9 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.view.View
-import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.ToggleButton
+import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
@@ -59,7 +59,7 @@ class ViewTranslationManager {
             if (view == null) {
                 it.remove()
             } else {
-                view.background = view.tag as? Drawable
+                view.background = view.getTag(NStackViewBackgroundTag)as? Drawable
                 view.setOnTouchListener(null)
                 closestView = view
             }
@@ -114,81 +114,52 @@ class ViewTranslationManager {
         val translatedTitle = getTranslationByKey(translationData.title)
         val translatedSubtitle = getTranslationByKey(translationData.subtitle)
         // All views should have this
-        translatedContentDescription?.let {
-            view.contentDescription = it
-        }
+
+        translatedContentDescription?.let(view::setContentDescription)
+        view.setTag(NStackViewTag, translationData)
 
         if (NStack.liveEditEnabled) {
             // Storing background drawable to view's tag
-            view.tag = view.background
-            view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
-            view.setOnVeryLongClickListener {
-                liveEditDialogListener?.invoke(
-                    view, translationData to TranslationData(
-                        translatedKey,
-                        translatedText,
-                        translatedHint,
-                        translatedDescription,
-                        translatedTextOn,
-                        translatedTextOff,
-                        translatedContentDescription,
-                        translatedTitle,
-                        translatedSubtitle
+            view.setTag(NStackViewBackgroundTag, view.background)
+            val data = view.getTag(NStackViewTag) as? TranslationData
+            if (data.isValid()) {
+                view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
+                view.setOnVeryLongClickListener {
+                    liveEditDialogListener?.invoke(
+                        view, translationData to TranslationData(
+                            translatedKey,
+                            translatedText,
+                            translatedHint,
+                            translatedDescription,
+                            translatedTextOn,
+                            translatedTextOff,
+                            translatedContentDescription,
+                            translatedTitle,
+                            translatedSubtitle
+                        )
                     )
-                )
+                }
             }
         }
 
         when (view) {
             is androidx.appcompat.widget.Toolbar -> {
-                translatedTitle?.let {
-                    view.title = it
-                }
-                translatedSubtitle?.let {
-                    view.subtitle = it
-                }
+                translatedTitle?.let(view::setTitle)
+                translatedSubtitle?.let(view::setSubtitle)
             }
 
             is ToggleButton -> {
                 NLog.d(this, "Is ToggleButton")
-                (translatedKey ?: translatedText)?.let {
-                    view.text = it
-                }
-                translatedHint?.let {
-                    view.hint = it
-                }
-                translatedDescription?.let {
-                    view.contentDescription = it
-                }
-                translatedTextOn?.let {
-                    view.textOn = it
-                }
-                translatedTextOff?.let {
-                    view.textOff = it
-                }
-            }
-            is CompoundButton -> {
-                NLog.d(this, "Is CompoundButton")
-                (translatedKey ?: translatedText)?.let {
-                    view.text = it
-                }
-                translatedHint?.let {
-                    view.hint = it
-                }
-                translatedDescription?.let {
-                    view.contentDescription = it
-                }
+                (translatedKey ?: translatedText)?.let(view::setText)
+                translatedHint?.let(view::setHint)
+                translatedDescription?.let(view::setContentDescription)
+                translatedTextOn?.let(view::setTextOn)
+                translatedTextOff?.let(view::setTextOff)
             }
             is TextView -> {
-                (translatedKey ?: translatedText)?.let {
-                    view.text = it
-                }
-                translatedHint?.let {
-                    view.hint = it
-                }
-                translatedDescription?.let {
-                    view.contentDescription = it
-                }
+                (translatedKey ?: translatedText)?.let(view::setText)
+                translatedHint?.let(view::setHint)
+                translatedDescription?.let(view::setContentDescription)
             }
         }
     }
@@ -278,6 +249,29 @@ class ViewTranslationManager {
     private fun runUiAction(action: () -> Unit) {
         handler.post {
             action()
+        }
+    }
+
+    companion object {
+        private val NStackViewTag = R.id.nstack_tag
+        private val NStackViewBackgroundTag = R.id.nstack_background_tag
+    }
+
+    private fun TranslationData?.isValid(): Boolean {
+        return if (this == null) false
+        else {
+            when {
+                getTranslationByKey(key) != null -> true
+                getTranslationByKey(text) != null -> true
+                getTranslationByKey(hint) != null -> true
+                getTranslationByKey(description) != null -> true
+                getTranslationByKey(textOn) != null -> true
+                getTranslationByKey(textOff) != null -> true
+                getTranslationByKey(contentDescription) != null -> true
+                getTranslationByKey(title) != null -> true
+                getTranslationByKey(subtitle) != null -> true
+                else -> false
+            }
         }
     }
 }
