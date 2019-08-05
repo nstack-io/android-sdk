@@ -1,18 +1,11 @@
 package dk.nodes.nstack.kotlin.managers
 
-import dk.nodes.nstack.kotlin.util.Constants
-import dk.nodes.nstack.kotlin.util.Preferences
-import dk.nodes.nstack.kotlin.util.asJsonObject
-import dk.nodes.nstack.kotlin.util.formatted
-import dk.nodes.nstack.kotlin.util.iso8601Date
+import dk.nodes.nstack.kotlin.util.*
 import org.json.JSONObject
 import java.util.*
 
 
-/**
- * Manages last update date and translations
- */
-class PrefManager(private val preferences: Preferences) {
+internal class PrefManager(private val preferences: Preferences) {
 
     private fun setLastUpdateDate() {
         val updateString = Date().formatted
