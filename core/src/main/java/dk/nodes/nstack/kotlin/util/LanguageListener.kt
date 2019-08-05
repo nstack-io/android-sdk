@@ -1,6 +1,6 @@
 package dk.nodes.nstack.kotlin.util
 
-import java.util.*
+import java.util.Locale
 
 typealias OnLanguageChangedFunction = ((Locale) -> Unit)
 

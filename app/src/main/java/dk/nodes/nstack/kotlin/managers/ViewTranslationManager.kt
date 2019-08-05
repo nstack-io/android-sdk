@@ -1,25 +1,18 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.view.View
 import android.widget.TextView
 import android.widget.ToggleButton
 import dk.nodes.nstack.R
-import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
+import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
 class ViewTranslationManager {
-
-    var liveEditDialogListener: LiveEditDialogListener? = null
-    var liveEditProposalsDialogListener: LiveEditProposalsDialogListener? = null
 
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
@@ -34,6 +27,8 @@ class ViewTranslationManager {
      */
     private var language = JSONObject()
 
+    private val updateViewListeners = mutableListOf<UpdateViewTranslationListener>()
+
     fun translate() {
         updateViews()
     }
@@ -42,34 +37,15 @@ class ViewTranslationManager {
         updateViews()
     }
 
+    fun addOnUpdateViewTranslationListener(listener: UpdateViewTranslationListener) {
+        updateViewListeners += listener
+    }
+
+    fun removeOnUpdateViewTranslationListener(listener: UpdateViewTranslationListener) {
+        updateViewListeners -= listener
+    }
+
     private var handler: Handler = Handler()
-
-    /**
-     * Removes background and long click listener
-     */
-    fun disableLiveEdit() {
-        val it: MutableIterator<Map.Entry<WeakReference<View>, TranslationData>> =
-            viewMap.iterator()
-
-        var closestView: View? = null
-        while (it.hasNext()) {
-            val entry = it.next()
-            val view = entry.key.get()
-            // If our view is null we should remove it from the map and return
-            if (view == null) {
-                it.remove()
-            } else {
-                view.background = view.getTag(NStackViewBackgroundTag)as? Drawable
-                view.setOnTouchListener(null)
-                closestView = view
-            }
-        }
-        closestView?.let(::showProposalsDialog)
-    }
-
-    private fun showProposalsDialog(view: View) {
-        liveEditProposalsDialogListener?.invoke(view)
-    }
 
     /**
      * Iterates through each view in the language map and tries to apply translation for the matching key
@@ -118,28 +94,20 @@ class ViewTranslationManager {
         translatedContentDescription?.let(view::setContentDescription)
         view.setTag(NStackViewTag, translationData)
 
-        if (NStack.liveEditEnabled) {
-            // Storing background drawable to view's tag
-            view.setTag(NStackViewBackgroundTag, view.background)
-            val data = view.getTag(NStackViewTag) as? TranslationData
-            if (data.isValid()) {
-                view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
-                view.setOnVeryLongClickListener {
-                    liveEditDialogListener?.invoke(
-                        view, translationData to TranslationData(
-                            translatedKey,
-                            translatedText,
-                            translatedHint,
-                            translatedDescription,
-                            translatedTextOn,
-                            translatedTextOff,
-                            translatedContentDescription,
-                            translatedTitle,
-                            translatedSubtitle
-                        )
-                    )
-                }
-            }
+        updateViewListeners.forEach {
+            it(
+                view, translationData to TranslationData(
+                    translatedKey,
+                    translatedText,
+                    translatedHint,
+                    translatedDescription,
+                    translatedTextOn,
+                    translatedTextOff,
+                    translatedContentDescription,
+                    translatedTitle,
+                    translatedSubtitle
+                )
+            )
         }
 
         when (view) {
@@ -253,25 +221,7 @@ class ViewTranslationManager {
     }
 
     companion object {
-        private val NStackViewTag = R.id.nstack_tag
-        private val NStackViewBackgroundTag = R.id.nstack_background_tag
+        private val NStackViewTag = dk.nodes.nstack.kotlin.core.R.id.nstack_tag
     }
 
-    private fun TranslationData?.isValid(): Boolean {
-        return if (this == null) false
-        else {
-            when {
-                getTranslationByKey(key) != null -> true
-                getTranslationByKey(text) != null -> true
-                getTranslationByKey(hint) != null -> true
-                getTranslationByKey(description) != null -> true
-                getTranslationByKey(textOn) != null -> true
-                getTranslationByKey(textOff) != null -> true
-                getTranslationByKey(contentDescription) != null -> true
-                getTranslationByKey(title) != null -> true
-                getTranslationByKey(subtitle) != null -> true
-                else -> false
-            }
-        }
-    }
 }

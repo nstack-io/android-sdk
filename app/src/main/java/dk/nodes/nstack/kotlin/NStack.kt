@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.hardware.SensorManager
 import android.os.Build
 import android.os.Handler
 import android.view.View
@@ -17,13 +16,13 @@ import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
 import dk.nodes.nstack.kotlin.managers.ConnectionManager
-import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.Language
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.providers.NStackModule
@@ -34,7 +33,7 @@ import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
-import dk.nodes.nstack.kotlin.util.ShakeDetector
+import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
@@ -62,9 +61,10 @@ object NStack {
             field = value
         }
 
+    private var currentLanguage: JSONObject? = null
+
     // Internally used classes
     private var classTranslationManager = ClassTranslationManager()
-    private lateinit var liveEditManager: LiveEditManager
     private lateinit var viewTranslationManager: ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
@@ -77,7 +77,7 @@ object NStack {
     private var networkLanguages: Map<Locale, JSONObject>? = null
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
 
-    private var handler: Handler = Handler()
+    private val handler: Handler = Handler()
 
     /**
      * Device Change Broadcast Listener
@@ -190,19 +190,6 @@ object NStack {
         }
 
     /**
-     * Enable/Disable live editing
-     */
-    var liveEditEnabled: Boolean = false
-        set(value) {
-            field = value
-            if (value) {
-                viewTranslationManager.enableLiveEdit()
-            } else {
-                viewTranslationManager.disableLiveEdit()
-            }
-        }
-
-    /**
      * If flag is set to true this will auto change NStack's language when the device's locale is changed
      */
     var autoChangeLanguage: Boolean = false
@@ -229,29 +216,11 @@ object NStack {
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
         appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
-        viewTranslationManager = ViewTranslationManager().apply {
-            liveEditDialogListener = { view, translationPair ->
-                liveEditManager.showChooseOptionDialog(view, translationPair)
-            }
-            liveEditProposalsDialogListener = { view ->
-                liveEditManager.showProposalsDialog(view)
-            }
-        }
+        viewTranslationManager = ViewTranslationManager()
         prefManager = nstackModule.providePrefManager()
-        liveEditManager = nstackModule.provideLiveEditManager()
         loadCacheTranslations()
 
         isInitialized = true
-
-        if (debugMode) {
-            val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
-                override fun hearShake() {
-                    liveEditEnabled = !liveEditEnabled
-                }
-            })
-            shakeDetector.start(sensorManager)
-        }
     }
 
     /**
@@ -265,6 +234,14 @@ object NStack {
 
     fun setLanguageByString(localeString: String) {
         language = localeString.locale
+    }
+
+    fun addOnUpdateViewTranslationListener(listener: UpdateViewTranslationListener) {
+        viewTranslationManager.addOnUpdateViewTranslationListener(listener)
+    }
+
+    fun removeOnUpdateViewTranslationListener(listener: UpdateViewTranslationListener) {
+        viewTranslationManager.removeOnUpdateViewTranslationListener(listener)
     }
 
     /**
@@ -449,7 +426,7 @@ object NStack {
     }
 
     fun hasKey(nstackKey: String): Boolean {
-        return viewTranslationManager.hasKey(nstackKey)
+        return currentLanguage?.has(cleanKeyName(nstackKey)) ?: false
     }
 
     /**
@@ -544,11 +521,11 @@ object NStack {
      * On State Change Listeners
      */
     private fun onLanguageChanged() {
-        val selectedLanguage = searchForLanguageByLocale(language)
+        currentLanguage = searchForLanguageByLocale(language)
 
-        NLog.d(this, "On Language Changed: $selectedLanguage")
+        NLog.d(this, "On Language Changed: $currentLanguage")
 
-        selectedLanguage?.let {
+        currentLanguage?.let {
             viewTranslationManager.parseTranslations(it)
             classTranslationManager.parseTranslations(it)
             onLanguageChanged(language)
@@ -639,7 +616,11 @@ object NStack {
     // Listener
 
     fun addLanguageChangeListener(listener: OnLanguageChangedListener) {
-        onLanguageChangedList.add(LanguageListener(onLanguageChangedListener = listener))
+        onLanguageChangedList.add(
+            LanguageListener(
+                onLanguageChangedListener = listener
+            )
+        )
     }
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedListener) {
@@ -652,7 +633,11 @@ object NStack {
     // Function
 
     fun addLanguageChangeListener(listener: OnLanguageChangedFunction) {
-        onLanguageChangedList.add(LanguageListener(onLanguageChangedFunction = listener))
+        onLanguageChangedList.add(
+            LanguageListener(
+                onLanguageChangedFunction = listener
+            )
+        )
     }
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedFunction) {
@@ -667,7 +652,11 @@ object NStack {
     // Listener
 
     fun addLanguagesChangeListener(listener: OnLanguagesChangedListener) {
-        onLanguagesChangedList.add(LanguagesListener(onLanguagesChangedListener = listener))
+        onLanguagesChangedList.add(
+            LanguagesListener(
+                onLanguagesChangedListener = listener
+            )
+        )
     }
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedListener) {
@@ -680,7 +669,11 @@ object NStack {
     // Function
 
     fun addLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
-        onLanguagesChangedList.add(LanguagesListener(onLanguagesChangedFunction = listener))
+        onLanguagesChangedList.add(
+            LanguagesListener(
+                onLanguagesChangedFunction = listener
+            )
+        )
     }
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
@@ -702,8 +695,11 @@ object NStack {
      * Exposed Adders(?)
      */
 
-    fun getTranslationFromKey(key: String): String? {
-        return viewTranslationManager.getTranslationByKey(key)
+    fun getTranslationByKey(key: String?): String? {
+        if (key == null) {
+            return null
+        }
+        return currentLanguage?.optString(cleanKeyName(key), null)
     }
 
     fun addView(view: View, translationData: TranslationData) {
@@ -715,6 +711,13 @@ object NStack {
     }
 
     fun getTranslation(@StringRes resId: Int, context: Context): String? {
-        return getTranslationFromKey(context.getString(resId))
+        return getTranslationByKey(context.getString(resId))
+    }
+
+    private fun cleanKeyName(keyName: String?): String? {
+        val key = keyName ?: return null
+        return if (key.startsWith("{") && key.endsWith("}")) {
+            key.substring(1, key.length - 1)
+        } else key
     }
 }
