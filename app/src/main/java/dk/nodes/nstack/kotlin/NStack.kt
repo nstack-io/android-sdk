@@ -13,7 +13,7 @@ import android.os.Build
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
-import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManagerImpl
+import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
 import dk.nodes.nstack.kotlin.managers.ConnectionManager
@@ -70,7 +70,7 @@ object NStack {
     private lateinit var connectionManager: ConnectionManager
     private lateinit var clientAppInfo: ClientAppInfo
     private lateinit var networkManager: NetworkManager
-    private lateinit var appOpenSettingsManager: AppOpenSettingsManagerImpl
+    private lateinit var appOpenSettingsManager: AppOpenSettingsManager
     private lateinit var prefManager: PrefManager
 
     // Cache Maps
