@@ -1,12 +1,15 @@
 package dk.nodes.nstack.kotlin
 
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
@@ -83,11 +86,26 @@ object NStack {
      */
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
-            val newLocale = context.resources.configuration.locale
+            val configuration = context.resources.configuration
+            val newLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                getSystemLocale(configuration)
+            } else {
+                getSystemLocaleLegacy(configuration)
+            }
             if (autoChangeLanguage) {
                 language = newLocale
             }
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private fun getSystemLocaleLegacy(config: Configuration): Locale {
+        return config.locale
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private fun getSystemLocale(config: Configuration): Locale {
+        return config.locales.get(0)
     }
 
     /**
