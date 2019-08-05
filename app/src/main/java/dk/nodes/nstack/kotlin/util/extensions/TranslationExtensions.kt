@@ -34,4 +34,3 @@ fun Context.getNSString(@StringRes stringRes: Int): String? {
 fun Fragment.getNSString(@StringRes stringRes: Int): String? {
     return NStack.getTranslation(stringRes, context ?: return null)
 }
-

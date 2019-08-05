@@ -23,7 +23,7 @@ import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.models.AppOpenResult
 import dk.nodes.nstack.models.AppUpdateData
-import dk.nodes.nstack.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.models.Message
 import dk.nodes.nstack.models.TranslationData
 import dk.nodes.nstack.kotlin.providers.NStackModule
@@ -677,7 +677,7 @@ object NStack {
         onLanguagesChangedList.remove(listenerContainer)
     }
 
-    //Function
+    // Function
 
     fun addLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
         onLanguagesChangedList.add(LanguagesListener(onLanguagesChangedFunction = listener))

@@ -157,7 +157,6 @@ internal class NStackLayoutInflater internal constructor(
         } catch (e: Exception) {
             null
         }
-
     }
 
     /**
@@ -211,7 +210,6 @@ internal class NStackLayoutInflater internal constructor(
         }
 
         androidAttributes.recycle()
-
 
         // Get our typed array
         val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.nstack, 0, 0)

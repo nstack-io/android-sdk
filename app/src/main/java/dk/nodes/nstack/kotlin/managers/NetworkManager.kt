@@ -1,6 +1,7 @@
 package dk.nodes.nstack.kotlin.managers
 
 import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.models.AppUpdateResponse
 import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
@@ -71,7 +72,6 @@ class NetworkManager {
             .header("Accept-Language", acceptLanguage)
             .post(formBuilder.build())
             .build()
-
 
         client
             .newCall(request)

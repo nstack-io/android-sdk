@@ -7,7 +7,7 @@ import dk.nodes.nstack.BuildConfig
 
 fun View.setOnVeryLongClickListener(listener: () -> Unit) {
     setOnTouchListener(object : View.OnTouchListener {
-        private val longClickDuration = if (BuildConfig.DEBUG) 2_000L else 15_000L  // 2 or 15 seconds delay
+        private val longClickDuration = if (BuildConfig.DEBUG) 2_000L else 15_000L // 2 or 15 seconds delay
         private var timerFinished = false
         private var cancelOrderCountdownTimer: CountDownTimer? = null
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -43,8 +43,3 @@ fun View.setOnVeryLongClickListener(listener: () -> Unit) {
         }
     })
 }
-
-
-
-
-

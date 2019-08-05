@@ -82,7 +82,6 @@ class LiveEditManager(
                                 }
                             }
                         }
-
                     }
                 },
                 onError = {
@@ -214,7 +213,6 @@ class LiveEditManager(
                 } else {
                     showChooseSectionKeyDialog(view, list)
                 }
-
             }
         builder.create().show()
     }
@@ -275,5 +273,3 @@ class LiveEditManager(
         return mutableList
     }
 }
-
-

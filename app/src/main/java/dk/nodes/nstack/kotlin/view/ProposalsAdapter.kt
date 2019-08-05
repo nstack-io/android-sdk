@@ -30,7 +30,7 @@ class ProposalsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when(list[position]) {
+        return when (list[position]) {
             is Item.Row -> Row
             else -> Header
         }

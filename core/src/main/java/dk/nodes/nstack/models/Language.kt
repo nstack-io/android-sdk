@@ -1,7 +1,6 @@
 package dk.nodes.nstack.models
 
-import org.json.JSONObject
-import java.util.*
+import java.util.Locale
 
 data class Language(
     val id: Int,
@@ -10,14 +9,4 @@ data class Language(
     val direction: String,
     val isDefault: Boolean,
     val isBestFit: Boolean
-) {
-
-    constructor(jsonObject: JSONObject) : this(
-        id = jsonObject.getInt("id"),
-        name = jsonObject.getString("name"),
-        locale = Locale(jsonObject.getString("locale")),
-        direction = jsonObject.getString("direction"),
-        isDefault = jsonObject.getBoolean("is_default"),
-        isBestFit = jsonObject.getBoolean("is_best_fit")
-    )
-}
+)
