@@ -1,6 +1,7 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
+import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManagerImpl
 import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
@@ -18,11 +19,11 @@ class NStackModule(private val context: Context) {
     /**
      * Creates new AppOpenSettingsManager
      */
-    fun provideAppOpenSettingsManager(): AppOpenSettingsManagerImpl {
+    fun provideAppOpenSettingsManager(): AppOpenSettingsManager {
         return getLazyDependency(AppOpenSettingsManagerImpl::class) {
             AppOpenSettingsManagerImpl(
-                    context,
-                    providePreferences()
+                context,
+                providePreferences()
             )
         }
     }
@@ -45,7 +46,12 @@ class NStackModule(private val context: Context) {
      * Creates LiveEdit Manager
      */
     fun provideLiveEditManager(): LiveEditManager {
-        return getLazyDependency(LiveEditManager::class) { LiveEditManager(provideNetworkManager(), provideAppOpenSettingsManager()) }
+        return getLazyDependency(LiveEditManager::class) {
+            LiveEditManager(
+                provideNetworkManager(),
+                provideAppOpenSettingsManager()
+            )
+        }
     }
 
     private fun providePreferences(): Preferences {

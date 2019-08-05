@@ -26,7 +26,7 @@ typealias LiveEditProposalsDialogListener = (View) -> Unit
 
 class LiveEditManager(
     private val networkManager: NetworkManager,
-    private val appOpenSettingsManager: AppOpenSettingsManagerImpl
+    private val appOpenSettingsManager: AppOpenSettingsManager
 ) {
     private fun showLiveEditDialog(
         view: View,
