@@ -153,7 +153,6 @@ class ViewTranslationManager {
                 (translatedKey ?: translatedText)?.let(view::setText)
                 translatedHint?.let(view::setHint)
                 translatedDescription?.let(view::setContentDescription)
-
                 translatedTextOn?.let(view::setTextOn)
                 translatedTextOff?.let(view::setTextOff)
             }
