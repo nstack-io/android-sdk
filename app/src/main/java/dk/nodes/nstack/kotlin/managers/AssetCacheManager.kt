@@ -12,9 +12,8 @@ internal class AssetCacheManager(private val contextWrapper: ContextWrapper) {
         return contextWrapper.assets
             .asSequence()
             .mapNotNull { loadTranslation(it) }
-            .filter { it.translations != null }
             .sortedBy { it.index }
-            .map { it.locale to it.translations as JSONObject }
+            .map { it.locale to it.translations }
             .toList()
             .toMap()
     }
@@ -26,9 +25,9 @@ internal class AssetCacheManager(private val contextWrapper: ContextWrapper) {
         val index = groups[1]
         val locale = Locale(groups[2])
         val translations = try {
-            contextWrapper.readAsset(translationFile).asJsonObject
+            contextWrapper.readAsset(translationFile).asJsonObject ?: return null
         } catch (e: Exception) {
-            null
+            return null
         }
         return Translation(index = index, locale = locale, translations = translations)
     }
@@ -36,6 +35,6 @@ internal class AssetCacheManager(private val contextWrapper: ContextWrapper) {
     private data class Translation(
         val index: String,
         val locale: Locale,
-        val translations: JSONObject?
+        val translations: JSONObject
     )
 }
