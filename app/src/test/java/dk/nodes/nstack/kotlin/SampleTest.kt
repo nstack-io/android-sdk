@@ -2,7 +2,6 @@ package dk.nodes.nstack.kotlin
 
 import org.junit.Test
 
-
 /**
  * A temp test to make sure junit is working
  */

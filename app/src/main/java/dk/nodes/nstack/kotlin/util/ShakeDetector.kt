@@ -113,15 +113,15 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
          * are accelerating.
          */
         val isShaking: Boolean
-            get() = (newest != null
-                    && oldest != null
-                    && newest!!.timestamp - oldest!!.timestamp >= MIN_WINDOW_SIZE
-                    && acceleratingCount >= (sampleCount shr 1) + (sampleCount shr 2))
+            get() = (newest != null &&
+                    oldest != null &&
+                    newest!!.timestamp - oldest!!.timestamp >= MIN_WINDOW_SIZE &&
+                    acceleratingCount >= (sampleCount shr 1) + (sampleCount shr 2))
 
         /**
          * Adds a sample.
          *
-         * @param timestamp    in nanoseconds of sample
+         * @param timestamp in nanoseconds of sample
          * @param accelerating true if > [.accelerationThreshold].
          */
         fun add(timestamp: Long, accelerating: Boolean) {
@@ -162,8 +162,8 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
 
         /** Purges samples with timestamps older than cutoff.  */
         fun purge(cutoff: Long) {
-            while (sampleCount >= MIN_QUEUE_SIZE
-                    && oldest != null && cutoff - oldest!!.timestamp > 0) {
+            while (sampleCount >= MIN_QUEUE_SIZE &&
+                    oldest != null && cutoff - oldest!!.timestamp > 0) {
                 // Remove sample.
                 val removed = oldest
                 if (removed!!.accelerating) {

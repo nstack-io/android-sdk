@@ -84,7 +84,7 @@ object NLog {
         if (level.value > Level.DEBUG.value) {
             return
         }
-        
+
         Log.d(parent.javaClass.simpleName, message)
     }
 }

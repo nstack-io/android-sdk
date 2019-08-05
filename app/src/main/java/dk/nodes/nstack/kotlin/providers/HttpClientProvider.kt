@@ -17,7 +17,7 @@ object HttpClientProvider {
 
     private fun provideHttpLoggingInterceptor(): Interceptor {
         val logging = HttpLoggingInterceptor()
-        logging.level = if(NStack.debugMode) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        logging.level = if (NStack.debugMode) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         return logging
     }
 

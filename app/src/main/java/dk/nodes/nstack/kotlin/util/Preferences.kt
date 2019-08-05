@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 
-
 /**
  * An interface for shared preferences
  */
@@ -26,7 +25,6 @@ interface Preferences {
      */
     fun loadStringsWhereKey(predicate: (String) -> Boolean): Map<String, String>
 }
-
 
 /**
  * Preferences implementation

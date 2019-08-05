@@ -19,5 +19,4 @@ class NMetaInterceptor(private val environment: String = NStack.env) : okhttp3.I
 
         return chain.proceed(newRequest)
     }
-
 }

@@ -1,13 +1,13 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
-import dk.nodes.nstack.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
 import dk.nodes.nstack.managers.AppOpenSettingsManager
+import dk.nodes.nstack.models.AppOpenSettings
 import java.util.Date
 import java.util.UUID
 
@@ -17,7 +17,7 @@ import java.util.UUID
 class AppOpenSettingsManagerImpl(
     private val context: Context,
     private val preferences: Preferences
-): AppOpenSettingsManager {
+) : AppOpenSettingsManager {
 
     override fun getAppOpenSettings(): AppOpenSettings {
         val uuid = appUUID

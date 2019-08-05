@@ -1,8 +1,5 @@
 package dk.nodes.nstack.models
 
-import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
-import dk.nodes.nstack.kotlin.util.extensions.localizeIndices
-import org.json.JSONObject
 import java.util.Date
 
 data class AppUpdateData(
@@ -15,4 +12,3 @@ data class AppUpdateData(
     val message: Message? = null,
     val rateReminder: RateReminder? = null
 )
-

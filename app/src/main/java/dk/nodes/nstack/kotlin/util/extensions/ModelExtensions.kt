@@ -4,7 +4,6 @@ import dk.nodes.nstack.models.Proposal
 import org.json.JSONArray
 import org.json.JSONObject
 
-
 fun MutableList<Proposal>.parseFromString(json: String?) {
     val jsonRoot: JSONObject = try {
         JSONObject(json)

@@ -1,8 +1,6 @@
 package dk.nodes.nstack.models
 
-import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
-import org.json.JSONObject
-import java.util.*
+import java.util.Date
 
 data class LocalizeIndex(
     val id: Int,
@@ -10,14 +8,4 @@ data class LocalizeIndex(
     val lastUpdatedAt: Date,
     val shouldUpdate: Boolean,
     val language: Language
-) {
-
-    constructor(jsonObject: JSONObject) : this(
-        id = jsonObject.getInt("id"),
-        url = jsonObject.getString("url"),
-        lastUpdatedAt = jsonObject.getString("last_updated_at").iso8601Date,
-        shouldUpdate = jsonObject.getBoolean("should_update"),
-        language = Language(jsonObject.getJSONObject("language"))
-    )
-}
-
+)

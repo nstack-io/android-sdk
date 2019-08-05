@@ -50,7 +50,6 @@ class ClassTranslationManager {
             NLog.d("", e.message ?: "")
             NLog.d("ClassTranslationManager", "Error updating field: $key : $value")
         }
-
     }
 
     companion object {
