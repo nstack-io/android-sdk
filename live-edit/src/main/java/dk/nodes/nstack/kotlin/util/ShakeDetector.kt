@@ -21,7 +21,8 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
      * When the magnitude of total acceleration exceeds this
      * value, the phone is accelerating.
      */
-    private var accelerationThreshold = DEFAULT_ACCELERATION_THRESHOLD
+    private var accelerationThreshold =
+        DEFAULT_ACCELERATION_THRESHOLD
 
     private val queue = SampleQueue()
 
@@ -248,6 +249,7 @@ class ShakeDetector(private val listener: Listener) : SensorEventListener {
         val SENSITIVITY_MEDIUM = 13
         val SENSITIVITY_HARD = 15
 
-        private val DEFAULT_ACCELERATION_THRESHOLD = SENSITIVITY_MEDIUM
+        private val DEFAULT_ACCELERATION_THRESHOLD =
+            SENSITIVITY_MEDIUM
     }
 }

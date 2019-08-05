@@ -3,11 +3,10 @@ package dk.nodes.nstack.kotlin.util.extensions
 import android.os.CountDownTimer
 import android.view.MotionEvent
 import android.view.View
-import dk.nodes.nstack.BuildConfig
 
 fun View.setOnVeryLongClickListener(listener: () -> Unit) {
     setOnTouchListener(object : View.OnTouchListener {
-        private val longClickDuration = if (BuildConfig.DEBUG) 2_000L else 15_000L // 2 or 15 seconds delay
+        private val longClickDuration = 1_200L
         private var timerFinished = false
         private var cancelOrderCountdownTimer: CountDownTimer? = null
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {

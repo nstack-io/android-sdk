@@ -9,5 +9,10 @@ android {
 }
 
 dependencies {
+    implementation project(':core')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.android.material:material:1.0.0'
 }
+
+sourceCompatibility = "7"
+targetCompatibility = "7"

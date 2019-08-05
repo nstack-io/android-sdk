@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import dk.nodes.nstack.R
+import dk.nodes.nstack.kotlin.liveedit.R
 import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 
-class KeyAndTranslationAdapter(
+internal class KeyAndTranslationAdapter(
     private val list: List<KeyAndTranslation>,
     var callback: ((KeyAndTranslation) -> Unit)? = null
 ) : RecyclerView.Adapter<KeyAndTranslationAdapter.ViewHolder>() {
