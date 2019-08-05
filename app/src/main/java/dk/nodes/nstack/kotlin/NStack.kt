@@ -21,11 +21,11 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.models.AppOpenResult
-import dk.nodes.nstack.models.AppUpdateData
+import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.models.Message
-import dk.nodes.nstack.models.TranslationData
+import dk.nodes.nstack.kotlin.models.Message
+import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener

@@ -2,28 +2,29 @@ package dk.nodes.nstack.kotlin.managers
 
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
-import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.parseFromString
-import dk.nodes.nstack.models.AppOpenResult
-import dk.nodes.nstack.models.AppOpenSettings
-import dk.nodes.nstack.models.AppUpdateData
-import dk.nodes.nstack.models.AppUpdateResponse
-import dk.nodes.nstack.models.Proposal
+import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppUpdateData
+import dk.nodes.nstack.kotlin.models.Proposal
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 
-class NetworkManager {
+class NetworkManagerImpl(private val client: OkHttpClient) : NetworkManager {
 
-    private val client = HttpClientProvider.getHttpClient()
-
-    fun loadTranslation(url: String, onSuccess: (String) -> Unit, onError: (Exception) -> Unit) {
+    override fun loadTranslation(
+        url: String,
+        onSuccess: (String) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
         client.newCall(Request.Builder().url(url).build())
             .enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
@@ -42,7 +43,7 @@ class NetworkManager {
             })
     }
 
-    suspend fun loadTranslation(url: String): String? {
+    override suspend fun loadTranslation(url: String): String? {
         val response = client.newCall(Request.Builder().url(url).build()).execute()
         val responseBody = response.body()
         return when {
@@ -53,7 +54,7 @@ class NetworkManager {
         }
     }
 
-    fun postAppOpen(
+    override fun postAppOpen(
         settings: AppOpenSettings,
         acceptLanguage: String,
         onSuccess: (AppUpdateData) -> Unit,
@@ -92,7 +93,7 @@ class NetworkManager {
             })
     }
 
-    suspend fun postAppOpen(
+    override suspend fun postAppOpen(
         settings: AppOpenSettings,
         acceptLanguage: String
     ): AppOpenResult {
@@ -127,7 +128,7 @@ class NetworkManager {
     /**
      * Notifies the backend that the message has been seen
      */
-    fun postMessageSeen(guid: String, messageId: Int) {
+    override fun postMessageSeen(guid: String, messageId: Int) {
         val formBuilder = FormBody.Builder()
             .add("guid", guid)
             .add("message_id", messageId.toString())
@@ -154,7 +155,7 @@ class NetworkManager {
     /**
      * Notifies the backend that the rate reminder has been seen
      */
-    fun postRateReminderSeen(appOpenSettings: AppOpenSettings, rated: Boolean) {
+    override fun postRateReminderSeen(appOpenSettings: AppOpenSettings, rated: Boolean) {
         val answer = if (rated) "yes" else "no"
 
         val formBuilder = FormBody.Builder()
@@ -184,7 +185,7 @@ class NetworkManager {
     /**
      * Get a Collection Response (as String) from NStack collections
      */
-    fun getResponse(
+    override fun getResponse(
         slug: String,
         onSuccess: (String) -> Unit,
         onError: (Exception) -> Unit
@@ -218,7 +219,7 @@ class NetworkManager {
     /**
      * Get a Collection Response (as String) synchronously in a coroutine from NStack collections
      */
-    suspend fun getResponseSync(slug: String): String? {
+    override suspend fun getResponseSync(slug: String): String? {
         val request = Request.Builder()
             .url("${NStack.baseUrl}/api/v1/content/responses/$slug")
             .get()
@@ -235,7 +236,7 @@ class NetworkManager {
         }
     }
 
-    fun postProposal(
+    override fun postProposal(
         settings: AppOpenSettings,
         locale: String,
         key: String,
@@ -276,7 +277,7 @@ class NetworkManager {
         )
     }
 
-    fun fetchProposals(
+    override fun fetchProposals(
         onSuccess: (List<Proposal>) -> Unit,
         onError: (IOException) -> Unit
     ) {

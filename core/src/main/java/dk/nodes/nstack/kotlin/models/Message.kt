@@ -1,4 +1,4 @@
-package dk.nodes.nstack.models
+package dk.nodes.nstack.kotlin.models
 
 data class Message(
     val id: Int,

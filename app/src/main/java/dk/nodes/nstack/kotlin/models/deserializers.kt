@@ -4,17 +4,6 @@ package dk.nodes.nstack.kotlin.models
 
 import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
 import dk.nodes.nstack.kotlin.util.extensions.localizeIndices
-import dk.nodes.nstack.models.AppUpdate
-import dk.nodes.nstack.models.AppUpdateData
-import dk.nodes.nstack.models.AppUpdateMeta
-import dk.nodes.nstack.models.AppUpdateResponse
-import dk.nodes.nstack.models.AppUpdateState
-import dk.nodes.nstack.models.Language
-import dk.nodes.nstack.models.LocalizeIndex
-import dk.nodes.nstack.models.Message
-import dk.nodes.nstack.models.RateReminder
-import dk.nodes.nstack.models.Update
-import dk.nodes.nstack.models.UpdateTranslate
 import org.json.JSONObject
 import java.util.Locale
 
