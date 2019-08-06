@@ -1,5 +1,20 @@
 apply plugin: 'kotlin'
+apply from: 'maven-push.gradle'
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
+
+task installArchives(type: Upload) {
+    group = "maven"
+    description "Installs the artifacts to the local Maven repository."
+    configuration = configurations['archives']
+    repositories {
+        mavenDeployer {
+            pom.groupId = 'dk.nodes.nstack'
+            pom.artifactId = 'nstack-kotlin-core'
+            pom.version = '3.0.5-LOCAL'
+            repository url: repositories.mavenLocal().url
+        }
+    }
 }
