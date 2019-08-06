@@ -243,7 +243,7 @@ class NetworkManagerImpl(private val client: OkHttpClient) : NetworkManager {
         section: String,
         newValue: String,
         onSuccess: () -> Unit,
-        onError: (IOException) -> Unit
+        onError: (Exception) -> Unit
     ) {
 
         val formBuilder = FormBody.Builder()
@@ -262,15 +262,15 @@ class NetworkManagerImpl(private val client: OkHttpClient) : NetworkManager {
         client.newCall(request).enqueue(
             object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    onError.invoke(e)
+                    onError(e)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     val jsonObject = response.body()?.string()?.asJsonObject
                     if (jsonObject != null && jsonObject.has("data")) {
-                        onSuccess.invoke()
+                        onSuccess()
                     } else {
-                        onError.invoke(IOException())
+                        onError(IOException())
                     }
                 }
             }
@@ -279,7 +279,7 @@ class NetworkManagerImpl(private val client: OkHttpClient) : NetworkManager {
 
     override fun fetchProposals(
         onSuccess: (List<Proposal>) -> Unit,
-        onError: (IOException) -> Unit
+        onError: (Exception) -> Unit
     ) {
         val request = Request.Builder()
             .url("${NStack.baseUrl}/api/v2/content/localize/proposals")
@@ -295,7 +295,7 @@ class NetworkManagerImpl(private val client: OkHttpClient) : NetworkManager {
                 val responseString = response.body()?.string()
                 val proposals = mutableListOf<Proposal>()
                 proposals.parseFromString(responseString)
-                onSuccess.invoke(proposals)
+                onSuccess(proposals)
             }
         })
     }

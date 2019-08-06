@@ -4,10 +4,10 @@ import android.os.Handler
 import android.view.View
 import android.widget.TextView
 import android.widget.ToggleButton
+import dk.nodes.nstack.kotlin.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -117,7 +117,6 @@ class ViewTranslationManager(private val translationHolder: TranslationHolder) :
             }
 
             is ToggleButton -> {
-                NLog.d(this, "Is ToggleButton")
                 (translatedKey ?: translatedText)?.let(view::setText)
                 translatedHint?.let(view::setHint)
                 translatedDescription?.let(view::setContentDescription)
@@ -161,6 +160,6 @@ class ViewTranslationManager(private val translationHolder: TranslationHolder) :
     }
 
     companion object {
-        private val NStackViewTag = dk.nodes.nstack.kotlin.core.R.id.nstack_tag
+        private val NStackViewTag = R.id.nstack_tag
     }
 }

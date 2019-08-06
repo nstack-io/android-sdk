@@ -4,7 +4,6 @@ import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.Proposal
-import java.io.IOException
 
 interface NetworkManager {
     fun loadTranslation(url: String, onSuccess: (String) -> Unit, onError: (Exception) -> Unit)
@@ -28,8 +27,8 @@ interface NetworkManager {
         section: String,
         newValue: String,
         onSuccess: () -> Unit,
-        onError: (IOException) -> Unit
+        onError: (Exception) -> Unit
     )
 
-    fun fetchProposals(onSuccess: (List<Proposal>) -> Unit, onError: (IOException) -> Unit)
+    fun fetchProposals(onSuccess: (List<Proposal>) -> Unit, onError: (Exception) -> Unit)
 }

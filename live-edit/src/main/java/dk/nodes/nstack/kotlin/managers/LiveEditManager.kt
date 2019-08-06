@@ -402,6 +402,6 @@ class LiveEditManager(
 
     companion object {
         private val NStackViewBackgroundTag = R.id.nstack_background_tag
-        private val NStackViewTag = dk.nodes.nstack.kotlin.core.R.id.nstack_tag
+        private val NStackViewTag = R.id.nstack_tag
     }
 }
