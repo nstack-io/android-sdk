@@ -13,8 +13,16 @@ translation {
 }
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    signingConfigs {
+        release {
+            storePassword 'test1234'
+            keyAlias = 'key_test'
+            keyPassword 'test1234'
+            storeFile file('/Users/lucassales/StudioProjects/nstack-kotlin/demo/keystore')
+        }
+    }
+    compileSdkVersion 29
+    buildToolsVersion '29.0.0'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -24,7 +32,7 @@ android {
     defaultConfig {
         applicationId "dk.nodes.nstack.nstackkotlintest"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -61,8 +69,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
 
 
-    implementation project(path: ':app')
-    implementation project(path: ':live-edit')
+    implementation project(':app')
+    debugImplementation project(':live-edit')
+    releaseImplementation project(':live-edit-no-op')
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
