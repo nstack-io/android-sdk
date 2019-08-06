@@ -22,9 +22,11 @@ import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.Language
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.plugin.NStackPlugin
+import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
+import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
@@ -33,7 +35,6 @@ import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
-import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
@@ -43,7 +44,7 @@ import java.util.ArrayList
 import java.util.Locale
 
 @SuppressLint("StaticFieldLeak", "LogNotTimber")
-object NStack {
+object NStack : TranslationHolder {
     // Has our app been started yet?
     private var isInitialized: Boolean = false
 
@@ -65,19 +66,24 @@ object NStack {
 
     // Internally used classes
     private var classTranslationManager = ClassTranslationManager()
-    private lateinit var viewTranslationManager: ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
     private lateinit var clientAppInfo: ClientAppInfo
     private lateinit var networkManager: NetworkManager
     private lateinit var appOpenSettingsManager: AppOpenSettingsManager
     private lateinit var prefManager: PrefManager
+    private lateinit var viewTranslationManager: ViewTranslationManager
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
 
     private val handler: Handler = Handler()
+
+    // Listener Lists
+    private val onLanguageChangedList = mutableListOf<LanguageListener?>()
+    private val onLanguagesChangedList = mutableListOf<LanguagesListener?>()
+    private val plugins = mutableListOf<Any>()
 
     /**
      * Device Change Broadcast Listener
@@ -122,10 +128,6 @@ object NStack {
                 networkLanguages ?: cacheLanguages
             }
         }
-
-    // Listener Lists
-    private var onLanguageChangedList: ArrayList<LanguageListener?> = arrayListOf()
-    private var onLanguagesChangedList: ArrayList<LanguagesListener?> = arrayListOf()
 
     /**
      * Listener specifically for listening for any app update events
@@ -198,7 +200,7 @@ object NStack {
      * Class Start
      */
 
-    fun init(context: Context) {
+    fun init(context: Context, vararg plugin: Any) {
         NLog.i(this, "NStack initializing")
 
         if (isInitialized) {
@@ -206,17 +208,18 @@ object NStack {
             return
         }
 
-        val nstackModule = NStackModule(context)
-
+        val nstackModule = NStackModule(context, this)
         getApplicationInfo(context)
         registerLocaleChangeBroadcastListener(context)
 
+        viewTranslationManager = nstackModule.provideViewTranslationManager()
+        plugins.addAll(plugin)
+        plugins += viewTranslationManager
         networkManager = nstackModule.provideNetworkManager()
         connectionManager = ConnectionManager(context)
         assetCacheManager = AssetCacheManager(context)
         clientAppInfo = ClientAppInfo(context)
         appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
-        viewTranslationManager = ViewTranslationManager()
         prefManager = nstackModule.providePrefManager()
         loadCacheTranslations()
 
@@ -234,14 +237,6 @@ object NStack {
 
     fun setLanguageByString(localeString: String) {
         language = localeString.locale
-    }
-
-    fun addOnUpdateViewTranslationListener(listener: UpdateViewTranslationListener) {
-        viewTranslationManager.addOnUpdateViewTranslationListener(listener)
-    }
-
-    fun removeOnUpdateViewTranslationListener(listener: UpdateViewTranslationListener) {
-        viewTranslationManager.removeOnUpdateViewTranslationListener(listener)
     }
 
     /**
@@ -422,25 +417,32 @@ object NStack {
             title = title,
             subtitle = subtitle
         )
-        viewTranslationManager.addView(WeakReference(view), translationData)
+        plugins.forEach { plugin ->
+            if (plugin is NStackViewPlugin) {
+                plugin.addView(
+                    WeakReference(view),
+                    translationData
+                )
+            }
+        }
     }
 
-    fun hasKey(nstackKey: String): Boolean {
-        return currentLanguage?.has(cleanKeyName(nstackKey)) ?: false
+    override fun hasKey(key: String): Boolean {
+        return currentLanguage?.has(cleanKeyName(key)) ?: false
     }
 
     /**
      * Triggers a translation of all currently cached views
      */
     fun translate() {
-        viewTranslationManager.translate()
+        plugins.filterIsInstance(NStackPlugin::class.java).forEach { plugin -> plugin.translate() }
     }
 
     /**
      * Clears all cached views
      */
     fun clearViewCache() {
-        viewTranslationManager.clear()
+        plugins.filterIsInstance(NStackPlugin::class.java).forEach { plugin -> plugin.clear() }
     }
 
     /**
@@ -521,14 +523,15 @@ object NStack {
      * On State Change Listeners
      */
     private fun onLanguageChanged() {
-        currentLanguage = searchForLanguageByLocale(language)
+        val languageByLocale = searchForLanguageByLocale(language)
+
 
         NLog.d(this, "On Language Changed: $currentLanguage")
 
-        currentLanguage?.let {
-            viewTranslationManager.parseTranslations(it)
+        languageByLocale?.let {
             classTranslationManager.parseTranslations(it)
             onLanguageChanged(language)
+            parseTranslations(it)
         }
     }
 
@@ -695,7 +698,7 @@ object NStack {
      * Exposed Adders(?)
      */
 
-    fun getTranslationByKey(key: String?): String? {
+    override fun getTranslationByKey(key: String?): String? {
         if (key == null) {
             return null
         }
@@ -703,7 +706,13 @@ object NStack {
     }
 
     fun addView(view: View, translationData: TranslationData) {
-        viewTranslationManager.addView(WeakReference(view), translationData)
+        plugins.forEach { plugin ->
+            if (plugin is NStackViewPlugin)
+                plugin.addView(
+                    WeakReference(view),
+                    translationData
+                )
+        }
     }
 
     fun hasKey(@StringRes resId: Int, context: Context): Boolean {
@@ -712,6 +721,37 @@ object NStack {
 
     fun getTranslation(@StringRes resId: Int, context: Context): String? {
         return getTranslationByKey(context.getString(resId))
+    }
+
+    private fun parseTranslations(jsonParent: JSONObject) {
+        // Clear our language map
+        currentLanguage = JSONObject()
+
+        // Pull our keys
+        val keys = jsonParent.keys()
+
+        // Iterate through each key and add the sub section
+        keys.forEach { sectionName ->
+            val subSection: JSONObject? = jsonParent.optJSONObject(sectionName)
+
+            if (subSection != null) {
+                parseSubsection(sectionName, subSection)
+            }
+        }
+    }
+
+    /**
+     * Goes through each sub section and adds the value under the new key
+     */
+
+    private fun parseSubsection(sectionName: String, jsonSection: JSONObject) {
+        val sectionKeys = jsonSection.keys()
+
+        sectionKeys.forEach { sectionKey ->
+            val newSectionKey = "${sectionName}_$sectionKey"
+            val sectionValue = jsonSection.getString(sectionKey)
+            currentLanguage?.put(newSectionKey, sectionValue)
+        }
     }
 
     private fun cleanKeyName(keyName: String?): String? {

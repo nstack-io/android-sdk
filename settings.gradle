@@ -1,1 +1,1 @@
-include ':app', ':demo', ':core', ':live-edit'
+include ':app', ':demo', ':core', ':live-edit', ':view', ':live-edit-no-op'

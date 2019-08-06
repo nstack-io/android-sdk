@@ -16,14 +16,14 @@ object NLog {
         DEBUG(0)
     }
 
-    var level: Level = Level.INFO
+    var level: Level = NLog.Level.INFO
 
     fun e(parent: Any, message: String) {
         if (!enableLogging) {
             return
         }
 
-        if (level.value >= Level.ERROR.value) {
+        if (level.value >= NLog.Level.ERROR.value) {
             return
         }
 
@@ -35,7 +35,7 @@ object NLog {
             return
         }
 
-        if (level.value >= Level.ERROR.value) {
+        if (level.value >= NLog.Level.ERROR.value) {
             return
         }
 
@@ -47,7 +47,7 @@ object NLog {
             return
         }
 
-        if (level.value > Level.WARN.value) {
+        if (level.value > NLog.Level.WARN.value) {
             return
         }
         Log.w(parent.javaClass.simpleName, message)
@@ -58,7 +58,7 @@ object NLog {
             return
         }
 
-        if (level.value > Level.INFO.value) {
+        if (level.value > NLog.Level.INFO.value) {
             return
         }
         Log.i(parent.javaClass.simpleName, message)
@@ -69,7 +69,7 @@ object NLog {
             return
         }
 
-        if (level.value > Level.VERBOSE.value) {
+        if (level.value > NLog.Level.VERBOSE.value) {
             return
         }
 
@@ -81,7 +81,7 @@ object NLog {
             return
         }
 
-        if (level.value > Level.DEBUG.value) {
+        if (level.value > NLog.Level.DEBUG.value) {
             return
         }
 

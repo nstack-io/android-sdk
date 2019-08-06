@@ -19,45 +19,59 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.liveedit.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
+import dk.nodes.nstack.kotlin.provider.TranslationHolder
+import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.ShakeDetector
-import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
 import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
-import org.json.JSONObject
 import java.lang.ref.WeakReference
-import java.util.Locale
-
-typealias LiveEditDialogListener = (View, Pair<TranslationData, TranslationData>) -> Unit
-typealias LiveEditProposalsDialogListener = (View) -> Unit
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class LiveEditManager(
-    private val networkManager: NetworkManager,
-    private val appOpenSettingsManager: AppOpenSettingsManager,
-    private val viewMap: Map<WeakReference<View>, TranslationData>
-) : OnLanguageChangedListener {
-    private var locale: Locale = Locale.getDefault()
-    private var language = JSONObject()
+    context: Context,
+    private val language: String
+) {
+
+    private var viewTranslationManager: ViewTranslationManager
+    private var translationHolder: TranslationHolder
     private val handler: Handler = Handler()
+    private val viewQueue: ConcurrentLinkedQueue<WeakReference<View>> = ConcurrentLinkedQueue()
+    private var networkManager: NetworkManager
+    private var appOpenSettingsManager: AppOpenSettingsManager
 
-
-    val updateViewTranslationListener: UpdateViewTranslationListener = { view, translationData ->
-        if (liveEditEnabled) {
-            // Storing background drawable to view's tag
-            view.setTag(NStackViewBackgroundTag, view.background)
-            val data = view.getTag(NStackViewTag) as? TranslationData
-            if (data.isValid()) {
-                view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
-                view.setOnVeryLongClickListener {
-                    showChooseOptionDialog(view, translationData)
+    init {
+        val nstackModule = NStackModule(context, NStack)
+        networkManager = nstackModule.provideNetworkManager()
+        appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
+        translationHolder = NStack
+        viewTranslationManager = nstackModule.provideViewTranslationManager()
+        viewTranslationManager.addOnUpdateViewTranslationListener { view, translationData ->
+            if (liveEditEnabled) {
+                // Storing background drawable to view's tag
+                view.setTag(NStackViewBackgroundTag, view.background)
+                val data = view.getTag(NStackViewTag) as? TranslationData
+                if (data.isValid()) {
+                    viewQueue += WeakReference(view)
+                    view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
+                    view.setOnVeryLongClickListener {
+                        showChooseOptionDialog(view, translationData)
+                    }
                 }
             }
         }
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
+            override fun hearShake() {
+                liveEditEnabled = !liveEditEnabled
+            }
+        })
+        shakeDetector.start(sensorManager)
     }
 
     /**
@@ -67,46 +81,30 @@ class LiveEditManager(
         set(value) {
             field = value
             if (value) {
-                enableLiveEdit()
+                viewTranslationManager.translate()
             } else {
                 disableLiveEdit()
             }
         }
 
-    private fun enableLiveEdit() {
-    }
-
     /**
      * Removes background and long click listener
      */
-    fun disableLiveEdit() {
-        val it: MutableIterator<Map.Entry<WeakReference<View>, TranslationData>> =
-            viewMap.toMutableMap().iterator()
-
+    private fun disableLiveEdit() {
         var closestView: View? = null
-        while (it.hasNext()) {
-            val entry = it.next()
-            val view = entry.key.get()
-            // If our view is null we should remove it from the map and return
-            if (view == null) {
-                it.remove()
-            } else {
+        while (viewQueue.isNotEmpty()) {
+            val view = viewQueue.poll()?.get()
+            if (view != null) {
                 view.background = view.getTag(NStackViewBackgroundTag)as? Drawable
                 view.setOnTouchListener(null)
                 closestView = view
             }
         }
-        closestView?.let(::showProposalsDialog)
+        closestView?.let { showProposalsDialog(it) }
+        viewQueue.clear()
     }
 
-    fun init(context: Context) {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
-            override fun hearShake() {
-                liveEditEnabled = !liveEditEnabled
-            }
-        })
-        shakeDetector.start(sensorManager)
+    fun init() {
     }
 
     private fun showLiveEditDialog(
@@ -129,7 +127,7 @@ class LiveEditManager(
             val editedTranslation = editText.text.toString()
             networkManager.postProposal(
                 appOpenSettingsManager.getAppOpenSettings(),
-                locale.toString().replace("_", "-"),
+                language,
                 pair?.second ?: "",
                 pair?.first ?: "",
                 editedTranslation,
@@ -266,10 +264,6 @@ class LiveEditManager(
         )
     }
 
-    override fun onLanguageChanged(locale: Locale) {
-        this.locale = locale
-    }
-
     private fun getWindowHeight(): Int {
         return Resources.getSystem().displayMetrics.heightPixels
     }
@@ -392,65 +386,17 @@ class LiveEditManager(
         return if (this == null) false
         else {
             when {
-                getTranslationByKey(key) != null -> true
-                getTranslationByKey(text) != null -> true
-                getTranslationByKey(hint) != null -> true
-                getTranslationByKey(description) != null -> true
-                getTranslationByKey(textOn) != null -> true
-                getTranslationByKey(textOff) != null -> true
-                getTranslationByKey(contentDescription) != null -> true
-                getTranslationByKey(title) != null -> true
-                getTranslationByKey(subtitle) != null -> true
+                translationHolder.getTranslationByKey(key) != null -> true
+                translationHolder.getTranslationByKey(text) != null -> true
+                translationHolder.getTranslationByKey(hint) != null -> true
+                translationHolder.getTranslationByKey(description) != null -> true
+                translationHolder.getTranslationByKey(textOn) != null -> true
+                translationHolder.getTranslationByKey(textOff) != null -> true
+                translationHolder.getTranslationByKey(contentDescription) != null -> true
+                translationHolder.getTranslationByKey(title) != null -> true
+                translationHolder.getTranslationByKey(subtitle) != null -> true
                 else -> false
             }
-        }
-    }
-
-    /**
-     * Returns the translation based on the key
-     *
-     * Can return a null so we need to cast it to a nullable string
-     * (This is because of JSONObject)
-     */
-    private fun getTranslationByKey(key: String?): String? {
-        if (key == null) {
-            return null
-        }
-        return language.optString(cleanKeyName(key), null)
-    }
-
-    /**
-     * In order to match the format that we use in our XML file we need to flatten the structure and prepend the key to the nstack key
-     */
-
-    fun parseTranslations(jsonParent: JSONObject) {
-        // Clear our locale map
-        language = JSONObject()
-
-        // Pull our keys
-        val keys = jsonParent.keys()
-
-        // Iterate through each key and add the sub section
-        keys.forEach { sectionName ->
-            val subSection: JSONObject? = jsonParent.optJSONObject(sectionName)
-
-            if (subSection != null) {
-                parseSubsection(sectionName, subSection)
-            }
-        }
-    }
-
-    /**
-     * Goes through each sub section and adds the value under the new key
-     */
-
-    private fun parseSubsection(sectionName: String, jsonSection: JSONObject) {
-        val sectionKeys = jsonSection.keys()
-
-        sectionKeys.forEach { sectionKey ->
-            val newSectionKey = "${sectionName}_$sectionKey"
-            val sectionValue = jsonSection.getString(sectionKey)
-            language.put(newSectionKey, sectionValue)
         }
     }
 

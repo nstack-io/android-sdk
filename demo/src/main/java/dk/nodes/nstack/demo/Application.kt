@@ -3,7 +3,7 @@ package dk.nodes.nstack.demo
 import android.app.Application
 import android.util.Log
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.kotlin.managers.LiveEditManager
+import dk.nodes.nstack.kotlin.enableLiveEdit
 
 class Application : Application() {
 
@@ -11,12 +11,11 @@ class Application : Application() {
         super.onCreate()
 
         NStack.translationClass = Translation::class.java
-        // NStack.liveEditEnabled = true
+        NStack.init(this)
         if (BuildConfig.DEBUG) {
             NStack.debugMode = true
-            LiveEditManager()
+            NStack.enableLiveEdit(this)
         }
-        NStack.init(this)
         NStack.appOpen {
             Log.d("AppOpen", it.toString())
         }

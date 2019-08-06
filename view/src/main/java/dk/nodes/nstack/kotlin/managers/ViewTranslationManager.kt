@@ -4,15 +4,17 @@ import android.os.Handler
 import android.view.View
 import android.widget.TextView
 import android.widget.ToggleButton
-import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
+import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
-class ViewTranslationManager {
+class ViewTranslationManager(private val translationHolder: TranslationHolder) :
+    NStackViewPlugin {
 
     /**
      * Contains a weak reference to our view along with a string value of our NStack Key
@@ -29,11 +31,7 @@ class ViewTranslationManager {
 
     private val updateViewListeners = mutableListOf<UpdateViewTranslationListener>()
 
-    fun translate() {
-        updateViews()
-    }
-
-    fun enableLiveEdit() {
+    override fun translate() {
         updateViews()
     }
 
@@ -80,15 +78,17 @@ class ViewTranslationManager {
             return
         }
 
-        val translatedKey = getTranslationByKey(translationData.key)
-        val translatedText = getTranslationByKey(translationData.text)
-        val translatedHint = getTranslationByKey(translationData.hint)
-        val translatedDescription = getTranslationByKey(translationData.description)
-        val translatedTextOn = getTranslationByKey(translationData.textOn)
-        val translatedTextOff = getTranslationByKey(translationData.textOff)
-        val translatedContentDescription = getTranslationByKey(translationData.contentDescription)
-        val translatedTitle = getTranslationByKey(translationData.title)
-        val translatedSubtitle = getTranslationByKey(translationData.subtitle)
+        val translatedKey = translationHolder.getTranslationByKey(translationData.key)
+        val translatedText = translationHolder.getTranslationByKey(translationData.text)
+        val translatedHint = translationHolder.getTranslationByKey(translationData.hint)
+        val translatedDescription =
+            translationHolder.getTranslationByKey(translationData.description)
+        val translatedTextOn = translationHolder.getTranslationByKey(translationData.textOn)
+        val translatedTextOff = translationHolder.getTranslationByKey(translationData.textOff)
+        val translatedContentDescription =
+            translationHolder.getTranslationByKey(translationData.contentDescription)
+        val translatedTitle = translationHolder.getTranslationByKey(translationData.title)
+        val translatedSubtitle = translationHolder.getTranslationByKey(translationData.subtitle)
         // All views should have this
 
         translatedContentDescription?.let(view::setContentDescription)
@@ -133,59 +133,9 @@ class ViewTranslationManager {
     }
 
     /**
-     * Returns the translation based on the key
-     *
-     * Can return a null so we need to cast it to a nullable string
-     * (This is because of JSONObject)
-     */
-    fun getTranslationByKey(key: String?): String? {
-        if (key == null) {
-            return null
-        }
-        return language.optString(cleanKeyName(key), null)
-    }
-
-    /**
-     * In order to match the format that we use in our XML file we need to flatten the structure and prepend the key to the nstack key
-     */
-
-    fun parseTranslations(jsonParent: JSONObject) {
-        // Clear our language map
-        language = JSONObject()
-
-        // Pull our keys
-        val keys = jsonParent.keys()
-
-        // Iterate through each key and add the sub section
-        keys.forEach { sectionName ->
-            val subSection: JSONObject? = jsonParent.optJSONObject(sectionName)
-
-            if (subSection != null) {
-                parseSubsection(sectionName, subSection)
-            }
-        }
-
-        updateViews()
-    }
-
-    /**
-     * Goes through each sub section and adds the value under the new key
-     */
-
-    private fun parseSubsection(sectionName: String, jsonSection: JSONObject) {
-        val sectionKeys = jsonSection.keys()
-
-        sectionKeys.forEach { sectionKey ->
-            val newSectionKey = "${sectionName}_$sectionKey"
-            val sectionValue = jsonSection.getString(sectionKey)
-            language.put(newSectionKey, sectionValue)
-        }
-    }
-
-    /**
      * Adds our view to our viewMap while adding the translation string as well
      */
-    fun addView(weakView: WeakReference<View>, translationData: TranslationData) {
+    override fun addView(weakView: WeakReference<View>, translationData: TranslationData) {
         val view = weakView.get() ?: return
 
         viewMap[weakView] = translationData
@@ -196,23 +146,13 @@ class ViewTranslationManager {
     /**
      * Clears the view map of any references
      */
-    fun clear() {
+    override fun clear() {
         viewMap.clear()
     }
 
     /**
      * Check if the key exists
      */
-    fun hasKey(nstackKey: String): Boolean {
-        return language.has(cleanKeyName(nstackKey))
-    }
-
-    private fun cleanKeyName(keyName: String?): String? {
-        val key = keyName ?: return null
-        return if (key.startsWith("{") && key.endsWith("}")) {
-            key.substring(1, key.length - 1)
-        } else key
-    }
 
     private fun runUiAction(action: () -> Unit) {
         handler.post {
@@ -223,5 +163,4 @@ class ViewTranslationManager {
     companion object {
         private val NStackViewTag = dk.nodes.nstack.kotlin.core.R.id.nstack_tag
     }
-
 }
