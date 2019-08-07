@@ -89,7 +89,6 @@ fun LocalizeIndex(jsonObject: JSONObject) = LocalizeIndex(
 
 fun Message(jsonObject: JSONObject) = Message(
     id = jsonObject.getInt("id"),
-    projectId = jsonObject.getInt("project_id"),
     platform = jsonObject.getString("platform"),
     showSetting = jsonObject.getString("show_setting"),
     viewCount = jsonObject.getInt("view_count"),
