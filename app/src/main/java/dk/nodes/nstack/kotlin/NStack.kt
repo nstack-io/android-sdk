@@ -11,6 +11,10 @@ import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
@@ -232,38 +236,45 @@ object NStack {
         }
 
         networkManager
-            .postAppOpen(appOpenSettings, localeString,
-                { appUpdate ->
-                    NLog.d(this, "NStack appOpen")
+                .postAppOpen(appOpenSettings, localeString,
+                        { appUpdate ->
+                            NLog.d(this, "NStack appOpen")
+                            appUpdate.localize.forEach { localizeIndex ->
+                                if (localizeIndex.shouldUpdate) {
+                                    networkManager.loadTranslation(localizeIndex.url, {
+                                        prefManager.setTranslations(localizeIndex.language.locale, it)
 
-                    appUpdate.localize.forEach { localizeIndex ->
-                        if (localizeIndex.shouldUpdate) {
-                            networkManager.loadTranslation(localizeIndex.url, {
-                                prefManager.setTranslations(localizeIndex.language.locale, it)
-                            }, {
-                                NLog.e(this, "Could not load translations for ${localizeIndex.language.locale}", it)
-                            })
+                                        if (localizeIndex.language.isBestFit) {
+                                            onLanguagesChanged()
+                                            onLanguageChanged()
+                                        }
+                                    }, {
+                                        NLog.e(this, "Could not load translations for ${localizeIndex.language.locale}", it)
+                                    })
 
-                            appOpenSettingsManager.setUpdateDate()
+                                    appOpenSettingsManager.setUpdateDate()
+                                }
+                                if (localizeIndex.language.isDefault) {
+                                    defaultLanguage = localizeIndex.language.locale
+                                }
+
+                                if (localizeIndex.language.isBestFit) {
+                                    language = localizeIndex.language.locale
+                                }
+                            }
+                            contextWrapper.runUiAction {
+                                callback.invoke(true)
+                                onAppUpdateListener?.invoke(appUpdate)
+                            }
+                        },
+                        {
+                            NLog.e(this, "Error: onAppOpened", it)
+
+                            // If our update failed for whatever reason we should still send an no update start
+                            callback.invoke(false)
+                            onAppUpdateListener?.invoke(AppUpdateData())
                         }
-                        if (localizeIndex.language.isDefault) {
-                            defaultLanguage = localizeIndex.language.locale
-                        }
-                    }
-
-                    contextWrapper.runUiAction {
-                        callback.invoke(true)
-                        onAppUpdateListener?.invoke(appUpdate)
-                    }
-                },
-                {
-                    NLog.e(this, "Error: onAppOpened", it)
-
-                    // If our update failed for whatever reason we should still send an no update start
-                    callback.invoke(false)
-                    onAppUpdateListener?.invoke(AppUpdateData())
-                }
-            )
+                )
     }
 
     /**
@@ -291,6 +302,14 @@ object NStack {
                 is AppOpenResult.Success -> {
                     NLog.d(this, "NStack appOpen")
                     result.appUpdateResponse.data.localize.forEach { handleLocalizeIndex(it) }
+
+                    val shouldUpdateTranslationClass = result.appUpdateResponse.data.localize.any { it.shouldUpdate }
+                    if (shouldUpdateTranslationClass) {
+                        NLog.e(this, "ShouldUpdate is set, updating Translations class...")
+                        onLanguagesChanged()
+                        onLanguageChanged()
+                    }
+
                     result
                 }
                 else -> {
@@ -466,12 +485,12 @@ object NStack {
         } else {
             // Search our available languages for any keys that might match
             availableLanguages
-                // Do our languages match
-                .filter { it.languageCode == locale.languageCode }
-                // Find the value for that language
-                .map { languages[it] }
-                // Return the first value or null
-                .firstOrNull()
+                    // Do our languages match
+                    .filter { it.languageCode == locale.languageCode }
+                    // Find the value for that language
+                    .map { languages[it] }
+                    // Return the first value or null
+                    .firstOrNull()
         }
     }
 
@@ -487,7 +506,7 @@ object NStack {
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedListener) {
         val listenerContainer = onLanguageChangedList.firstOrNull { it?.onLanguageChangedListener == listener }
-            ?: return
+                ?: return
         onLanguageChangedList.remove(listenerContainer)
     }
 
@@ -499,7 +518,7 @@ object NStack {
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedFunction) {
         val listenerContainer = onLanguageChangedList.firstOrNull { it?.onLanguageChangedFunction == listener }
-            ?: return
+                ?: return
         onLanguageChangedList.remove(listenerContainer)
     }
 
@@ -513,7 +532,7 @@ object NStack {
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedListener) {
         val listenerContainer = onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedListener == listener }
-            ?: return
+                ?: return
         onLanguagesChangedList.remove(listenerContainer)
     }
 
@@ -525,7 +544,7 @@ object NStack {
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
         val listenerContainer = onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedFunction == listener }
-            ?: return
+                ?: return
         onLanguagesChangedList.remove(listenerContainer)
     }
 
