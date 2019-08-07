@@ -7,6 +7,7 @@ import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.ContextWrapper
+import dk.nodes.nstack.kotlin.util.TranslationTest
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -50,10 +51,14 @@ internal class NStackTest {
     @Test
     fun `Test app open with internet connection`() {
         var updated = false
+        val translations1 = "translations1"
+        val translations2 = "translations2"
 
         val successCallbackSlot = slot<(AppUpdateData) -> Unit>()
 
         every { connectionManagerMock.isConnected } returns true
+        coEvery { networkManagerMock.loadTranslation(languageIndex1.url) } returns translations1
+        coEvery { networkManagerMock.loadTranslation(languageIndex2.url) } returns translations2
 
         NStack.onAppUpdateListener = { updated = true }
         NStack.appOpen { }
@@ -63,12 +68,28 @@ internal class NStackTest {
         successCallbackSlot.captured(appUpdateDate)
         verify { appOpenSettingsManagerMock.setUpdateDate() }
 
-        verifyLanguageIndecesAreHandled()
+        verifyLanguageIndicesAreHandled()
 
         assert(updated)
     }
 
-    private fun verifyLanguageIndecesAreHandled() {
+    @Test
+    fun `Test ClassTranslationManager parse ran correct translation`() {
+        val translationCacheMock = mapOf(Locale.getDefault() to translations3)
+        val successResult = AppOpenResult.Success(appUpdateResponse)
+
+        every { connectionManagerMock.isConnected } returns true
+        every { assetCacheManagerMock.loadTranslations() } returns translationCacheMock
+        coEvery { networkManagerMock.postAppOpen(any(), any()) } returns successResult
+
+        runBlocking { NStack.appOpen() }
+
+        verify { classTranslationManagerMock.parseTranslations(translations3) }
+        verify(exactly = 0) { classTranslationManagerMock.parseTranslations(translations1) }
+        verify(exactly = 0) { classTranslationManagerMock.parseTranslations(translations2) }
+    }
+
+    private fun verifyLanguageIndicesAreHandled() {
         val translations1 = "translations1"
         val translations2 = "translations2"
         val loadTranslations1Slot = slot<(String) -> Unit>()
@@ -96,7 +117,6 @@ internal class NStackTest {
     @Test
     fun `Test app open error`() {
         var updated = false
-
         val errorCallbackSlot = slot<(Exception) -> Unit>()
 
         every { connectionManagerMock.isConnected } returns true
@@ -220,7 +240,8 @@ internal class NStackTest {
         private val translations2 = mockk<JSONObject>()
 
         private val locale3 = Locale.getDefault()
-        private val translations3 = mockk<JSONObject>()
+        //private val translations3 = mockk<JSONObject>()
+        private val translations3 = JSONObject("{\"$locale3\":{\"default\":{\"ok\": \"OK!!!\"}}}")
 
         private val translations = mapOf(
             locale1 to translations1,
