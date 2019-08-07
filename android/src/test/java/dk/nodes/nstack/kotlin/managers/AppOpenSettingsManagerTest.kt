@@ -3,7 +3,7 @@ package dk.nodes.nstack.kotlin.managers
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.Preferences
-import dk.nodes.nstack.kotlin.util.formatted
+import dk.nodes.nstack.kotlin.util.extensions.formatted
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -18,7 +18,7 @@ internal class AppOpenSettingsManagerTest {
 
     private val version = "version"
 
-    private val appOpenSettingsManager = AppOpenSettingsManager(clientAppInfoMock, preferencesMock)
+    private val appOpenSettingsManager = AppOpenSettingsManagerImpl(clientAppInfoMock, preferencesMock)
 
     init {
         every { clientAppInfoMock.versionName } returns version

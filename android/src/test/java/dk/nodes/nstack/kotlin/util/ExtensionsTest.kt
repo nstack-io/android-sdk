@@ -1,7 +1,9 @@
 package dk.nodes.nstack.kotlin.util
 
+import dk.nodes.nstack.kotlin.util.extensions.languageCode
+import dk.nodes.nstack.kotlin.util.extensions.locale
 import org.junit.Test
-import java.util.*
+import java.util.Locale
 
 internal class ExtensionsTest {
 
