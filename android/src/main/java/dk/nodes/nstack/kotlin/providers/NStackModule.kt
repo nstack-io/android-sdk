@@ -56,14 +56,6 @@ internal class NStackModule(
         return getLazyDependency(PreferencesImpl::class) { PreferencesImpl(context) }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun <T : Any> getLazyDependency(clazz: KClass<T>, block: () -> T): T {
-        if (!dependenciesMap.containsKey(clazz)) {
-            dependenciesMap[clazz] = block()
-        }
-        return dependenciesMap[clazz] as T
-    }
-
     fun provideViewTranslationManager(): ViewTranslationManager {
         return getLazyDependency(ViewTranslationManager::class) {
             ViewTranslationManager(translationHolder)
@@ -71,23 +63,34 @@ internal class NStackModule(
     }
 
     fun provideClientAppInfo(): ClientAppInfo {
-        return ClientAppInfo(context)
+        return getLazyDependency(ClientAppInfo::class) { ClientAppInfo(context) }
     }
 
     fun provideNStackMeta(): NStackMeta {
-        return NStackMeta(context)
+        return getLazyDependency(NStackMeta::class) { NStackMeta(context) }
     }
 
     fun provideConnectionManager(): ConnectionManager {
-        return ConnectionManager(context)
+        return getLazyDependency(ConnectionManager::class) { ConnectionManager(context) }
     }
 
     fun provideClassTranslationManager(): ClassTranslationManager {
-        return ClassTranslationManager()
+        return getLazyDependency(ClassTranslationManager::class) { ClassTranslationManager() }
     }
 
     fun provideContextWrapper(): ContextWrapper {
-        return ContextWrapper(context)
+        return getLazyDependency(ContextWrapper::class) { ContextWrapper(context) }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private inline fun <T : Any> getLazyDependency(
+        clazz: KClass<T>,
+        crossinline block: () -> T
+    ): T {
+        if (!dependenciesMap.containsKey(clazz)) {
+            dependenciesMap[clazz] = block()
+        }
+        return dependenciesMap[clazz] as T
     }
 
     companion object {
