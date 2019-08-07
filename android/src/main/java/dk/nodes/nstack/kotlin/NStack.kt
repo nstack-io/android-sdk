@@ -742,13 +742,15 @@ object NStack : TranslationHolder {
     }
 
     fun enableLiveEdit(context: Context) {
-        LiveEditManager(
-            context,
-            language.toString().replace("_", "-"),
-            this,
-            viewTranslationManager,
-            networkManager,
-            appOpenSettingsManager
-        )
+        if (debugMode) {
+            LiveEditManager(
+                context,
+                language.toString().replace("_", "-"),
+                this,
+                viewTranslationManager,
+                networkManager,
+                appOpenSettingsManager
+            )
+        }
     }
 }
