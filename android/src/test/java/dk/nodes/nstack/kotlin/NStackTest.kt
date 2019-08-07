@@ -28,7 +28,6 @@ internal class NStackTest {
 
         assert(languagesChanged)
 
-        verify { viewTranslationManagerMock.parseTranslations(translations3) }
         verify { classTranslationManagerMock.parseTranslations(translations3) }
         assert(currentLanguage == locale3)
     }
