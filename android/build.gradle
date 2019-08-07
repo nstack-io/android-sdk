@@ -21,9 +21,14 @@ dependencies {
     implementation project(':view')
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinx_version"
+
     implementation 'com.google.android.material:material:1.0.0'
 
     testImplementation "junit:junit:4.12"
+    testImplementation "io.mockk:mockk:1.9.3"
+    testImplementation "org.json:json:20180130"
 }
 
 apply plugin: 'maven'
@@ -36,7 +41,7 @@ task installArchives(type: Upload) {
         mavenDeployer {
             pom.groupId = 'dk.nodes.nstack'
             pom.artifactId = 'nstack-kotlin'
-            pom.version = '3.0.5-LOCAL'
+            pom.version = '3.0.6-LOCAL'
             repository url: repositories.mavenLocal().url
         }
     }

@@ -1,15 +1,15 @@
 package dk.nodes.nstack.kotlin.managers
 
 import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.Proposal
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.parseFromString
-import dk.nodes.nstack.kotlin.models.AppOpenResult
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.AppUpdateData
-import dk.nodes.nstack.kotlin.models.Proposal
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -18,7 +18,7 @@ import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 
-class NetworkManagerImpl(private val client: OkHttpClient) : NetworkManager {
+internal class NetworkManagerImpl(private val client: OkHttpClient) : NetworkManager {
 
     override fun loadTranslation(
         url: String,

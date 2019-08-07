@@ -13,7 +13,7 @@ class NMetaInterceptor(private val environment: String = NStack.env) : okhttp3.I
                 .header("Accept", "application/vnd.nodes.v1+json")
                 .header(
                         "N-Meta",
-                        "android;$environment;${NStack.getAppClientInfo().versionName};${Build.VERSION.RELEASE};${Build.MODEL}"
+                    "android;$environment;${NStack.appClientInfo.versionName};${Build.VERSION.RELEASE};${Build.MODEL}"
                 )
                 .build()
 

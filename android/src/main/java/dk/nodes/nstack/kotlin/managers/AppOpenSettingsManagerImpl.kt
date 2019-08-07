@@ -1,26 +1,23 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.content.Context
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import java.util.Date
 import java.util.UUID
 
-/**
- * Manages app open settings
- */
-class AppOpenSettingsManagerImpl(
-    private val context: Context,
+internal class AppOpenSettingsManagerImpl(
+    private val clientAppInfo: ClientAppInfo,
     private val preferences: Preferences
 ) : AppOpenSettingsManager {
 
     override fun getAppOpenSettings(): AppOpenSettings {
         val uuid = appUUID
-        val version = appVersion
+        val version = clientAppInfo.versionName
         val oldVersion = appOldVersion ?: version
         val updateDate = appUpdateDate
 
@@ -34,7 +31,7 @@ class AppOpenSettingsManagerImpl(
     }
 
     override fun setUpdateDate() {
-        val version = appVersion
+        val version = clientAppInfo.versionName
         val updateDate = Date().formatted
 
         preferences.saveString(Constants.spk_nstack_last_updated, updateDate)
@@ -56,18 +53,10 @@ class AppOpenSettingsManagerImpl(
             return uuid
         }
 
-    private val appVersion: String
-        get() {
-            return try {
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            } catch (e: Exception) {
-                ""
-            }
-        }
-
     private val appOldVersion: String?
         get() {
             return preferences.loadString(Constants.spk_nstack_old_version)
+                .takeUnless { it.isEmpty() }
         }
 
     private val appUpdateDate: Date
