@@ -70,8 +70,6 @@ dependencies {
 
 
     implementation project(':android')
-    debugImplementation project(':live-edit')
-    releaseImplementation project(':live-edit-no-op')
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

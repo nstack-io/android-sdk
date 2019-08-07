@@ -19,6 +19,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     api project(':core')
     implementation project(':view')
+    implementation project(':live-edit')
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_version"

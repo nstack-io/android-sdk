@@ -1,1 +1,1 @@
-include ':android', ':demo', ':core', ':live-edit', ':view', ':live-edit-no-op'
+include ':android', ':demo', ':core', ':live-edit', ':view'

@@ -3,7 +3,6 @@ package dk.nodes.nstack.demo
 import android.app.Application
 import android.util.Log
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.kotlin.enableLiveEdit
 
 class Application : Application() {
 
