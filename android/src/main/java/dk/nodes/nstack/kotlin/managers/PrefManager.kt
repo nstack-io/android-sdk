@@ -9,10 +9,7 @@ import org.json.JSONObject
 import java.util.Date
 import java.util.Locale
 
-/**
- * Manages last update date and translations
- */
-class PrefManager(private val preferences: Preferences) {
+internal class PrefManager(private val preferences: Preferences) {
 
     private fun setLastUpdateDate() {
         val updateString = Date().formatted
