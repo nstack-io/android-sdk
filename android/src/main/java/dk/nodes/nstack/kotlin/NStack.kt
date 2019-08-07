@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Handler
@@ -16,21 +15,22 @@ import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
 import dk.nodes.nstack.kotlin.managers.ConnectionManager
+import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackPlugin
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.managers.*
-import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
+import dk.nodes.nstack.kotlin.util.ContextWrapper
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
 import dk.nodes.nstack.kotlin.util.NLog
@@ -41,22 +41,16 @@ import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
-import dk.nodes.nstack.kotlin.util.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
-import java.util.*
 
 /**
  * NStack
  */
 @SuppressLint("StaticFieldLeak", "LogNotTimber")
-object NStack {
+object NStack : TranslationHolder {
 
     // Has our app been started yet?
     private var isInitialized: Boolean = false
@@ -82,7 +76,7 @@ object NStack {
 
     // Internally used classes
     private lateinit var classTranslationManager: ClassTranslationManager
-    private lateinit var viewTranslationManager: ViewTranslationManager
+    internal lateinit var viewTranslationManager: ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
     private lateinit var appInfo: ClientAppInfo
@@ -238,8 +232,6 @@ object NStack {
         viewTranslationManager = nstackModule.provideViewTranslationManager()
         classTranslationManager = nstackModule.provideClassTranslationManager()
 
-
-        getApplicationInfo(context)
         registerLocaleChangeBroadcastListener(context)
 
         viewTranslationManager = nstackModule.provideViewTranslationManager()
@@ -301,10 +293,11 @@ object NStack {
                     appUpdate.localize.forEach { localizeIndex ->
                         if (localizeIndex.shouldUpdate) {
                             networkManager.loadTranslation(localizeIndex.url, {
-                                prefManager.setTranslations(localizeIndex.language.locale, it)if (localizeIndex.language.isBestFit) {
-                                            onLanguagesChanged()
-                                            onLanguageChanged()
-                                        }
+                                prefManager.setTranslations(localizeIndex.language.locale, it)
+                                if (localizeIndex.language.isBestFit) {
+                                    onLanguagesChanged()
+                                    onLanguageChanged()
+                                }
                             }, {
                                 NLog.e(
                                     this,
@@ -313,29 +306,29 @@ object NStack {
                                 )
                             })
 
-                                    appOpenSettingsManager.setUpdateDate()
-                                }
-                                if (localizeIndex.language.isDefault) {
-                                    defaultLanguage = localizeIndex.language.locale
-                                }
-
-                                if (localizeIndex.language.isBestFit) {
-                                    language = localizeIndex.language.locale
-                                }
-                            }
-                            contextWrapper.runUiAction {
-                                callback.invoke(true)
-                                onAppUpdateListener?.invoke(appUpdate)
-                            }
-                        },
-                        {
-                            NLog.e(this, "Error: onAppOpened", it)
-
-                            // If our update failed for whatever reason we should still send an no update start
-                            callback.invoke(false)
-                            onAppUpdateListener?.invoke(AppUpdateData())
+                            appOpenSettingsManager.setUpdateDate()
                         }
-                )
+                        if (localizeIndex.language.isDefault) {
+                            defaultLanguage = localizeIndex.language.locale
+                        }
+
+                        if (localizeIndex.language.isBestFit) {
+                            language = localizeIndex.language.locale
+                        }
+                    }
+                    contextWrapper.runUiAction {
+                        callback.invoke(true)
+                        onAppUpdateListener?.invoke(appUpdate)
+                    }
+                },
+                {
+                    NLog.e(this, "Error: onAppOpened", it)
+
+                    // If our update failed for whatever reason we should still send an no update start
+                    callback.invoke(false)
+                    onAppUpdateListener?.invoke(AppUpdateData())
+                }
+            )
     }
 
     /**
@@ -364,7 +357,8 @@ object NStack {
                     NLog.d(this, "NStack appOpen")
                     result.appUpdateResponse.data.localize.forEach { handleLocalizeIndex(it) }
 
-                    val shouldUpdateTranslationClass = result.appUpdateResponse.data.localize.any { it.shouldUpdate }
+                    val shouldUpdateTranslationClass =
+                        result.appUpdateResponse.data.localize.any { it.shouldUpdate }
                     if (shouldUpdateTranslationClass) {
                         NLog.e(this, "ShouldUpdate is set, updating Translations class...")
                         onLanguagesChanged()
@@ -469,7 +463,7 @@ object NStack {
         }
     }
 
-    override fun hasKey(key: String): Boolean {
+    override fun hasKey(key: String?): Boolean {
         return currentLanguage?.has(cleanKeyName(key)) ?: false
     }
 
@@ -523,7 +517,6 @@ object NStack {
      */
     private fun onLanguageChanged() {
         val languageByLocale = searchForLanguageByLocale(language)
-
 
         NLog.d(this, "On Language Changed: $currentLanguage")
 
@@ -588,12 +581,12 @@ object NStack {
         } else {
             // Search our available languages for any keys that might match
             availableLanguages
-                    // Do our languages match
-                    .filter { it.languageCode == locale.languageCode }
-                    // Find the value for that language
-                    .map { languages[it] }
-                    // Return the first value or null
-                    .firstOrNull()
+                // Do our languages match
+                .filter { it.languageCode == locale.languageCode }
+                // Find the value for that language
+                .map { languages[it] }
+                // Return the first value or null
+                .firstOrNull()
         }
     }
 
@@ -746,5 +739,16 @@ object NStack {
         return if (key.startsWith("{") && key.endsWith("}")) {
             key.substring(1, key.length - 1)
         } else key
+    }
+
+    fun enableLiveEdit(context: Context) {
+        LiveEditManager(
+            context,
+            language.toString().replace("_", "-"),
+            this,
+            viewTranslationManager,
+            networkManager,
+            appOpenSettingsManager
+        )
     }
 }

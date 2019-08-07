@@ -4,11 +4,16 @@ import android.content.Context
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManagerImpl
+import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
+import dk.nodes.nstack.kotlin.managers.ConnectionManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.NetworkManagerImpl
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
+import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.NStackMeta
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
+import dk.nodes.nstack.kotlin.util.ContextWrapper
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.PreferencesImpl
 import kotlin.reflect.KClass
@@ -16,7 +21,10 @@ import kotlin.reflect.KClass
 /**
  * Provides dependencies for NStack
  */
-class NStackModule(private val context: Context, private val translationHolder: TranslationHolder) {
+internal class NStackModule(
+    private val context: Context,
+    private val translationHolder: TranslationHolder
+) {
 
     /**
      * Creates new AppOpenSettingsManager
@@ -24,7 +32,7 @@ class NStackModule(private val context: Context, private val translationHolder: 
     fun provideAppOpenSettingsManager(): AppOpenSettingsManager {
         return getLazyDependency(AppOpenSettingsManagerImpl::class) {
             AppOpenSettingsManagerImpl(
-                context,
+                NStack.appClientInfo,
                 providePreferences()
             )
         }
@@ -44,7 +52,7 @@ class NStackModule(private val context: Context, private val translationHolder: 
         return getLazyDependency(NetworkManagerImpl::class) { NetworkManagerImpl(HttpClientProvider.getHttpClient()) }
     }
 
-    private fun providePreferences(): Preferences {
+    fun providePreferences(): Preferences {
         return getLazyDependency(PreferencesImpl::class) { PreferencesImpl(context) }
     }
 
@@ -60,6 +68,26 @@ class NStackModule(private val context: Context, private val translationHolder: 
         return getLazyDependency(ViewTranslationManager::class) {
             ViewTranslationManager(translationHolder)
         }
+    }
+
+    fun provideClientAppInfo(): ClientAppInfo {
+        return ClientAppInfo(context)
+    }
+
+    fun provideNStackMeta(): NStackMeta {
+        return NStackMeta(context)
+    }
+
+    fun provideConnectionManager(): ConnectionManager {
+        return ConnectionManager(context)
+    }
+
+    fun provideClassTranslationManager(): ClassTranslationManager {
+        return ClassTranslationManager()
+    }
+
+    fun provideContextWrapper(): ContextWrapper {
+        return ContextWrapper(context)
     }
 
     companion object {

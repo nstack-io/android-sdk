@@ -7,7 +7,6 @@ import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.ContextWrapper
-import dk.nodes.nstack.kotlin.util.TranslationTest
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -240,7 +239,7 @@ internal class NStackTest {
         private val translations2 = mockk<JSONObject>()
 
         private val locale3 = Locale.getDefault()
-        //private val translations3 = mockk<JSONObject>()
+        // private val translations3 = mockk<JSONObject>()
         private val translations3 = JSONObject("{\"$locale3\":{\"default\":{\"ok\": \"OK!!!\"}}}")
 
         private val translations = mapOf(
@@ -281,7 +280,6 @@ internal class NStackTest {
             NStack.addLanguagesChangeListener { languagesChanged = true }
             NStack.addLanguageChangeListener { currentLanguage = it }
         }
-
 
         @BeforeClass
         @JvmStatic

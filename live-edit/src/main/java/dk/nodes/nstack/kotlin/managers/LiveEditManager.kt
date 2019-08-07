@@ -19,13 +19,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
-import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.liveedit.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.ShakeDetector
 import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
@@ -35,22 +33,17 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 class LiveEditManager(
     context: Context,
-    private val language: String
+    private val language: String,
+    private val translationHolder: TranslationHolder,
+    private val viewTranslationManager: ViewTranslationManager,
+    private val networkManager: NetworkManager,
+    private val appOpenSettingsManager: AppOpenSettingsManager
 ) {
 
-    private var viewTranslationManager: ViewTranslationManager
-    private var translationHolder: TranslationHolder
     private val handler: Handler = Handler()
     private val viewQueue: ConcurrentLinkedQueue<WeakReference<View>> = ConcurrentLinkedQueue()
-    private var networkManager: NetworkManager
-    private var appOpenSettingsManager: AppOpenSettingsManager
 
     init {
-        val nstackModule = NStackModule(context, NStack)
-        networkManager = nstackModule.provideNetworkManager()
-        appOpenSettingsManager = nstackModule.provideAppOpenSettingsManager()
-        translationHolder = NStack
-        viewTranslationManager = nstackModule.provideViewTranslationManager()
         viewTranslationManager.addOnUpdateViewTranslationListener { view, translationData ->
             if (liveEditEnabled) {
                 // Storing background drawable to view's tag
@@ -104,9 +97,6 @@ class LiveEditManager(
         viewQueue.clear()
     }
 
-    fun init() {
-    }
-
     private fun showLiveEditDialog(
         view: View,
         keyAndTranslation: KeyAndTranslation
@@ -144,7 +134,6 @@ class LiveEditManager(
                                     StyleableEnum.TextOn -> view.textOn = editedTranslation
                                     StyleableEnum.TextOff -> view.textOff = editedTranslation
                                     else -> {
-
                                     }
                                 }
                             }
@@ -205,7 +194,7 @@ class LiveEditManager(
         bottomSheetDialog.show()
     }
 
-    fun showProposalsDialog(
+    private fun showProposalsDialog(
         view: View,
         translationPair: Pair<TranslationData, TranslationData>? = null,
         showDialogOnLoad: Boolean = false
@@ -284,7 +273,7 @@ class LiveEditManager(
         } else key
     }
 
-    fun showChooseOptionDialog(
+    private fun showChooseOptionDialog(
         view: View,
         translationPair: Pair<TranslationData, TranslationData>
     ) {
@@ -386,15 +375,15 @@ class LiveEditManager(
         return if (this == null) false
         else {
             when {
-                translationHolder.getTranslationByKey(key) != null -> true
-                translationHolder.getTranslationByKey(text) != null -> true
-                translationHolder.getTranslationByKey(hint) != null -> true
-                translationHolder.getTranslationByKey(description) != null -> true
-                translationHolder.getTranslationByKey(textOn) != null -> true
-                translationHolder.getTranslationByKey(textOff) != null -> true
-                translationHolder.getTranslationByKey(contentDescription) != null -> true
-                translationHolder.getTranslationByKey(title) != null -> true
-                translationHolder.getTranslationByKey(subtitle) != null -> true
+                translationHolder.hasKey(key) -> true
+                translationHolder.hasKey(text) -> true
+                translationHolder.hasKey(hint) -> true
+                translationHolder.hasKey(description) -> true
+                translationHolder.hasKey(textOn) -> true
+                translationHolder.hasKey(textOff) -> true
+                translationHolder.hasKey(contentDescription) -> true
+                translationHolder.hasKey(title) -> true
+                translationHolder.hasKey(subtitle) -> true
                 else -> false
             }
         }

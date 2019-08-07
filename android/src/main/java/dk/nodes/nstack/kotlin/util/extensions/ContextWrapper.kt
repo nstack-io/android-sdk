@@ -3,7 +3,6 @@ package dk.nodes.nstack.kotlin.util
 import android.content.Context
 import android.os.Handler
 
-
 internal class ContextWrapper(
     private val context: Context
 ) {
