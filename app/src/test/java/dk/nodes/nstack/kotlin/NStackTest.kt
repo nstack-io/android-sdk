@@ -177,7 +177,7 @@ internal class NStackTest {
     @Test
     fun `Test message seen`() {
         val messageId = 101
-        val message = Message(messageId, "", "", 0, "")
+        val message = Message(messageId, "", "")
 
         NStack.messageSeen(message)
 
