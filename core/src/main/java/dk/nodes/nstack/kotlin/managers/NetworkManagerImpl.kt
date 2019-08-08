@@ -309,10 +309,17 @@ class NetworkManagerImpl(
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val responseString = response.body()?.string()
-                val listType = object : TypeToken<ArrayList<Proposal>>() {}.type
-                val proposals = Gson().fromJson<List<Proposal>>(responseString, listType)
-                onSuccess(proposals)
+                try {
+                    val responseString = response.body()?.string()
+                    val listType = object : TypeToken<List<Proposal>>() {}.type
+                    val proposals = gson.fromJson<List<Proposal>>(
+                        responseString?.asJsonObject?.get("data")!!,
+                        listType
+                    )
+                    onSuccess(proposals)
+                } catch (e: Exception) {
+                    onError(e)
+                }
             }
         })
     }
