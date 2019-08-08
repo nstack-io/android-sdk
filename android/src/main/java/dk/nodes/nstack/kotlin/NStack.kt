@@ -76,7 +76,7 @@ object NStack : TranslationHolder {
 
     // Internally used classes
     private lateinit var classTranslationManager: ClassTranslationManager
-    internal lateinit var viewTranslationManager: ViewTranslationManager
+    private lateinit var viewTranslationManager: ViewTranslationManager
     private lateinit var assetCacheManager: AssetCacheManager
     private lateinit var connectionManager: ConnectionManager
     private lateinit var appInfo: ClientAppInfo
@@ -222,7 +222,7 @@ object NStack : TranslationHolder {
         }
 
         val nstackModule = NStackModule(context, this)
-        val managersModule = ManagersModule(nstackModule, context)
+        val managersModule = ManagersModule(nstackModule)
 
         val nstackMeta = nstackModule.provideNStackMeta()
         appIdKey = nstackMeta.appIdKey
