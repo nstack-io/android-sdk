@@ -85,19 +85,6 @@ val String.asJsonObject: JSONObject?
         null
     }
 
-val JSONArray.localizeIndices: List<LocalizeIndex>
-    get() {
-        return try {
-            val result = mutableListOf<LocalizeIndex>()
-            for (i in 0 until length()) {
-                result.add(LocalizeIndex(getJSONObject(i)))
-            }
-            return result
-        } catch (e: Exception) {
-            listOf()
-        }
-    }
-
 val Locale.languageCode: String
     get() {
         return try {

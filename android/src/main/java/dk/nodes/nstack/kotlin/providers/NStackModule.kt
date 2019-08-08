@@ -49,7 +49,13 @@ internal class NStackModule(
      * Creates Network Manager
      */
     fun provideNetworkManager(): NetworkManager {
-        return getLazyDependency(NetworkManagerImpl::class) { NetworkManagerImpl(HttpClientProvider.getHttpClient()) }
+        return getLazyDependency(NetworkManagerImpl::class) {
+            NetworkManagerImpl(
+                HttpClientProvider.getHttpClient(),
+                NStack.baseUrl,
+                NStack.debugMode
+            )
+        }
     }
 
     fun providePreferences(): Preferences {

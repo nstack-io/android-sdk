@@ -3,6 +3,9 @@ apply from: 'maven-push.gradle'
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'com.squareup.okhttp3:okhttp:3.12.3'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
+    implementation 'com.google.code.gson:gson:2.8.5'
 }
 
 task installArchives(type: Upload) {
