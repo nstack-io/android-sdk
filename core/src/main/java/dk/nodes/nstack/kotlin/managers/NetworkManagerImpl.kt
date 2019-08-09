@@ -1,7 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
 import com.google.gson.FieldNamingPolicy
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
@@ -151,7 +150,7 @@ class NetworkManagerImpl(
             .add("message_id", messageId.toString())
 
         val request = Request.Builder()
-            .url("${baseUrl}/api/v1/notify/messages/views")
+            .url("$baseUrl/api/v1/notify/messages/views")
             .post(formBuilder.build())
             .build()
 
