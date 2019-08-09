@@ -50,7 +50,7 @@ import java.util.Locale
  * NStack
  */
 @SuppressLint("StaticFieldLeak", "LogNotTimber")
-object NStack : TranslationHolder {
+object NStack {
 
     // Has our app been started yet?
     private var isInitialized: Boolean = false
@@ -71,6 +71,16 @@ object NStack : TranslationHolder {
 
     val appClientInfo: ClientAppInfo
         get() = appInfo
+
+    val translationHolder = object : TranslationHolder {
+        override fun hasKey(key: String?): Boolean {
+            return this@NStack.hasKey(key)
+        }
+
+        override fun getTranslationByKey(key: String?): String? {
+            return this@NStack.getTranslationByKey(key)
+        }
+    }
 
     private var currentLanguage: JSONObject? = null
 
@@ -221,7 +231,7 @@ object NStack : TranslationHolder {
             return
         }
 
-        val nstackModule = NStackModule(context, this)
+        val nstackModule = NStackModule(context, translationHolder)
         val managersModule = ManagersModule(nstackModule)
 
         val nstackMeta = nstackModule.provideNStackMeta()
@@ -463,7 +473,7 @@ object NStack : TranslationHolder {
         }
     }
 
-    override fun hasKey(key: String?): Boolean {
+    private fun hasKey(key: String?): Boolean {
         return currentLanguage?.has(cleanKeyName(key)) ?: false
     }
 
@@ -678,7 +688,7 @@ object NStack : TranslationHolder {
      * Exposed Adders(?)
      */
 
-    override fun getTranslationByKey(key: String?): String? {
+    private fun getTranslationByKey(key: String?): String? {
         if (key == null) {
             return null
         }
@@ -746,7 +756,7 @@ object NStack : TranslationHolder {
             LiveEditManager(
                 context,
                 language.toString().replace("_", "-"),
-                this,
+                translationHolder,
                 viewTranslationManager,
                 networkManager,
                 appOpenSettingsManager

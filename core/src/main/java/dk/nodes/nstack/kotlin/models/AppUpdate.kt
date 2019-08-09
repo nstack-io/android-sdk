@@ -19,6 +19,3 @@ val AppUpdate.state: AppUpdateState
             else -> AppUpdateState.NONE
         }
     }
-
-
-

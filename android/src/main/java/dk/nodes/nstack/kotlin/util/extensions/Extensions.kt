@@ -2,8 +2,6 @@ package dk.nodes.nstack.kotlin.util.extensions
 
 import android.view.View
 import android.view.ViewGroup
-import dk.nodes.nstack.kotlin.models.LocalizeIndex
-import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
