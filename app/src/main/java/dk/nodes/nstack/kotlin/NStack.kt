@@ -12,6 +12,7 @@ import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.providers.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.*
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -189,12 +190,35 @@ object NStack {
     }
 
     /**
+     * Setup build relevant info for the N-Meta headers.
+     *
+     * Should be in the form: setupMetaHeaders(BuildConfig.FLAVOR, Build.VERSION.RELEASE, Build.MODEL)
+     * Assuming that Flavor is environment, otherwise setup a BuildConfig variable that matches production, staging, develop etc.
+     */
+    fun setupMetaHeaders(buildEnvironment: String,
+                         osVersion: String,
+                         phoneModel: String) {
+        HttpClientProvider.metaInterceptor.setupMetaHeaders(
+                environment = buildEnvironment.toLowerCase(),
+                osVersion = osVersion,
+                phoneModel = phoneModel
+        )
+    }
+
+    /**
      * Callback method for when the app is first opened
      */
 
     fun appOpen(callback: AppOpenCallback = {}) {
         if (!isInitialized) {
             throw IllegalStateException("init() has not been called")
+        }
+
+        if(HttpClientProvider.metaInterceptor.initialized.not()) {
+            NLog.e(this, "setupMetaHeaders() has not been called!")
+            if(debugMode) {
+                throw IllegalStateException("setupMetaHeaders() has not been called!")
+            }
         }
 
         val localeString = language.toString()

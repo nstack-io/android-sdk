@@ -1,6 +1,7 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
+import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.util.NLog
 import okhttp3.Cache
 import okhttp3.Interceptor
@@ -20,13 +21,15 @@ object HttpClientProvider {
         }
     }
 
+    val metaInterceptor: NMetaInterceptor by lazy { NMetaInterceptor() }
+
     private fun providesNStackInterceptor(): Interceptor {
         return NStackInterceptor()
     }
 
     private fun providesHttpLoggingInterceptor(): HttpLoggingInterceptor {
         val logging = okhttp3.logging.HttpLoggingInterceptor()
-        logging.level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+        logging.level = if(NStack.debugMode) okhttp3.logging.HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         return logging
     }
 
@@ -42,6 +45,7 @@ object HttpClientProvider {
         val loggingInterceptor = providesHttpLoggingInterceptor()
 
         client.addInterceptor(nStackInterceptor)
+        client.addInterceptor(metaInterceptor)
         client.addInterceptor(loggingInterceptor)
         client.cache(cache)
 
