@@ -3,7 +3,19 @@ package dk.nodes.nstack.kotlin.providers
 import android.os.Build
 import dk.nodes.nstack.kotlin.NStack
 
-class NMetaInterceptor(private val environment: String = "development") : okhttp3.Interceptor {
+class NMetaInterceptor : okhttp3.Interceptor {
+
+    private var environment = "production"
+    private var osVersion = "unknown"
+    private var phoneModel = "unknown"
+    var initialized = false
+
+    fun setupMetaHeaders(environment: String, osVersion: String, phoneModel: String) {
+        this.environment = environment
+        this.osVersion = osVersion
+        this.phoneModel = phoneModel
+    }
+
     @Throws(java.io.IOException::class)
     override fun intercept(chain: okhttp3.Interceptor.Chain): okhttp3.Response {
         val originalRequest = chain.request()
@@ -12,7 +24,7 @@ class NMetaInterceptor(private val environment: String = "development") : okhttp
                 .header("Accept", "application/vnd.nodes.v1+json")
                 .header(
                         "N-Meta",
-                        "android;$environment;${NStack.getAppClientInfo().versionName} (${NStack.getAppClientInfo().versionCode});${Build.VERSION.RELEASE};${Build.MODEL}"
+                        "android;$environment;${NStack.getAppClientInfo().versionName} (${NStack.getAppClientInfo().versionCode});$osVersion;$phoneModel"
                 )
                 .build()
 
