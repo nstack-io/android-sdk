@@ -45,9 +45,8 @@ object HttpClientProvider {
         val loggingInterceptor = providesHttpLoggingInterceptor()
 
         client.addInterceptor(nStackInterceptor)
-        client.addInterceptor(loggingInterceptor)
         client.addInterceptor(metaInterceptor)
-        client.cache(cache)
+        client.addInterceptor(loggingInterceptor)
 
         return client.build()
     }

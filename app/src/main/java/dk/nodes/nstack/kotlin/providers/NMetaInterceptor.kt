@@ -2,6 +2,7 @@ package dk.nodes.nstack.kotlin.providers
 
 import android.os.Build
 import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.util.NLog
 
 class NMetaInterceptor : okhttp3.Interceptor {
 
@@ -14,6 +15,7 @@ class NMetaInterceptor : okhttp3.Interceptor {
         this.environment = environment
         this.osVersion = osVersion
         this.phoneModel = phoneModel
+        initialized = true
     }
 
     @Throws(java.io.IOException::class)
@@ -24,7 +26,7 @@ class NMetaInterceptor : okhttp3.Interceptor {
                 .header("Accept", "application/vnd.nodes.v1+json")
                 .header(
                         "N-Meta",
-                        "android;$environment;${NStack.getAppClientInfo().versionName} (${NStack.getAppClientInfo().versionCode});$osVersion;$phoneModel"
+                        "android;$environment;${NStack.getAppClientInfo().versionName};$osVersion;$phoneModel"
                 )
                 .build()
 
