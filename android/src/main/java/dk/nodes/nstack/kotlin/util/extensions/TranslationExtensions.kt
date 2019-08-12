@@ -8,7 +8,7 @@ import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 
 private fun setTranslation(view: View, key: String) {
-    if (!NStack.hasKey(key)) return
+    if (!NStack.translationHolder.hasKey(key)) return
     NStack.addView(view, TranslationData(key = key))
 }
 
