@@ -2,6 +2,7 @@ package dk.nodes.nstack.kotlin
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import dk.nodes.nstack.kotlin.managers.*
 import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.providers.ManagersModule
@@ -275,6 +276,10 @@ internal class NStackTest {
             every { assetCacheManagerMock.loadTranslations() } returns translations
 
             every { appOpenSettingsManagerMock.getAppOpenSettings() } returns appOpenSettings
+            mockkStatic(Log::class)
+            every { Log.e(any(), any())} returns 0
+            every { Log.e(any(), any(), any())} returns 0
+
 
             NStack.addLanguagesChangeListener { languagesChanged = true }
             NStack.addLanguageChangeListener { currentLanguage = it }
