@@ -73,8 +73,25 @@ afterEvaluate { project ->
         }
     }
 
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allJava
+        archiveClassifier = 'sources'
+    }
+
+    task javadocJar(type: Jar) {
+        from javadoc
+        archiveClassifier = 'javadoc'
+    }
+
     signing {
         required { gradle.taskGraph.hasTask("uploadArchives") }
         sign configurations.archives
+    }
+
+    javadoc {
+        if (JavaVersion.current().isJava9Compatible()) {
+            options.addBooleanOption('html5', true)
+        }
     }
 }
