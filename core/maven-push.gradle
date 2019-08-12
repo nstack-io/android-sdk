@@ -84,6 +84,11 @@ afterEvaluate { project ->
         archiveClassifier = 'javadoc'
     }
 
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
     signing {
         required { gradle.taskGraph.hasTask("uploadArchives") }
         sign configurations.archives
