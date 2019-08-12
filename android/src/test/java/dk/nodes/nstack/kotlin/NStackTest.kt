@@ -283,7 +283,7 @@ internal class NStackTest {
         @BeforeClass
         @JvmStatic
         fun singleSetup() {
-            NStack.init(contextMock)
+            NStack.init(contextMock, true)
         }
     }
 }
