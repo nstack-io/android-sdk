@@ -39,7 +39,7 @@ afterEvaluate { project ->
 
                 pom.project {
                     name _name
-                    packaging 'aar'
+                    packaging 'jar'
                     description _description
                     url 'https://github.com/nodes-android/nstack-kotlin'
                     inceptionYear '2017'
