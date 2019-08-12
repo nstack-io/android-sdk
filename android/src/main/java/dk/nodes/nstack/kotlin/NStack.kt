@@ -127,6 +127,7 @@ object NStack {
 
     @SuppressWarnings("deprecation")
     private fun getSystemLocaleLegacy(config: Configuration): Locale {
+        Build.VERSION.RELEASE
         return config.locale
     }
 
@@ -223,13 +224,22 @@ object NStack {
     /**
      * Class Start
      */
-    fun init(context: Context, vararg plugin: Any) {
-        NLog.i(this, "NStack initializing")
 
+    @Deprecated(
+        "Use init sending debug mode",
+        ReplaceWith("init(context, boolean)", "dk.nodes.nstack.kotlin.NStack.init")
+    )
+    fun init(context: Context) {
+        init(context, false)
+    }
+
+    fun init(context: Context, debugMode: Boolean, vararg plugin: Any) {
+        NLog.i(this, "NStack initializing")
         if (isInitialized) {
             NLog.w(this, "NStack already initialized")
             return
         }
+        this.debugMode = debugMode
 
         val nstackModule = NStackModule(context, translationHolder)
         val managersModule = ManagersModule(nstackModule)
@@ -244,16 +254,16 @@ object NStack {
 
         registerLocaleChangeBroadcastListener(context)
 
-        viewTranslationManager = nstackModule.provideViewTranslationManager()
         plugins.addAll(plugin)
+        viewTranslationManager = nstackModule.provideViewTranslationManager()
+        appInfo = nstackModule.provideClientAppInfo()
         plugins += viewTranslationManager
-        networkManager = nstackModule.provideNetworkManager()
         connectionManager = nstackModule.provideConnectionManager()
         assetCacheManager = managersModule.provideAssetCacheManager()
-        appInfo = nstackModule.provideClientAppInfo()
         appOpenSettingsManager = managersModule.provideAppOpenSettingsManager()
         prefManager = managersModule.providePrefManager()
         contextWrapper = nstackModule.provideContextWrapper()
+        networkManager = nstackModule.provideNetworkManager()
         loadCacheTranslations()
 
         isInitialized = true

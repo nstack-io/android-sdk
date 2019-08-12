@@ -1,17 +1,18 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
+import android.os.Build
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManagerImpl
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
 import dk.nodes.nstack.kotlin.managers.ConnectionManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
-import dk.nodes.nstack.kotlin.managers.NetworkManagerImpl
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.NStackMeta
+import dk.nodes.nstack.kotlin.provider.HttpClientProvider
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.ContextWrapper
 import dk.nodes.nstack.kotlin.util.Preferences
@@ -49,9 +50,17 @@ internal class NStackModule(
      * Creates Network Manager
      */
     fun provideNetworkManager(): NetworkManager {
-        return getLazyDependency(NetworkManagerImpl::class) {
-            NetworkManagerImpl(
-                HttpClientProvider.getHttpClient(),
+        return getLazyDependency(NetworkManager::class) {
+            NetworkManager(
+                HttpClientProvider.getHttpClient(
+                    appIdKey = NStack.appIdKey,
+                    appApiKey = NStack.appApiKey,
+                    environment = NStack.env,
+                    versionName = NStack.appClientInfo.versionName,
+                    versionRelease = Build.VERSION.RELEASE,
+                    model = Build.MODEL,
+                    debugMode = NStack.debugMode
+                ),
                 NStack.baseUrl,
                 NStack.debugMode
             )

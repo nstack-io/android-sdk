@@ -10,9 +10,6 @@ allprojects { ext."signing.keyId" = System.getenv('keyId') }
 allprojects { ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile') }
 allprojects { ext."signing.password" = System.getenv('password') }
 
-// Artifact settings
-def _group = 'dk.nodes.nstack'
-def _version = '3.1.0'
 def _archivesBaseName = 'nstack-kotlin'
 
 def _name = 'NStack Kotlin Library'
@@ -28,9 +25,9 @@ afterEvaluate { project ->
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-                pom.groupId = _group
+                pom.groupId = groupId
                 pom.artifactId = _archivesBaseName
-                pom.version = _version
+                pom.version = version
 
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                     authentication(userName: _ossrhUsername, password: _ossrhPassword)

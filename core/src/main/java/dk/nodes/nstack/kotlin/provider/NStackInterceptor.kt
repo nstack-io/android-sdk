@@ -1,9 +1,8 @@
-package dk.nodes.nstack.kotlin.providers
+package dk.nodes.nstack.kotlin.provider
 
-import dk.nodes.nstack.kotlin.NStack
 import okhttp3.Interceptor
 
-class NStackInterceptor : Interceptor {
+class NStackInterceptor(private val appIdKey: String, private val appApiKey: String) : Interceptor {
 
     @Throws(java.io.IOException::class)
     override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
@@ -12,8 +11,8 @@ class NStackInterceptor : Interceptor {
         val newRequest = originalRequest.newBuilder()
                 // Commented this out because it was causing issues with the cached languageHeader
                 // .header("Accept-Language", NStack.getStack().getSelectedLanguageHeader())
-                .header("X-Application-Id", NStack.appIdKey)
-                .header("X-Rest-Api-Key", NStack.appApiKey)
+                .header("X-Application-Id", appIdKey)
+                .header("X-Rest-Api-Key", appApiKey)
                 .build()
 
         return chain.proceed(newRequest)
