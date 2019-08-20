@@ -1,6 +1,8 @@
-apply plugin: 'kotlin'
 apply plugin: 'java-library'
-apply from: 'maven-push.gradle'
+apply plugin: 'kotlin'
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -17,10 +19,12 @@ task installArchives(type: Upload) {
     configuration = configurations['archives']
     repositories {
         mavenDeployer {
-            pom.groupId = 'dk.nodes.nstack'
-            pom.artifactId = 'nstack-kotlin-core'
-            pom.version = '3.1.0-LOCAL'
+            pom.groupId = GROUP
+            pom.artifactId = POM_ARTIFACT_ID
+            pom.version = VERSION_NAME + '-LOCAL'
             repository url: repositories.mavenLocal().url
         }
     }
 }
+
+apply from: rootProject.file('gradle/maven-push.gradle')

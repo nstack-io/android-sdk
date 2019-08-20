@@ -3,6 +3,7 @@ buildscript {
     ext {
         kotlinx_version = '1.3.0-RC'
         kotlin_version = '1.3.41'
+        dokkaVersion = '0.9.17'
     }
 
     repositories {
@@ -18,6 +19,7 @@ buildscript {
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.10.0"
         classpath "dk.nodes.nstack:translation:3.0.3"
         classpath 'dk.nodes.ci:bitrise:1.0'
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokkaVersion"
     }
 }
 
@@ -36,7 +38,15 @@ allprojects {
 }
 
 subprojects {
+    apply plugin: 'org.jetbrains.dokka'
     apply plugin: 'com.diffplug.gradle.spotless'
+
+    dokka {
+        reportUndocumented = false
+        outputFormat = 'html'
+        outputDirectory = "$buildDir/javadoc"
+    }
+
     spotless {
         kotlin {
             target "**/*.kt"
@@ -44,3 +54,4 @@ subprojects {
         }
     }
 }
+

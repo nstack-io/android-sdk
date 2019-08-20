@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply from: 'maven-push.gradle'
 
 android {
     compileSdkVersion 29
@@ -40,10 +39,12 @@ task installArchives(type: Upload) {
     configuration = configurations['archives']
     repositories {
         mavenDeployer {
-            pom.groupId = 'dk.nodes.nstack'
-            pom.artifactId = 'nstack-kotlin'
-            pom.version = '3.1.0-LOCAL'
+            pom.groupId = GROUP
+            pom.artifactId = POM_ARTIFACT_ID
+            pom.version = VERSION_NAME + '-LOCAL'
             repository url: repositories.mavenLocal().url
         }
     }
 }
+
+apply from: rootProject.file('gradle/maven-push.gradle')
