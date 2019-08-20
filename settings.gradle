@@ -1,1 +1,1 @@
-include ':android', ':demo', ':core', ':live-edit', ':view'
+include ':nstack-kotlin', ':demo', ':nstack-kotlin-core', ':nstack-kotlin-live-edit', ':nstack-kotlin-view'
