@@ -10,11 +10,6 @@ allprojects { ext."signing.keyId" = System.getenv('keyId') }
 allprojects { ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile') }
 allprojects { ext."signing.password" = System.getenv('password') }
 
-def _archivesBaseName = 'nstack-kotlin-core'
-
-def _name = 'NStack Kotlin Library JVM Core'
-def _description = 'nstack.io library for translations, update management and more.'
-
 nexusStaging {
     packageGroup = "dk.nodes"
 }
@@ -25,9 +20,9 @@ afterEvaluate { project ->
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-                pom.groupId = group
-                pom.artifactId = _archivesBaseName
-                pom.version = version
+                pom.groupId = GROUP
+                pom.artifactId = POM_ARTIFACT_ID
+                pom.version = VERSION_NAME
 
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                     authentication(userName: _ossrhUsername, password: _ossrhPassword)
@@ -38,29 +33,29 @@ afterEvaluate { project ->
                 }
 
                 pom.project {
-                    name _name
-                    packaging 'jar'
-                    description _description
-                    url 'https://github.com/nodes-android/nstack-kotlin'
+                    name POM_NAME
+                    packaging POM_PACKAGING
+                    description POM_DESCRIPTION
+                    url POM_URL
                     inceptionYear '2017'
 
                     scm {
-                        url 'https://github.com/nodes-android/nstack-kotlin'
-                        connection 'scm:https://github.com/nodes-android/nstack-kotlin.git'
+                        url POM_SCM_URL
+                        connection POM_SCM_CONNECTION
                     }
 
                     licenses {
                         license {
-                            name 'The Apache License, Update 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name POM_LICENCE_NAME
+                            url POM_LICENCE_URL
                         }
                     }
 
                     developers {
                         developer {
-                            id 'johsoe'
-                            name 'Johnny Sørensen'
-                            email 'joso@nodes.dk'
+                            id POM_DEVELOPER_ID
+                            name POM_DEVELOPER_NAME
+                            email POM_DEVELOPER_EMAIL
                         }
                     }
 
@@ -73,25 +68,44 @@ afterEvaluate { project ->
         }
     }
 
-
-    task sourcesJar(type: Jar) {
-        archiveClassifier.set("sources")
-        from sourceSets.main.allJava
-    }
-
-    task javadocJar(type: Jar) {
-        archiveClassifier.set("javadoc")
-        from javadoc.destinationDir
-    }
-
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
-    }
-
     signing {
         required { gradle.taskGraph.hasTask("uploadArchives") }
         sign configurations.archives
     }
 
+    def plugins = project.getPlugins()
+    if (plugins.hasPlugin('com.android.application') || plugins.hasPlugin('com.android.library')) {
+        task androidSourcesJar(type: Jar) {
+            classifier = 'sources'
+            from android.sourceSets.main.java.sourceFiles
+        }
+
+        artifacts {
+            archives androidSourcesJar
+        }
+    }
+    else {
+        task sourcesJar(type: Jar, dependsOn: classes) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        task javadocsJar(type: Jar, dependsOn: javadoc) {
+            classifier = 'javadoc'
+            from javadoc.destinationDir
+        }
+
+        artifacts {
+            archives sourcesJar
+            archives javadocsJar
+        }
+    }
+
+    if (JavaVersion.current().isJava8Compatible()) {
+        allprojects {
+            tasks.withType(Javadoc) {
+                options.addStringOption('Xdoclint:none', '-quiet')
+            }
+        }
+    }
 }
