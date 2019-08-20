@@ -2,7 +2,6 @@ package dk.nodes.nstack.kotlin.util
 
 object Constants {
     const val spk_nstack_network_update_time = "spk_nstack_network_update_time_v2"
-    const val spk_nstack_languages_cache = "spk_nstack_languages_cache_v2"
     const val spk_nstack_language_cache = "spk_nstack_language_cache_v2"
 
     const val spk_nstack_guid = "spk_nstack_guid_v2"

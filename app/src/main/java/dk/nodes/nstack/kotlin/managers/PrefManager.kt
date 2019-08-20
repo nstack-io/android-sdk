@@ -29,7 +29,7 @@ internal class PrefManager(private val preferences: Preferences) {
 
     fun getTranslations(): Map<Locale, JSONObject> {
         return preferences
-            .loadStringsWhereKey { it.startsWith(Constants.spk_nstack_languages_cache) }
+            .loadStringsWhereKey { it.startsWith(Constants.spk_nstack_language_cache) }
             .mapKeys { it.key.localeFromKey }
             .mapValues { it.value.asJsonObject ?: JSONObject() }
     }
