@@ -38,6 +38,9 @@ allprojects {
 }
 
 subprojects {
+    group = GROUP
+    version = VERSION_NAME
+
     apply plugin: 'org.jetbrains.dokka'
     apply plugin: 'com.diffplug.gradle.spotless'
 
