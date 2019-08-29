@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
-import dk.nodes.nstack.kotlin.liveedit.R
+import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
@@ -31,7 +31,7 @@ import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class LiveEditManager(
+internal class LiveEditManager(
     context: Context,
     private val language: String,
     private val translationHolder: TranslationHolder,
@@ -59,7 +59,8 @@ class LiveEditManager(
             }
         }
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
+        val shakeDetector = ShakeDetector(object :
+            ShakeDetector.Listener {
             override fun hearShake() {
                 liveEditEnabled = !liveEditEnabled
             }
@@ -150,8 +151,8 @@ class LiveEditManager(
                             }
                             is androidx.appcompat.widget.Toolbar -> {
                                 when (keyAndTranslation.styleable) {
-                                    StyleableEnum.Title -> view.title = editedTranslation
-                                    StyleableEnum.Subtitle -> view.subtitle = editedTranslation
+                                    dk.nodes.nstack.kotlin.models.local.StyleableEnum.Title -> view.title = editedTranslation
+                                    dk.nodes.nstack.kotlin.models.local.StyleableEnum.Subtitle -> view.subtitle = editedTranslation
                                     else -> {
                                     }
                                 }

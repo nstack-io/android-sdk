@@ -10,12 +10,12 @@ import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
 import java.util.Date
 import java.util.UUID
 
-internal class AppOpenSettingsManagerImpl(
+internal class AppOpenSettingsManager(
     private val clientAppInfo: ClientAppInfo,
     private val preferences: Preferences
-) : AppOpenSettingsManager {
+) {
 
-    override fun getAppOpenSettings(): AppOpenSettings {
+    fun getAppOpenSettings(): AppOpenSettings {
         val uuid = appUUID
         val version = clientAppInfo.versionName
         val oldVersion = appOldVersion ?: version
@@ -30,7 +30,7 @@ internal class AppOpenSettingsManagerImpl(
         )
     }
 
-    override fun setUpdateDate() {
+    fun setUpdateDate() {
         val version = clientAppInfo.versionName
         val updateDate = Date().formatted
 

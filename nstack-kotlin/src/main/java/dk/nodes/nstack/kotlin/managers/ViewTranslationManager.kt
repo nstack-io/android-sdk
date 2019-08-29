@@ -4,7 +4,7 @@ import android.os.Handler
 import android.view.View
 import android.widget.TextView
 import android.widget.ToggleButton
-import dk.nodes.nstack.kotlin.R
+import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
@@ -13,7 +13,7 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
-class ViewTranslationManager(private val translationHolder: TranslationHolder) :
+internal class ViewTranslationManager(private val translationHolder: TranslationHolder) :
     NStackViewPlugin {
 
     /**

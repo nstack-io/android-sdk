@@ -15,7 +15,7 @@ import java.util.*
  * @author Bob Lee (bob@squareup.com)
  * @author Eric Burke (eric@squareup.com)
  */
-class ShakeDetector(private val listener: Listener) : SensorEventListener {
+internal class ShakeDetector(private val listener: Listener) : SensorEventListener {
 
     /**
      * When the magnitude of total acceleration exceeds this

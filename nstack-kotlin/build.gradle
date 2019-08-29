@@ -16,9 +16,7 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    api project(':nstack-kotlin-core')
-    api project(':nstack-kotlin-view')
-    api project(':nstack-kotlin-live-edit')
+    implementation project(':nstack-kotlin-core')
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_version"

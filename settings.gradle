@@ -1,1 +1,1 @@
-include ':nstack-kotlin', ':demo', ':nstack-kotlin-core', ':nstack-kotlin-live-edit', ':nstack-kotlin-view'
+include ':nstack-kotlin', ':demo', ':nstack-kotlin-core'
