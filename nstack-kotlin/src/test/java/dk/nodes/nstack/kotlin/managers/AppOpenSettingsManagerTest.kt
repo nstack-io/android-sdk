@@ -9,7 +9,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.Test
-import java.util.*
+import java.util.Date
 
 internal class AppOpenSettingsManagerTest {
 
@@ -18,7 +18,7 @@ internal class AppOpenSettingsManagerTest {
 
     private val version = "version"
 
-    private val appOpenSettingsManager = AppOpenSettingsManagerImpl(clientAppInfoMock, preferencesMock)
+    private val appOpenSettingsManager = AppOpenSettingsManager(clientAppInfoMock, preferencesMock)
 
     init {
         every { clientAppInfoMock.versionName } returns version
@@ -77,7 +77,12 @@ internal class AppOpenSettingsManagerTest {
         val uuidSlot = slot<String>()
 
         every { preferencesMock.loadString(Constants.spk_nstack_guid) } returns ""
-        every { preferencesMock.saveString(Constants.spk_nstack_guid, capture(uuidSlot)) } answers { }
+        every {
+            preferencesMock.saveString(
+                Constants.spk_nstack_guid,
+                capture(uuidSlot)
+            )
+        } answers { }
 
         val settings = appOpenSettingsManager.getAppOpenSettings()
 

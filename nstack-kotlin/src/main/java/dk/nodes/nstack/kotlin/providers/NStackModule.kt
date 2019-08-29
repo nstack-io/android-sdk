@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
-import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManagerImpl
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
 import dk.nodes.nstack.kotlin.managers.ConnectionManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
@@ -31,8 +30,8 @@ internal class NStackModule(
      * Creates new AppOpenSettingsManager
      */
     fun provideAppOpenSettingsManager(): AppOpenSettingsManager {
-        return getLazyDependency(AppOpenSettingsManagerImpl::class) {
-            AppOpenSettingsManagerImpl(
+        return getLazyDependency(AppOpenSettingsManager::class) {
+            AppOpenSettingsManager(
                 NStack.appClientInfo,
                 providePreferences()
             )

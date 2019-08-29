@@ -277,9 +277,8 @@ internal class NStackTest {
 
             every { appOpenSettingsManagerMock.getAppOpenSettings() } returns appOpenSettings
             mockkStatic(Log::class)
-            every { Log.e(any(), any())} returns 0
-            every { Log.e(any(), any(), any())} returns 0
-
+            every { Log.e(any(), any()) } returns 0
+            every { Log.e(any(), any(), any()) } returns 0
 
             NStack.addLanguagesChangeListener { languagesChanged = true }
             NStack.addLanguageChangeListener { currentLanguage = it }

@@ -601,6 +601,7 @@ object NStack {
         } else {
             // Search our available languages for any keys that might match
             availableLanguages
+                .asSequence()
                 // Do our languages match
                 .filter { it.languageCode == locale.languageCode }
                 // Find the value for that language
