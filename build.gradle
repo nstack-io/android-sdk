@@ -58,3 +58,16 @@ subprojects {
     }
 }
 
+static def getRepositoryUsername() {
+    return System.getenv('NEXUS_USERNAME')
+}
+
+static def getRepositoryPassword() {
+    return System.getenv('NEXUS_PASSWORD')
+}
+
+nexusStaging {
+    packageGroup = "dk.nodes"
+    username = getRepositoryUsername()
+    password = getRepositoryPassword()
+}
