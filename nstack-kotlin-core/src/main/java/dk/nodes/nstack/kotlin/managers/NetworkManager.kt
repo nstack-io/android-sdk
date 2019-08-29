@@ -1,7 +1,5 @@
 package dk.nodes.nstack.kotlin.managers
 
-import com.google.gson.FieldNamingPolicy
-import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import dk.nodes.nstack.kotlin.models.AppOpenResult
@@ -9,8 +7,8 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
 import dk.nodes.nstack.kotlin.models.Proposal
-import dk.nodes.nstack.kotlin.util.DateDeserializer
-import dk.nodes.nstack.kotlin.util.LocaleDeserializer
+import dk.nodes.nstack.kotlin.provider.HttpClientProvider
+import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -27,12 +25,8 @@ class NetworkManager(
     private val baseUrl: String,
     private val debugMode: Boolean
 ) {
-    private val gson = GsonBuilder()
-        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-        .registerTypeAdapter(Date::class.java, DateDeserializer())
-        .registerTypeAdapter(Locale::class.java, LocaleDeserializer())
-        .setDateFormat(DATE_FORMAT)
-        .create()
+
+    private val gson = HttpClientProvider.provideGson()
 
     fun loadTranslation(
         url: String,
@@ -302,7 +296,7 @@ class NetworkManager(
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                onError.invoke(e)
+                onError(e)
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -327,11 +321,6 @@ class NetworkManager(
         } catch (e: Exception) {
             null
         }
-
-    companion object {
-
-        private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ"
-    }
 
     private val Date.formatted: String
         get() {

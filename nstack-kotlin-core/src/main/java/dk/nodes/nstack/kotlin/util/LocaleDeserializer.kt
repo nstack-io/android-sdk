@@ -6,7 +6,7 @@ import com.google.gson.JsonElement
 import java.lang.reflect.Type
 import java.util.Locale
 
-internal class LocaleDeserializer : JsonDeserializer<Locale> {
+class LocaleDeserializer : JsonDeserializer<Locale> {
     override fun deserialize(
         json: JsonElement?,
         typeOfT: Type?,
