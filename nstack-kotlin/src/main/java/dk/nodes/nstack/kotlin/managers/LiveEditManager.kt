@@ -20,6 +20,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import dk.nodes.nstack.R
+import dk.nodes.nstack.kotlin.models.NStackException
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
@@ -89,7 +90,7 @@ internal class LiveEditManager(
         while (viewQueue.isNotEmpty()) {
             val view = viewQueue.poll()?.get()
             if (view != null) {
-                view.background = view.getTag(NStackViewBackgroundTag)as? Drawable
+                view.background = view.getTag(NStackViewBackgroundTag) as? Drawable
                 view.setOnTouchListener(null)
                 closestView = view
             }
@@ -151,8 +152,8 @@ internal class LiveEditManager(
                             }
                             is androidx.appcompat.widget.Toolbar -> {
                                 when (keyAndTranslation.styleable) {
-                                    dk.nodes.nstack.kotlin.models.local.StyleableEnum.Title -> view.title = editedTranslation
-                                    dk.nodes.nstack.kotlin.models.local.StyleableEnum.Subtitle -> view.subtitle = editedTranslation
+                                    StyleableEnum.Title -> view.title = editedTranslation
+                                    StyleableEnum.Subtitle -> view.subtitle = editedTranslation
                                     else -> {
                                     }
                                 }
@@ -160,9 +161,24 @@ internal class LiveEditManager(
                         }
                     }
                 },
-                onError = {
-                    runUiAction {
-                        Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show()
+                onError = { exception ->
+
+                    when (exception) {
+                        is NStackException -> {
+                            runUiAction {
+                                Toast.makeText(
+                                    view.context,
+                                    exception.errorBody.localizedMessage ?: exception.errorBody.message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        else -> {
+                            runUiAction {
+                                Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
                     }
                 }
             )

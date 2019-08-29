@@ -23,6 +23,12 @@
             android:value="${apiKey}"
             tools:replace="android:value" />
 
+        <meta-data
+            android:name="dk.nodes.nstack.env"
+            android:value="${env}"
+            tools:replace="android:value" />
+
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
