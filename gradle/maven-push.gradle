@@ -9,10 +9,6 @@ allprojects { ext."signing.keyId" = System.getenv('keyId') }
 allprojects { ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile') }
 allprojects { ext."signing.password" = System.getenv('password') }
 
-nexusStaging {
-    packageGroup = "dk.nodes"
-}
-
 afterEvaluate { project ->
     uploadArchives {
         repositories {

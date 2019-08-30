@@ -68,6 +68,7 @@ static def getRepositoryPassword() {
 
 nexusStaging {
     packageGroup = "dk.nodes"
+    stagingProfileId = "5a414403b5bf75"
     username = getRepositoryUsername()
     password = getRepositoryPassword()
 }
