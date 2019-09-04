@@ -6,22 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:title="@string/nstack_test_title"
-        app:subtitle="@string/nstack_test_subTitle"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/messageTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/nstack_test_message"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
-
     <Button
         android:id="@+id/yesButton"
         android:layout_width="wrap_content"
@@ -34,10 +18,27 @@
 
     <Button
         android:id="@+id/noButton"
-        android:text="@string/nstack_default_no"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/nstack_default_no"
         app:layout_constraintEnd_toStartOf="@id/yesButton"
         app:layout_constraintTop_toTopOf="@id/yesButton" />
+
+    <TextView
+        android:id="@+id/messageTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="8dp"
+        android:text="@string/nstack_test_message"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:subtitle="@string/nstack_test_subTitle"
+        app:title="@string/nstack_test_title" />
 
 </android.support.constraint.ConstraintLayout>

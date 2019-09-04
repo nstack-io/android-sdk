@@ -2,18 +2,10 @@ package dk.nodes.nstack.kotlin.managers
 
 import android.content.Context
 import android.content.res.Resources
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.hardware.SensorManager
 import android.os.Handler
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.TextView
-import android.widget.Toast
-import android.widget.ToggleButton
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -26,6 +18,8 @@ import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.ShakeDetector
+import dk.nodes.nstack.kotlin.util.extensions.addLiveEditOverlay
+import dk.nodes.nstack.kotlin.util.extensions.clearLiveEditOverlay
 import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
@@ -47,12 +41,10 @@ internal class LiveEditManager(
     init {
         viewTranslationManager.addOnUpdateViewTranslationListener { view, translationData ->
             if (liveEditEnabled) {
-                // Storing background drawable to view's tag
-                view.setTag(NStackViewBackgroundTag, view.background)
                 val data = view.getTag(NStackViewTag) as? TranslationData
                 if (data.isValid()) {
                     viewQueue += WeakReference(view)
-                    view.background = ColorDrawable(Color.parseColor("#E2FF0266"))
+                    view.addLiveEditOverlay()
                     view.setOnVeryLongClickListener {
                         showChooseOptionDialog(view, translationData)
                     }
@@ -90,7 +82,7 @@ internal class LiveEditManager(
         while (viewQueue.isNotEmpty()) {
             val view = viewQueue.poll()?.get()
             if (view != null) {
-                view.background = view.getTag(NStackViewBackgroundTag) as? Drawable
+                view.clearLiveEditOverlay()
                 view.setOnTouchListener(null)
                 closestView = view
             }
@@ -407,7 +399,6 @@ internal class LiveEditManager(
     }
 
     companion object {
-        private val NStackViewBackgroundTag = R.id.nstack_background_tag
         private val NStackViewTag = R.id.nstack_tag
     }
 }
