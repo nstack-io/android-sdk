@@ -11,7 +11,7 @@ allprojects { ext."signing.password" = System.getenv('password') }
 
 // Artifact settings
 def _group = 'dk.nodes.nstack'
-def _version = '3.1.51'
+def _version = '3.1.0'
 def _archivesBaseName = 'translation'
 
 def _name = 'NStack Gradle Plugin'
