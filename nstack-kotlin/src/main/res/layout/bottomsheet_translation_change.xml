@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:padding="16dp"
     android:layout_height="match_parent"
     android:clipChildren="false"
-    android:clipToPadding="false">
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
-        android:text="Edit NStack"
-        android:fontFamily="sans-serif-medium"
-        android:textColor="#333"
-        android:textSize="20sp"
-        android:layout_marginBottom="12dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Edit NStack"
+        android:textColor="#333"
+        android:textSize="20sp" />
 
     <EditText
         android:id="@+id/zzz_nstack_translation_et"
-        android:inputType="textMultiLine|textNoSuggestions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:imeOptions="actionDone"
-        android:layout_width="300dp"
-        android:layout_gravity="center"
-        android:layout_height="wrap_content" />
+        android:inputType="textMultiLine|textNoSuggestions" />
 
     <Button
         android:id="@+id/zzz_nstack_translation_change_btn"
-        android:text="Change"
-        android:layout_gravity="end"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:backgroundTint="@color/colorAccent"
+        android:text="Change"
+        android:textColor="@color/white" />
 
 </LinearLayout>
