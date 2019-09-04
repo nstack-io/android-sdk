@@ -16,7 +16,7 @@
 
     <EditText
         android:id="@+id/zzz_nstack_translation_et"
-        android:inputType="textFilter|textNoSuggestions"
+        android:inputType="textMultiLine|textNoSuggestions"
         android:imeOptions="actionDone"
         android:layout_width="300dp"
         android:layout_gravity="center"
