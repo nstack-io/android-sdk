@@ -2,8 +2,10 @@
 <resources>
 
     <style name="NstackBottomSheetTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="colorAccent">#FF0266</item>
         <item name="bottomSheetStyle">@style/NstackBottomSheetStyle</item>
         <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
