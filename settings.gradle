@@ -1,1 +1,1 @@
-include ':nstack-kotlin', ':demo', ':nstack-kotlin-core'
+include ':nstack-kotlin', ':demo', ':nstack-kotlin-core', ':nstack-kotlin-plugin'
