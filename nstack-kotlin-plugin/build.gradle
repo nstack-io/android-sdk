@@ -7,20 +7,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile 'com.android.tools.build:gradle:3.4.2'
+    implementation gradleApi()
+    implementation localGroovy()
 }
-
-task installArchives(type: Upload) {
-    group = "maven"
-    description "Installs the artifacts to the local Maven repository."
-    repositories.mavenInstaller {
-        configuration = configurations.default
-        pom.groupId = 'dk.nodes.nstack'
-        pom.artifactId = 'translation'
-        pom.version = '3.0.3-LOCAL'
-        pom.packaging = 'jar'
-    }
-}
-signArchives
