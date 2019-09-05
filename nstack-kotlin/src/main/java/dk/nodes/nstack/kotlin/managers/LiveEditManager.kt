@@ -18,8 +18,8 @@ import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.ShakeDetector
-import dk.nodes.nstack.kotlin.util.extensions.detachLiveEditListener
 import dk.nodes.nstack.kotlin.util.extensions.attachLiveEditListener
+import dk.nodes.nstack.kotlin.util.extensions.detachLiveEditListener
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 import java.lang.ref.WeakReference
@@ -283,19 +283,22 @@ internal class LiveEditManager(
         view: View,
         translationPair: Pair<TranslationData, TranslationData>
     ) {
+        val options = arrayOf("View translation proposals", "Propose new translation")
         val builder = AlertDialog.Builder(view.context)
-            .setTitle("NStack proposal")
-            .setPositiveButton("View translation proposals") { _, _ ->
-                showProposalsDialog(view, translationPair, true)
-            }
-            .setNegativeButton("Propose new translation") { _, _ ->
-                val list = translationPair.toKeyAndTranslationList()
-                if (list.size == 1) {
-                    showLiveEditDialog(view, list.first())
-                } else {
-                    showChooseSectionKeyDialog(view, list)
+                .setTitle("NStack proposal")
+                .setItems(options) { _, position ->
+                    when (position) {
+                        0 -> showProposalsDialog(view, translationPair, true)
+                        else -> {
+                            val list = translationPair.toKeyAndTranslationList()
+                            if (list.size == 1) {
+                                showLiveEditDialog(view, list.first())
+                            } else {
+                                showChooseSectionKeyDialog(view, list)
+                            }
+                        }
+                    }
                 }
-            }
         builder.create().show()
     }
 
