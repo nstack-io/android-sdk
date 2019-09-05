@@ -18,9 +18,8 @@ import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.ShakeDetector
-import dk.nodes.nstack.kotlin.util.extensions.addLiveEditOverlay
-import dk.nodes.nstack.kotlin.util.extensions.clearLiveEditOverlay
-import dk.nodes.nstack.kotlin.util.extensions.setOnVeryLongClickListener
+import dk.nodes.nstack.kotlin.util.extensions.detachLiveEditListener
+import dk.nodes.nstack.kotlin.util.extensions.attachLiveEditListener
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 import java.lang.ref.WeakReference
@@ -44,8 +43,7 @@ internal class LiveEditManager(
                 val data = view.getTag(NStackViewTag) as? TranslationData
                 if (data.isValid()) {
                     viewQueue += WeakReference(view)
-                    view.addLiveEditOverlay()
-                    view.setOnVeryLongClickListener {
+                    view.attachLiveEditListener {
                         showChooseOptionDialog(view, translationData)
                     }
                 }
@@ -82,8 +80,7 @@ internal class LiveEditManager(
         while (viewQueue.isNotEmpty()) {
             val view = viewQueue.poll()?.get()
             if (view != null) {
-                view.clearLiveEditOverlay()
-                view.setOnTouchListener(null)
+                view.detachLiveEditListener()
                 closestView = view
             }
         }
