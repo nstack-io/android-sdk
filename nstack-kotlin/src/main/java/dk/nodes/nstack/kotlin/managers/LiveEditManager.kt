@@ -9,7 +9,6 @@ import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.snackbar.Snackbar
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.NStackException
 import dk.nodes.nstack.kotlin.models.TranslationData
@@ -17,8 +16,7 @@ import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.ShakeDetector
-import dk.nodes.nstack.kotlin.util.extensions.attachLiveEditListener
-import dk.nodes.nstack.kotlin.util.extensions.detachLiveEditListener
+import dk.nodes.nstack.kotlin.util.extensions.*
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 import java.lang.ref.WeakReference
@@ -75,15 +73,10 @@ internal class LiveEditManager(
      * Removes background and long click listener
      */
     private fun disableLiveEdit() {
-        var closestView: View? = null
         while (viewQueue.isNotEmpty()) {
             val view = viewQueue.poll()?.get()
-            if (view != null) {
-                view.detachLiveEditListener()
-                closestView = view
-            }
+            view?.detachLiveEditListener()
         }
-        closestView?.let { showProposalsDialog(it) }
         viewQueue.clear()
     }
 
@@ -190,7 +183,7 @@ internal class LiveEditManager(
         val bottomSheetInternal =
             bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
         BottomSheetBehavior.from(bottomSheetInternal).apply {
-            peekHeight = 400
+            peekHeight = 168.dp
             isFitToContents = true
         }
         recyclerView!!.layoutParams = recyclerView.layoutParams.apply {
@@ -201,29 +194,30 @@ internal class LiveEditManager(
 
     private fun showProposalsDialog(
         view: View,
-        translationPair: Pair<TranslationData, TranslationData>? = null,
-        showDialogOnLoad: Boolean = false
+        translationPair: Pair<TranslationData, TranslationData>? = null
     ) {
+        val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_proposals)
+
+        val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+        val recyclerView = bottomSheetDialog.findViewById<RecyclerView>(R.id.recyclerView)
+        val loadingView = bottomSheetDialog.findViewById<ProgressBar>(R.id.loadingView)
+        val errorTextView = bottomSheetDialog.findViewById<TextView>(R.id.errorTextView)
+
+        BottomSheetBehavior.from(bottomSheetInternal).apply {
+            peekHeight = 300.dp
+        }
+
+        loadingView?.show()
+
         networkManager.fetchProposals(
             { proposals ->
                 runUiAction {
-                    if (proposals.isNotEmpty()) {
-                        val bottomSheetDialog =
-                            BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
-                        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_proposals)
-                        val bottomSheetInternal =
-                            bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
-                        val recyclerView =
-                            bottomSheetDialog.findViewById<RecyclerView>(R.id.recyclerView)
-                        BottomSheetBehavior.from(bottomSheetInternal).apply {
-                            peekHeight = 400
-                            isFitToContents = true
-                        }
-                        recyclerView!!.layoutParams = recyclerView.layoutParams.apply {
-                            height = getWindowHeight() * 2 / 3
-                        }
+                    loadingView?.hide()
 
-                        recyclerView.adapter = ProposalsAdapter().apply {
+                    if (proposals.isNotEmpty()) {
+                        errorTextView?.visibility = View.GONE
+                        recyclerView?.adapter = ProposalsAdapter().apply {
                             val sectionAndKeyPairList =
                                 translationPair?.toKeyAndTranslationList()
                                     ?.map { getSectionAndKeyPair(it.key) }
@@ -233,29 +227,19 @@ internal class LiveEditManager(
                                 update(proposals.filter { sectionAndKeyPairList.contains(it.section to it.key) })
                             }
                         }
-                        if (showDialogOnLoad) {
-                            bottomSheetDialog.show()
-                        } else {
-                            Snackbar.make(view, "Open Proposals", Snackbar.LENGTH_LONG)
-                                .setAction("OPEN") {
-                                    bottomSheetDialog.show()
-                                }
-                                .show()
-                        }
                     } else {
-                        Toast.makeText(
-                            view.context,
-                            "There isn't any proposals",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
+                        errorTextView?.text = "No proposals found"
+                        errorTextView?.visibility = View.VISIBLE
                     }
                 }
             },
             {
-                Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT).show()
+                errorTextView?.text = "Could not load proposals"
+                errorTextView?.visibility = View.VISIBLE
+                loadingView?.hide()
             }
         )
+        bottomSheetDialog.show()
     }
 
     private fun getWindowHeight(): Int {
@@ -294,7 +278,7 @@ internal class LiveEditManager(
 
         optionViewProposalTextView?.setOnClickListener {
             bottomSheetDialog.dismiss()
-            showProposalsDialog(view, translationPair, true)
+            showProposalsDialog(view, translationPair)
         }
 
         optionEditProposalTextView?.setOnClickListener {
