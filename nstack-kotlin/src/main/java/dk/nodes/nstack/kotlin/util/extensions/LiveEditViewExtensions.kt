@@ -11,11 +11,18 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import dk.nodes.nstack.R
 
+/**
+ * Clears the live-edit view overlay and the associated touch-listener.
+ */
 fun View.detachLiveEditListener() {
     overlay.clear()
     setOnTouchListener(null)
 }
 
+/**
+ * Applies the live-edit view overlay and the corresponding touch-listener.
+ * To disable call [detachLiveEditListener].
+ */
 fun View.attachLiveEditListener(listener: () -> Unit) {
     val drawable = LiveEditOverlayDrawable(context)
     drawable.setBounds(0, 0, width, height)
@@ -43,6 +50,7 @@ fun View.attachLiveEditListener(listener: () -> Unit) {
             cancelCountdownTimer()
             cancelOrderCountdownTimer = object : CountDownTimer(longClickDuration, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
+                    // Do nothing
                 }
 
                 override fun onFinish() {

@@ -2,12 +2,18 @@ package dk.nodes.nstack.kotlin.util.extensions
 
 import android.view.View
 
-fun View.show() {
+/**
+ * Changes visibility of a View to [View.VISIBLE] along with a alpha-fade-in animation.
+ */
+fun View.show(duration : Long = 200L, startDelay : Long = 200) {
     animation?.cancel()
-    animate().alpha(1f).setDuration(200L).setStartDelay(200L).withStartAction { visibility = View.VISIBLE }.start()
+    animate().alpha(1f).setDuration(duration).setStartDelay(startDelay).withStartAction { visibility = View.VISIBLE }.start()
 }
 
-fun View.hide() {
+/**
+ * Changes visibility of a View to [View.INVISIBLE] along with a alpha-fade-out animation.
+ */
+fun View.hide(duration : Long = 200L, startDelay : Long = 0) {
     animation?.cancel()
-    animate().alpha(0f).setDuration(200L).setStartDelay(0L).withEndAction { visibility = View.INVISIBLE }.start()
+    animate().alpha(0f).setDuration(duration).setStartDelay(startDelay).withEndAction { visibility = View.INVISIBLE }.start()
 }

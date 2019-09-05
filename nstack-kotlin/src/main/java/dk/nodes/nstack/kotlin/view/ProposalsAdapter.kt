@@ -56,7 +56,7 @@ internal class ProposalsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(
         private val valueTextView: TextView = itemView.findViewById(R.id.valueTextView)
 
         fun bind(row: Item.Row) {
-            localeTextView.text = row.local
+            localeTextView.text = row.locale
             valueTextView.text = row.value
         }
     }
@@ -64,13 +64,21 @@ internal class ProposalsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(
     private class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
         fun bind(header: Item.Header) {
-            titleTextView.text = header.key
+            titleTextView.text = header.title
         }
     }
 
     private sealed class Item {
-        data class Header(val key: String) : Item()
-        data class Row(val id: Long, val value: String, val local : String) : Item()
+        /**
+         * @title the list title
+         */
+        data class Header(val title: String) : Item()
+        /**
+         * @id the id of a translation
+         * @value the translated text
+         * @local the translation locale
+         */
+        data class Row(val id: Long, val value: String, val locale : String) : Item()
     }
 
     companion object {
