@@ -143,21 +143,19 @@ internal class LiveEditManager(
                     }
                 },
                 onError = { exception ->
-
-                    when (exception) {
-                        is NStackException -> {
-                            runUiAction {
+                    runUiAction {
+                        when (exception) {
+                            is NStackException -> {
                                 Toast.makeText(
-                                    view.context,
-                                    exception.errorBody.localizedMessage ?: exception.errorBody.message,
-                                    Toast.LENGTH_SHORT
+                                        view.context,
+                                        exception.errorBody.localizedMessage
+                                                ?: exception.errorBody.message,
+                                        Toast.LENGTH_SHORT
                                 ).show()
                             }
-                        }
-                        else -> {
-                            runUiAction {
+                            else -> {
                                 Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT)
-                                    .show()
+                                        .show()
                             }
                         }
                     }
@@ -211,33 +209,35 @@ internal class LiveEditManager(
         loadingView?.show()
 
         networkManager.fetchProposals(
-            { proposals ->
-                runUiAction {
-                    loadingView?.hide()
+                { proposals ->
+                    runUiAction {
+                        loadingView?.hide()
 
-                    if (proposals.isNotEmpty()) {
-                        errorTextView?.visibility = View.GONE
-                        recyclerView?.adapter = ProposalsAdapter().apply {
-                            val sectionAndKeyPairList =
-                                translationPair?.toKeyAndTranslationList()
-                                    ?.map { getSectionAndKeyPair(it.key) }
-                            if (sectionAndKeyPairList.isNullOrEmpty()) {
-                                update(proposals)
-                            } else {
-                                update(proposals.filter { sectionAndKeyPairList.contains(it.section to it.key) })
+                        if (proposals.isNotEmpty()) {
+                            errorTextView?.visibility = View.GONE
+                            recyclerView?.adapter = ProposalsAdapter().apply {
+                                val sectionAndKeyPairList =
+                                        translationPair?.toKeyAndTranslationList()
+                                                ?.map { getSectionAndKeyPair(it.key) }
+                                if (sectionAndKeyPairList.isNullOrEmpty()) {
+                                    update(proposals)
+                                } else {
+                                    update(proposals.filter { sectionAndKeyPairList.contains(it.section to it.key) })
+                                }
                             }
+                        } else {
+                            errorTextView?.text = "No proposals found"
+                            errorTextView?.visibility = View.VISIBLE
                         }
-                    } else {
-                        errorTextView?.text = "No proposals found"
+                    }
+                },
+                {
+                    runUiAction {
+                        errorTextView?.text = "Could not load proposals"
                         errorTextView?.visibility = View.VISIBLE
+                        loadingView?.hide()
                     }
                 }
-            },
-            {
-                errorTextView?.text = "Could not load proposals"
-                errorTextView?.visibility = View.VISIBLE
-                loadingView?.hide()
-            }
         )
         bottomSheetDialog.show()
     }
