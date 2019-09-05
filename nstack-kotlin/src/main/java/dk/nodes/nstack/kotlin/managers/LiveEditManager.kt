@@ -90,6 +90,7 @@ internal class LiveEditManager(
             val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
         }
+        val contentView = bottomSheetDialog.findViewById<View>(R.id.contentView)
         val editText = bottomSheetDialog.findViewById<EditText>(R.id.zzz_nstack_translation_et)
         val btn = bottomSheetDialog.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
         val loadingView = bottomSheetDialog.findViewById<ProgressBar>(R.id.loadingView)
@@ -101,6 +102,7 @@ internal class LiveEditManager(
 
             editText?.isEnabled = false
             btn.isEnabled = false
+            contentView?.hide()
             loadingView?.show()
             networkManager.postProposal(
                 appOpenSettingsManager.getAppOpenSettings(),
@@ -152,6 +154,7 @@ internal class LiveEditManager(
                         editText?.isEnabled = true
                         btn.isEnabled = true
                         loadingView?.hide()
+                        contentView?.show()
 
                         when (exception) {
                             is NStackException -> {

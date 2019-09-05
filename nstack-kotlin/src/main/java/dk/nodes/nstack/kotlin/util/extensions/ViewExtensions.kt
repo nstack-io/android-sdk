@@ -9,5 +9,5 @@ fun View.show() {
 
 fun View.hide() {
     animation?.cancel()
-    animate().alpha(0f).setDuration(200L).setStartDelay(0L).withEndAction { visibility = View.GONE }.start()
+    animate().alpha(0f).setDuration(200L).setStartDelay(0L).withEndAction { visibility = View.INVISIBLE }.start()
 }

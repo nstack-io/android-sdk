@@ -6,6 +6,7 @@
     android:minHeight="300dp">
 
     <LinearLayout
+        android:id="@+id/contentView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
