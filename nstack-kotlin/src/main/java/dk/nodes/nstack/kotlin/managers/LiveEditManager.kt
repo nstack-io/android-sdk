@@ -283,23 +283,32 @@ internal class LiveEditManager(
         view: View,
         translationPair: Pair<TranslationData, TranslationData>
     ) {
-        val options = arrayOf("View translation proposals", "Propose new translation")
-        val builder = AlertDialog.Builder(view.context)
-                .setTitle("NStack proposal")
-                .setItems(options) { _, position ->
-                    when (position) {
-                        0 -> showProposalsDialog(view, translationPair, true)
-                        else -> {
-                            val list = translationPair.toKeyAndTranslationList()
-                            if (list.size == 1) {
-                                showLiveEditDialog(view, list.first())
-                            } else {
-                                showChooseSectionKeyDialog(view, list)
-                            }
-                        }
-                    }
-                }
-        builder.create().show()
+        val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_option)
+        bottomSheetDialog.setOnShowListener {
+            val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+            BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
+        }
+
+        val optionViewProposalTextView = bottomSheetDialog.findViewById<TextView>(R.id.optionViewProposalTextView)
+        val optionEditProposalTextView = bottomSheetDialog.findViewById<TextView>(R.id.optionEditProposalTextView)
+
+        optionViewProposalTextView?.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            showProposalsDialog(view, translationPair, true)
+        }
+
+        optionEditProposalTextView?.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            val list = translationPair.toKeyAndTranslationList()
+            if (list.size == 1) {
+                showLiveEditDialog(view, list.first())
+            } else {
+                showChooseSectionKeyDialog(view, list)
+            }
+        }
+
+        bottomSheetDialog.show()
     }
 
     private fun Pair<TranslationData, TranslationData>.toKeyAndTranslationList(): List<KeyAndTranslation> {

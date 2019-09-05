@@ -1,8 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
+    <TextView
+        android:id="@+id/optionViewProposalTextView"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="?selectableItemBackground"
+        android:drawableStart="@drawable/ic_visibility"
+        android:drawablePadding="16dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="View translation proposals"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
+    <TextView
+        android:id="@+id/optionEditProposalTextView"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="?selectableItemBackground"
+        android:drawableStart="@drawable/ic_edit"
+        android:drawablePadding="16dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="Propose new translation"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
 </LinearLayout>
