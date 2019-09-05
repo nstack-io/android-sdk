@@ -215,12 +215,10 @@ internal class LiveEditManager(
         }
 
         loadingView?.show()
-
+        recyclerView?.hide()
         networkManager.fetchProposals(
                 { proposals ->
                     runUiAction {
-                        loadingView?.hide()
-
                         if (proposals.isNotEmpty()) {
                             errorTextView?.visibility = View.GONE
                             recyclerView?.adapter = ProposalsAdapter().apply {
@@ -233,6 +231,9 @@ internal class LiveEditManager(
                                     update(proposals.filter { sectionAndKeyPairList.contains(it.section to it.key) })
                                 }
                             }
+
+                            loadingView?.hide()
+                            recyclerView?.show()
                         } else {
                             errorTextView?.text = "No proposals found"
                             errorTextView?.visibility = View.VISIBLE
