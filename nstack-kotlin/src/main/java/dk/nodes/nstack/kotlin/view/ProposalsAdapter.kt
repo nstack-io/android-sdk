@@ -45,30 +45,32 @@ internal class ProposalsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(
         newList.groupBy { it.key }.forEach { entry ->
             list += Item.Header(entry.key)
             entry.value.forEach {
-                list += Item.Row(it.id, it.value)
+                list += Item.Row(it.id, it.value, it.locale)
             }
         }
         notifyDataSetChanged()
     }
 
     private class RowViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val proposalTv: TextView = itemView.findViewById(R.id.proposalTv)
+        private val localeTextView: TextView = itemView.findViewById(R.id.localeTextView)
+        private val valueTextView: TextView = itemView.findViewById(R.id.valueTextView)
 
         fun bind(row: Item.Row) {
-            proposalTv.text = row.value
+            localeTextView.text = row.local
+            valueTextView.text = row.value
         }
     }
 
     private class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val headerTv: TextView = itemView.findViewById(R.id.headerTv)
+        private val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
         fun bind(header: Item.Header) {
-            headerTv.text = header.key
+            titleTextView.text = header.key
         }
     }
 
     private sealed class Item {
         data class Header(val key: String) : Item()
-        data class Row(val id: Long, val value: String) : Item()
+        data class Row(val id: Long, val value: String, val local : String) : Item()
     }
 
     companion object {
