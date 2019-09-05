@@ -6,7 +6,6 @@ import android.hardware.SensorManager
 import android.os.Handler
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -93,7 +92,7 @@ internal class LiveEditManager(
         keyAndTranslation: KeyAndTranslation
     ) {
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
-        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_change)
+        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_edit)
         bottomSheetDialog.setOnShowListener {
             val bottomSheetInternal =
                 bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
@@ -284,7 +283,7 @@ internal class LiveEditManager(
         translationPair: Pair<TranslationData, TranslationData>
     ) {
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
-        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_option)
+        bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_options)
         bottomSheetDialog.setOnShowListener {
             val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
