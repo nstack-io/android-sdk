@@ -13,7 +13,7 @@ data class NStackErrorBody(
     @SerializedName("class")
     val errorClass: String = "",
     val code: String = "",
-    val errors: List<String> = listOf(),
+    //val errors: List<String> = listOf(),
     val localizedMessage: String? = null,
     val message: String = "",
     val service: String? = null

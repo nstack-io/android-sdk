@@ -87,17 +87,21 @@ internal class LiveEditManager(
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_edit)
         bottomSheetDialog.setOnShowListener {
-            val bottomSheetInternal =
-                bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+            val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
         }
         val editText = bottomSheetDialog.findViewById<EditText>(R.id.zzz_nstack_translation_et)
         val btn = bottomSheetDialog.findViewById<Button>(R.id.zzz_nstack_translation_change_btn)
+        val loadingView = bottomSheetDialog.findViewById<ProgressBar>(R.id.loadingView)
 
-        editText!!.setText(keyAndTranslation.translation)
-        btn!!.setOnClickListener {
+        editText?.setText(keyAndTranslation.translation)
+        btn?.setOnClickListener {
             val pair = getSectionAndKeyPair(keyAndTranslation.key)
-            val editedTranslation = editText.text.toString()
+            val editedTranslation = editText?.text.toString()
+
+            editText?.isEnabled = false
+            btn.isEnabled = false
+            loadingView?.show()
             networkManager.postProposal(
                 appOpenSettingsManager.getAppOpenSettings(),
                 language,
@@ -105,6 +109,7 @@ internal class LiveEditManager(
                 pair?.first ?: "",
                 editedTranslation,
                 onSuccess = {
+                    bottomSheetDialog.dismiss()
                     runUiAction {
                         when (view) {
                             is ToggleButton -> {
@@ -144,6 +149,10 @@ internal class LiveEditManager(
                 },
                 onError = { exception ->
                     runUiAction {
+                        editText?.isEnabled = true
+                        btn.isEnabled = true
+                        loadingView?.hide()
+
                         when (exception) {
                             is NStackException -> {
                                 Toast.makeText(
@@ -161,7 +170,6 @@ internal class LiveEditManager(
                     }
                 }
             )
-            bottomSheetDialog.dismiss()
         }
         bottomSheetDialog.show()
     }
