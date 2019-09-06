@@ -34,7 +34,6 @@
         android:drawableTop="@drawable/ic_warning"
         android:drawablePadding="8dp"
         android:gravity="center"
-        android:progressTint="@color/colorAccent"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
         android:textColor="@color/white"
         android:visibility="gone"
