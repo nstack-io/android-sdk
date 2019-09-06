@@ -407,6 +407,9 @@ object NStack {
         if (index.language.isDefault) {
             defaultLanguage = index.language.locale
         }
+        if(index.language.isBestFit) {
+            language = index.language.locale
+        }
     }
 
     /**
@@ -766,7 +769,6 @@ object NStack {
         if (debugMode) {
             LiveEditManager(
                 context,
-                language.toString().replace("_", "-"),
                 translationHolder,
                 viewTranslationManager,
                 networkManager,
