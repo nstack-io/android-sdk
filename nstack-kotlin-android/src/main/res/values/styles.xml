@@ -20,4 +20,8 @@
         <item name="colorControlActivated">#37DDAD</item>
         <item name="colorControlHighlight">#37DDAD</item>
     </style>
+
+    <style name="ProgressBarTheme">
+        <item name="colorAccent">#37DDAD</item>
+    </style>
 </resources>

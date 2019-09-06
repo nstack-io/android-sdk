@@ -18,6 +18,7 @@
 
     <ProgressBar
         android:id="@+id/loadingView"
+        android:theme="@style/ProgressBarTheme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|top"
@@ -33,6 +34,7 @@
         android:drawableTop="@drawable/ic_warning"
         android:drawablePadding="8dp"
         android:gravity="center"
+        android:progressTint="@color/colorAccent"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
         android:textColor="@color/white"
         android:visibility="gone"
