@@ -29,7 +29,7 @@ fun View.attachLiveEditListener(listener: () -> Unit) {
     overlay.add(drawable)
 
     setOnTouchListener(object : View.OnTouchListener {
-        private val longClickDuration = 1_200L
+        private val longClickDuration = 800L
         private var timerFinished = false
         private var cancelOrderCountdownTimer: CountDownTimer? = null
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
