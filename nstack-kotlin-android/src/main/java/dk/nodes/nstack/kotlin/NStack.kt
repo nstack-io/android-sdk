@@ -30,14 +30,8 @@ import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
+import dk.nodes.nstack.kotlin.util.*
 import dk.nodes.nstack.kotlin.util.ContextWrapper
-import dk.nodes.nstack.kotlin.util.LanguageListener
-import dk.nodes.nstack.kotlin.util.LanguagesListener
-import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
@@ -45,6 +39,8 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * NStack
@@ -310,6 +306,8 @@ object NStack {
                         "NStack appOpen "
                     )
 
+                    val languageFetchCallback = LanguageFetchCallback(appUpdate.localize.size)
+
                     appUpdate.localize.forEach { localizeIndex ->
                         if (localizeIndex.shouldUpdate) {
                             networkManager.loadTranslation(localizeIndex.url, {
@@ -318,12 +316,16 @@ object NStack {
                                     onLanguagesChanged()
                                     onLanguageChanged()
                                 }
+
+                                languageFetchCallback.fetchedLangauge()
                             }, {
                                 NLog.e(
                                     this,
                                     "Could not load translations for ${localizeIndex.language.locale}",
                                     it
                                 )
+
+                                languageFetchCallback.fetchedLangauge()
                             })
 
                             appOpenSettingsManager.setUpdateDate()
@@ -336,9 +338,12 @@ object NStack {
                             language = localizeIndex.language.locale
                         }
                     }
-                    contextWrapper.runUiAction {
-                        callback.invoke(true)
-                        onAppUpdateListener?.invoke(appUpdate)
+
+                    languageFetchCallback.done = {
+                        contextWrapper.runUiAction {
+                            callback.invoke(true)
+                            onAppUpdateListener?.invoke(appUpdate)
+                        }
                     }
                 },
                 {
