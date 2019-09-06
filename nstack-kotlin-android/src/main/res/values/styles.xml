@@ -14,7 +14,7 @@
     </style>
 
     <style name="EditEditTextStyle">
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">14sp</item>
         <item name="colorAccent">#37DDAD</item>
         <item name="colorControlNormal">#37DDAD</item>
         <item name="colorControlActivated">#37DDAD</item>
