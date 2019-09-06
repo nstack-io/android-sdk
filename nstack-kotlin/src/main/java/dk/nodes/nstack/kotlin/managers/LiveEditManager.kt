@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dk.nodes.nstack.R
+import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.NStackException
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
@@ -24,7 +25,6 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 internal class LiveEditManager(
     context: Context,
-    private val language: String,
     private val translationHolder: TranslationHolder,
     private val viewTranslationManager: ViewTranslationManager,
     private val networkManager: NetworkManager,
@@ -106,7 +106,7 @@ internal class LiveEditManager(
             loadingView?.show()
             networkManager.postProposal(
                 appOpenSettingsManager.getAppOpenSettings(),
-                language,
+                NStack.language.toString().replace("_", "-"),
                 pair?.second ?: "",
                 pair?.first ?: "",
                 editedTranslation,

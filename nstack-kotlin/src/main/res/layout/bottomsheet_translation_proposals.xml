@@ -34,6 +34,7 @@
         android:drawablePadding="8dp"
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+        android:textColor="@color/white"
         android:visibility="gone"
         tools:text="Text Preview"
         tools:visibility="visible" />

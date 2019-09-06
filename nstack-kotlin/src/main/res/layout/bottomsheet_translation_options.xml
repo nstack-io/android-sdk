@@ -6,6 +6,33 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
+    <LinearLayout
+        android:gravity="center_vertical"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:src="@drawable/ic_nstack_logo"
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:fontFamily="sans-serif-black"
+            android:includeFontPadding="false"
+            android:layout_marginStart="12dp"
+            android:text="NStack"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/optionViewProposalTextView"
         android:layout_width="match_parent"
@@ -16,6 +43,8 @@
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-medium"
         android:text="View translation proposals"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
@@ -29,6 +58,8 @@
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-medium"
         android:text="Propose new translation"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
