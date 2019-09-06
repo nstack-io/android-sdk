@@ -1,10 +1,12 @@
+import dk.nstack.translation.plugin.TranslationPlugin
+
 apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-apply plugin: "dk.nstack.translation.plugin"
+apply plugin: TranslationPlugin
 
 translation {
     appId = "bOdrNuZd4syxuAz6gyCb3xwBCjA8U4h4IcQI"

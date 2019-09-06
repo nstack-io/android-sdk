@@ -1,1 +1,1 @@
-include ':nstack-kotlin-android', ':demo', ':nstack-kotlin-core'
+include ':nstack-kotlin-android', ':demo', ':nstack-kotlin-core', ':nstack-gradle'
