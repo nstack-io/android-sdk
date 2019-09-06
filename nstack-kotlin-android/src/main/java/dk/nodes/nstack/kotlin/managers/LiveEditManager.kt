@@ -85,6 +85,7 @@ internal class LiveEditManager(
         keyAndTranslation: KeyAndTranslation
     ) {
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+        bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_edit)
         bottomSheetDialog.setOnShowListener {
             val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
@@ -182,6 +183,7 @@ internal class LiveEditManager(
         keyAndTranslationList: List<KeyAndTranslation>
     ) {
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+        bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_choose_key_section)
         val recyclerView = bottomSheetDialog.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView?.adapter =
@@ -206,6 +208,7 @@ internal class LiveEditManager(
         translationPair: Pair<TranslationData, TranslationData>? = null
     ) {
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+        bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_proposals)
 
         val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
@@ -279,6 +282,7 @@ internal class LiveEditManager(
         translationPair: Pair<TranslationData, TranslationData>
     ) {
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+        bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_options)
         bottomSheetDialog.setOnShowListener {
             val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
