@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorAccentLight">#85eace</color>
+    <color name="colorAccent">#37DDAD</color>
+    <color name="colorAccentDark">#1eae85</color>
+
+    <color name="white">#FFFFFF</color>
+
+    <color name="nstackBackground">#12222F</color>
+    <color name="nstackbackgroundDark">#0E1A24</color>
+    <color name="nstackButtonColor">#37DDAD</color>
+
+</resources>

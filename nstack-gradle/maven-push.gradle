@@ -1,0 +1,106 @@
+apply plugin: 'signing'
+apply plugin: 'maven'
+
+// Username & password for Sonatype, stored in gradle.properties
+def _ossrhUsername = System.getenv('NEXUS_USERNAME')
+def _ossrhPassword = System.getenv('NEXUS_PASSWORD')
+
+allprojects { ext."signing.keyId" = System.getenv('keyId') }
+allprojects { ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile') }
+allprojects { ext."signing.password" = System.getenv('password') }
+
+// Artifact settings
+def _group = 'dk.nodes.nstack'
+def _version = '3.1.0'
+def _archivesBaseName = 'translation'
+
+def _name = 'NStack Gradle Plugin'
+def _description = 'Gradle extensions for NStack.io translations'
+
+nexusStaging {
+    packageGroup = "dk.nodes"
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': _name, 'Implementation-Version': _version
+    }
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar, androidJavadocsJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            pom.groupId = _group
+            pom.artifactId = _archivesBaseName
+            pom.version = _version
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: _ossrhUsername, password: _ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: _ossrhUsername, password: _ossrhPassword)
+            }
+
+            pom.project {
+                name _name
+                packaging 'jar'
+                artifactId _archivesBaseName
+                description _description
+                url 'https://github.com/nodes-android/nstack-gradle'
+                inceptionYear '2015'
+
+                scm {
+                    url 'https://github.com/nodes-android/nstack-gradle'
+                    connection 'scm:https://github.com/nodes-android/nstack-gradle'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'johsoe'
+                        name 'Johnny Sørensen'
+                        email 'joso@nodes.dk'
+                    }
+                }
+
+                issueManagement {
+                    system 'GitHub issues'
+                    url 'https://github.com/nodes-android/nstack-gradle/issues'
+                }
+            }
+        }
+    }
+}

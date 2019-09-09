@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="NstackBottomSheetTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="bottomSheetStyle">@style/NstackBottomSheetStyle</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+
+    <style name="NstackBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="android:background">@drawable/background_rounded_dialog</item>
+    </style>
+
+    <style name="EditEditTextStyle">
+        <item name="android:textSize">14sp</item>
+        <item name="colorAccent">#37DDAD</item>
+        <item name="colorControlNormal">#37DDAD</item>
+        <item name="colorControlActivated">#37DDAD</item>
+        <item name="colorControlHighlight">#37DDAD</item>
+    </style>
+
+    <style name="ProgressBarTheme">
+        <item name="colorAccent">#37DDAD</item>
+    </style>
+</resources>
