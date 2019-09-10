@@ -19,20 +19,20 @@ internal class NetworkManager(context: Context) {
 
     fun loadTranslation(url: String, onSuccess: (String) -> Unit, onError: (Exception) -> Unit) {
         client.newCall(Request.Builder().url(url).build())
-            .enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    onError(e)
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    try {
-                        val translations = response.body()!!.string().asJsonObject!!.getJSONObject("data")
-                        onSuccess(translations.toString())
-                    } catch (e: Exception) {
+                .enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
                         onError(e)
                     }
-                }
-            })
+
+                    override fun onResponse(call: Call, response: Response) {
+                        try {
+                            val translations = response.body()!!.string().asJsonObject!!.getJSONObject("data")
+                            onSuccess(translations.toString())
+                        } catch (e: Exception) {
+                            onError(e)
+                        }
+                    }
+                })
     }
 
     suspend fun loadTranslation(url: String): String? {
@@ -45,43 +45,44 @@ internal class NetworkManager(context: Context) {
     }
 
     fun postAppOpen(
-        settings: AppOpenSettings,
-        acceptLanguage: String,
-        onSuccess: (AppUpdateData) -> Unit,
-        onError: (Exception) -> Unit
+            settings: AppOpenSettings,
+            acceptLanguage: String,
+            onSuccess: (AppUpdateData) -> Unit,
+            onError: (Exception) -> Unit
     ) {
         val formBuilder = FormBody.Builder()
-            .add("guid", settings.guid)
-            .add("version", settings.version)
-            .add("old_version", settings.oldVersion)
-            .add("platform", settings.platform)
-            .add("last_updated", settings.lastUpdated.formatted)
-            .add("dev", NStack.debugMode.toString())
+                .add("guid", settings.guid)
+                .add("version", settings.version)
+                .add("old_version", settings.oldVersion)
+                .add("platform", settings.platform)
+                .add("last_updated", settings.lastUpdated.formatted)
+                .add("dev", NStack.debugMode.toString())
+                .add("test", settings.versionUpdateTestMode.toString())
 
         val request = Request.Builder()
-            .url("${NStack.baseUrl}/api/v2/open")
-            .header("Accept-Language", acceptLanguage)
-            .post(formBuilder.build())
-            .build()
+                .url("${NStack.baseUrl}/api/v2/open")
+                .header("Accept-Language", acceptLanguage)
+                .post(formBuilder.build())
+                .build()
 
 
         client
-            .newCall(request)
-            .enqueue(object : Callback {
-                override fun onFailure(call: Call?, e: IOException) {
-                    onError.invoke(e)
-                }
-
-                override fun onResponse(call: Call?, response: Response?) {
-                    try {
-                        val responseString = response?.body()?.string()!!
-                        val appUpdate = AppUpdateResponse(responseString.asJsonObject!!)
-                        onSuccess.invoke(appUpdate.data)
-                    } catch (e: Exception) {
-                        onError(e)
+                .newCall(request)
+                .enqueue(object : Callback {
+                    override fun onFailure(call: Call?, e: IOException) {
+                        onError.invoke(e)
                     }
-                }
-            })
+
+                    override fun onResponse(call: Call?, response: Response?) {
+                        try {
+                            val responseString = response?.body()?.string()!!
+                            val appUpdate = AppUpdateResponse(responseString.asJsonObject!!)
+                            onSuccess.invoke(appUpdate.data)
+                        } catch (e: Exception) {
+                            onError(e)
+                        }
+                    }
+                })
     }
 
     suspend fun postAppOpen(
@@ -95,6 +96,7 @@ internal class NetworkManager(context: Context) {
                 .add("platform", settings.platform)
                 .add("last_updated", settings.lastUpdated.formatted)
                 .add("dev", NStack.debugMode.toString())
+                .add("test", settings.versionUpdateTestMode.toString())
 
         val request = Request.Builder()
                 .url("${NStack.baseUrl}/api/v2/open")
@@ -108,7 +110,8 @@ internal class NetworkManager(context: Context) {
                     .execute()
 
             val responseString = response?.body()?.string() ?: return AppOpenResult.Failure
-            val appUpdate = AppUpdateResponse(responseString.asJsonObject  ?: return AppOpenResult.Failure)
+            val appUpdate = AppUpdateResponse(responseString.asJsonObject
+                    ?: return AppOpenResult.Failure)
             return AppOpenResult.Success(appUpdate)
         } catch (e: Exception) {
             return AppOpenResult.Failure
@@ -120,26 +123,26 @@ internal class NetworkManager(context: Context) {
      */
     fun postMessageSeen(guid: String, messageId: Int) {
         val formBuilder = FormBody.Builder()
-            .add("guid", guid)
-            .add("message_id", messageId.toString())
+                .add("guid", guid)
+                .add("message_id", messageId.toString())
 
         val request = Request.Builder()
-            .url("${NStack.baseUrl}/api/v1/notify/messages/views")
-            .post(formBuilder.build())
-            .build()
+                .url("${NStack.baseUrl}/api/v1/notify/messages/views")
+                .post(formBuilder.build())
+                .build()
 
         client
-            .newCall(request)
-            .enqueue(object : Callback {
+                .newCall(request)
+                .enqueue(object : Callback {
 
-                override fun onFailure(call: Call, e: IOException) {
-                    NLog.e(this, "Failure posting message seen", e)
-                }
+                    override fun onFailure(call: Call, e: IOException) {
+                        NLog.e(this, "Failure posting message seen", e)
+                    }
 
-                override fun onResponse(call: Call, response: Response) {
-                    NLog.v(this, "Message seen")
-                }
-            })
+                    override fun onResponse(call: Call, response: Response) {
+                        NLog.v(this, "Message seen")
+                    }
+                })
     }
 
     /**
@@ -149,27 +152,27 @@ internal class NetworkManager(context: Context) {
         val answer = if (rated) "yes" else "no"
 
         val formBuilder = FormBody.Builder()
-            .add("guid", appOpenSettings.guid)
-            .add("platform", appOpenSettings.platform)
-            .add("answer", answer)
+                .add("guid", appOpenSettings.guid)
+                .add("platform", appOpenSettings.platform)
+                .add("answer", answer)
 
         val request = Request.Builder()
-            .url("${NStack.baseUrl}/api/v1/notify/rate_reminder/views")
-            .post(formBuilder.build())
-            .build()
+                .url("${NStack.baseUrl}/api/v1/notify/rate_reminder/views")
+                .post(formBuilder.build())
+                .build()
 
         client
-            .newCall(request)
-            .enqueue(object : Callback {
+                .newCall(request)
+                .enqueue(object : Callback {
 
-                override fun onFailure(call: Call, e: IOException) {
-                    NLog.e(this, "Failure posting rate reminder seen", e)
-                }
+                    override fun onFailure(call: Call, e: IOException) {
+                        NLog.e(this, "Failure posting rate reminder seen", e)
+                    }
 
-                override fun onResponse(call: Call, response: Response) {
-                    NLog.v(this, "Rate reminder seen")
-                }
-            })
+                    override fun onResponse(call: Call, response: Response) {
+                        NLog.v(this, "Rate reminder seen")
+                    }
+                })
     }
 
     /**

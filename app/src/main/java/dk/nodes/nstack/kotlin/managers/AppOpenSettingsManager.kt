@@ -7,8 +7,9 @@ import java.util.*
 
 
 internal class AppOpenSettingsManager(
-    private val clientAppInfo: ClientAppInfo,
-    private val preferences: Preferences
+        private val clientAppInfo: ClientAppInfo,
+        private val preferences: Preferences,
+        var versionUpdateTestMode: Boolean = false
 ) {
 
     fun getAppOpenSettings(): AppOpenSettings {
@@ -16,13 +17,15 @@ internal class AppOpenSettingsManager(
         val version = clientAppInfo.versionName
         val oldVersion = appOldVersion ?: version
         val updateDate = appUpdateDate
+        val versionUpdateTestMode = versionUpdateTestMode
 
         return AppOpenSettings(
-            "android",
-            uuid,
-            version,
-            oldVersion,
-            updateDate
+                "android",
+                uuid,
+                version,
+                oldVersion,
+                updateDate,
+                versionUpdateTestMode
         )
     }
 

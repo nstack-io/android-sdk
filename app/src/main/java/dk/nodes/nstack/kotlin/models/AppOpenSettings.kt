@@ -7,5 +7,6 @@ data class AppOpenSettings(
         var guid: String,
         var version: String,
         var oldVersion: String,
-        var lastUpdated: Date
+        var lastUpdated: Date,
+        var versionUpdateTestMode: Boolean = false
 )
