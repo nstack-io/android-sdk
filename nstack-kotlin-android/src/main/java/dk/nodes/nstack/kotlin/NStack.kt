@@ -213,6 +213,16 @@ object NStack {
         }
 
     /**
+     * Enable/Disable versionUpdateTestMode
+     */
+    var versionUpdateTestMode: Boolean
+        get() = appOpenSettingsManager.getAppOpenSettings().versionUpdateTestMode
+        set(value) {
+            appOpenSettingsManager.versionUpdateTestMode = value
+        }
+
+
+    /**
      * If flag is set to true this will auto change NStack's language when the device's locale is changed
      */
     var autoChangeLanguage: Boolean = false
