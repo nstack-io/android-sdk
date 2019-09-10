@@ -49,4 +49,5 @@ task installArchives(type: Upload) {
             repository url: repositories.mavenLocal().url
         }
     }
+
 }
