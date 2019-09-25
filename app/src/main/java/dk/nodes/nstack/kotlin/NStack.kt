@@ -127,7 +127,6 @@ object NStack {
     var language: Locale = Locale.getDefault()
         set(value) {
             field = value
-            onLanguageChanged()
         }
 
     /**
@@ -157,7 +156,7 @@ object NStack {
             return NLog.level
         }
         set(value) {
-            NLog.level
+            NLog.level = value
         }
 
     /**
@@ -314,9 +313,10 @@ object NStack {
 
                     val shouldUpdateTranslationClass = result.appUpdateResponse.data.localize.any { it.shouldUpdate }
                     if (shouldUpdateTranslationClass) {
-                        NLog.e(this, "ShouldUpdate is set, updating Translations class...")
-                        onLanguagesChanged()
-                        onLanguageChanged()
+                        withContext(Dispatchers.Main) {
+                            onLanguagesChanged()
+                            onLanguageChanged()
+                        }
                     }
 
                     result
@@ -327,7 +327,7 @@ object NStack {
                 }
             }
         } catch (e: Exception) {
-            NLog.e(this, "Error: onAppOpened - network request probably failed")
+            NLog.e(this, "Error: onAppOpened - network request probably failed -> $e")
             return AppOpenResult.Failure
         }
     }
@@ -340,6 +340,9 @@ object NStack {
         }
         if (index.language.isDefault) {
             defaultLanguage = index.language.locale
+        }
+        if (index.language.isBestFit) {
+            language = index.language.locale
         }
     }
 
@@ -461,7 +464,6 @@ object NStack {
      */
     private fun searchForLanguageByLocale(locale: Locale): JSONObject? {
         NLog.d(this, "searchForLanguageByLocale: $locale")
-
         // Search for our exact language
         var languageJson = searchForLocale(locale)
 
