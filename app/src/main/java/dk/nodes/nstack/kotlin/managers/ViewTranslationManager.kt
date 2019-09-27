@@ -85,7 +85,6 @@ class ViewTranslationManager {
             }
 
             is ToggleButton -> {
-                NLog.d(this, "Is ToggleButton")
                 (translatedKey ?: translatedText)?.let {
                     view.text = it
                 }
@@ -103,7 +102,6 @@ class ViewTranslationManager {
                 }
             }
             is CompoundButton -> {
-                NLog.d(this, "Is CompoundButton")
                 (translatedKey ?: translatedText)?.let {
                     view.text = it
                 }
@@ -124,6 +122,9 @@ class ViewTranslationManager {
                 translatedDescription?.let {
                     view.contentDescription = it
                 }
+            }
+            else -> {
+                NLog.d(this, "$view was a recognized type, not translating...")
             }
         }
     }

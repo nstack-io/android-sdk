@@ -12,7 +12,7 @@ allprojects { ext."signing.password" = System.getenv('password') }
 
 // Artifact settings
 def _group = 'dk.nodes.nstack'
-def _version = '3.0.14'
+def _version = '3.0.15'
 def _archivesBaseName = 'nstack-kotlin'
 
 def _name = 'NStack Kotlin Library'
@@ -20,6 +20,8 @@ def _description = 'nstack.io library for translations, update management and mo
 
 nexusStaging {
     packageGroup = "dk.nodes"
+    delayBetweenRetriesInMillis = 4000
+    stagingProfileId = "5a414403b5bf75"
 }
 
 afterEvaluate { project ->

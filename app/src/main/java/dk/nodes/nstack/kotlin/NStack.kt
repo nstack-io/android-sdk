@@ -12,8 +12,6 @@ import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -247,17 +245,47 @@ object NStack {
                 .postAppOpen(appOpenSettings, localeString,
                         { appUpdate ->
                             NLog.d(this, "NStack appOpen")
+                            val appOpenCallbackCount  = AppOpenCallbackCount(
+                                    callsCount = appUpdate.localize.count { it.shouldUpdate }
+                            )
                             appUpdate.localize.forEach { localizeIndex ->
                                 if (localizeIndex.shouldUpdate) {
                                     networkManager.loadTranslation(localizeIndex.url, {
                                         prefManager.setTranslations(localizeIndex.language.locale, it)
 
+                                        // Update localization in our runtime map
+                                        try {
+                                            networkLanguages = networkLanguages?.toMutableMap()?.apply {
+                                                put(localizeIndex.language.locale, it.asJsonObject ?: return@apply)
+                                            }?.toMap()
+                                        } catch (e: Exception) {
+                                            NLog.e(this, e.toString())
+                                        }
+
                                         if (localizeIndex.language.isBestFit) {
                                             onLanguagesChanged()
                                             onLanguageChanged()
                                         }
+
+                                        appOpenCallbackCount.callsCount--
+                                        if(appOpenCallbackCount.callsCount <= 0 && !appOpenCallbackCount.callbackRan) {
+                                            contextWrapper.runUiAction {
+                                                callback.invoke(true)
+                                                onAppUpdateListener?.invoke(appUpdate)
+                                            }
+                                            appOpenCallbackCount.callbackRan = true
+                                        }
                                     }, {
                                         NLog.e(this, "Could not load translations for ${localizeIndex.language.locale}", it)
+
+                                        appOpenCallbackCount.callsCount--
+                                        if(appOpenCallbackCount.callsCount <= 0 && !appOpenCallbackCount.callbackRan) {
+                                            contextWrapper.runUiAction {
+                                                callback.invoke(true)
+                                                onAppUpdateListener?.invoke(appUpdate)
+                                            }
+                                            appOpenCallbackCount.callbackRan = true
+                                        }
                                     })
 
                                     appOpenSettingsManager.setUpdateDate()
@@ -269,10 +297,14 @@ object NStack {
                                 if (localizeIndex.language.isBestFit) {
                                     language = localizeIndex.language.locale
                                 }
-                            }
-                            contextWrapper.runUiAction {
-                                callback.invoke(true)
-                                onAppUpdateListener?.invoke(appUpdate)
+
+                                if(appOpenCallbackCount.callsCount == 0 && !appOpenCallbackCount.callbackRan) {
+                                    contextWrapper.runUiAction {
+                                        callback.invoke(true)
+                                        onAppUpdateListener?.invoke(appUpdate)
+                                    }
+                                    appOpenCallbackCount.callbackRan = true
+                                }
                             }
                         },
                         {
@@ -335,7 +367,19 @@ object NStack {
     private suspend fun handleLocalizeIndex(index: LocalizeIndex) {
         if (index.shouldUpdate) {
             val translation = networkManager.loadTranslation(index.url) ?: return
+
+            // Save this localization for next app run
             prefManager.setTranslations(index.language.locale, translation)
+
+            // Update localization in our runtime map
+            try {
+                networkLanguages = networkLanguages?.toMutableMap()?.apply {
+                    put(index.language.locale, translation.asJsonObject ?: return@apply)
+                }?.toMap()
+            } catch (e: Exception) {
+                NLog.e(this, e.toString())
+            }
+
             appOpenSettingsManager.setUpdateDate()
         }
         if (index.language.isDefault) {
