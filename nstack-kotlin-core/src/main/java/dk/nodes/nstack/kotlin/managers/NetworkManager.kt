@@ -2,11 +2,13 @@ package dk.nodes.nstack.kotlin.managers
 
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
+import dk.nodes.nstack.kotlin.models.Answer
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
 import dk.nodes.nstack.kotlin.models.Proposal
+import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.provider.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import okhttp3.Call
@@ -324,4 +326,72 @@ class NetworkManager(
         get() {
             return SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(this)
         }
+
+    fun checkRateReminder(
+        settings: AppOpenSettings,
+        callback: (RateReminder2) -> Unit
+    ) {
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}")
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    callback(response.body()?.string()?.asJsonObject?.let { RateReminder2(it) } ?: return)
+                }
+            }
+        })
+    }
+
+    fun callActionEvents(
+        settings: AppOpenSettings,
+        action: String
+    ) {
+        val body = FormBody.Builder()
+            .add("guid", settings.guid)
+            .add("action", action)
+            .build()
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/notify/rate_reminder_v2/events")
+            .post(body)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                println(response.body())
+            }
+        })
+    }
+
+    fun callAnswers(
+        settings: AppOpenSettings,
+        rateReminder2: RateReminder2,
+        answer: Answer
+    ) {
+        val body = FormBody.Builder()
+            .add("guid", settings.guid)
+            .add("answer", answer.apiName)
+            .build()
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminder2.id}/answers")
+            .post(body)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+            }
+        })
+    }
 }

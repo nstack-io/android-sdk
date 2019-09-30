@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
@@ -19,11 +20,13 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
+import dk.nodes.nstack.kotlin.models.Answer
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
+import dk.nodes.nstack.kotlin.models.RateReminder
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackPlugin
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
@@ -31,7 +34,6 @@ import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.AppOpenCallbackCount
-import dk.nodes.nstack.kotlin.util.ContextWrapper
 import dk.nodes.nstack.kotlin.util.LanguageFetchCallback
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
@@ -41,6 +43,7 @@ import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
+import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
@@ -498,6 +501,7 @@ object NStack {
      * Call it to notify that the rate reminder was seen and doesn't need to appear any more
      * @param rated - true if user pressed Yes, false if user pressed No, not called if user pressed Later
      */
+    @Deprecated("use checkRateReminder to check and show rate reminder")
     fun onRateReminderAction(rated: Boolean) {
         val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
         networkManager.postRateReminderSeen(appOpenSettings, rated)
@@ -849,5 +853,30 @@ object NStack {
                 appOpenSettingsManager
             )
         }
+    }
+
+    fun checkRateReminder(rateReminder: RateReminder) {
+        val settings = appOpenSettingsManager.getAppOpenSettings()
+        networkManager.checkRateReminder(settings) {
+            AlertDialog.Builder(contextWrapper.context)
+                .setTitle(rateReminder.title)
+                .setMessage(rateReminder.body)
+                .setPositiveButton(rateReminder.yesButton) { _, _ ->
+                    networkManager.callAnswers(settings, it, Answer.POSITIVE)
+                }
+                .setNegativeButton(rateReminder.noButton) { _, _ ->
+                    // TODO: feedback
+                    networkManager.callAnswers(settings, it, Answer.NEGATIVE)
+                }
+                .setNeutralButton(rateReminder.laterButton) { _, _ ->
+                    networkManager.callAnswers(settings, it, Answer.SKIP)
+                }
+                .show()
+        }
+    }
+
+    // TODO: pass generated action
+    fun rateReminderAction(action: String) {
+        networkManager.callActionEvents(appOpenSettingsManager.getAppOpenSettings(), action)
     }
 }

@@ -1,10 +1,10 @@
-package dk.nodes.nstack.kotlin.util
+package dk.nodes.nstack.kotlin.util.extensions
 
 import android.content.Context
 import android.os.Handler
 
 internal class ContextWrapper(
-    private val context: Context
+    val context: Context
 ) {
 
     private var handler: Handler = Handler()
