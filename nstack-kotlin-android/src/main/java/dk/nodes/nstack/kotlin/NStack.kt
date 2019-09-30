@@ -30,17 +30,26 @@ import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
-import dk.nodes.nstack.kotlin.util.*
+import dk.nodes.nstack.kotlin.util.AppOpenCallbackCount
 import dk.nodes.nstack.kotlin.util.ContextWrapper
+import dk.nodes.nstack.kotlin.util.LanguageFetchCallback
+import dk.nodes.nstack.kotlin.util.LanguageListener
+import dk.nodes.nstack.kotlin.util.LanguagesListener
+import dk.nodes.nstack.kotlin.util.NLog
+import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
+import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
+import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
+import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
+import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * NStack
@@ -209,7 +218,7 @@ object NStack {
             return NLog.level
         }
         set(value) {
-            NLog.level
+            NLog.level = value
         }
 
     /**
@@ -291,9 +300,7 @@ object NStack {
      * Callback method for when the app is first opened
      */
     fun appOpen(callback: AppOpenCallback = {}) {
-        if (!isInitialized) {
-            throw IllegalStateException("init() has not been called")
-        }
+        check(isInitialized) { "init() has not been called" }
 
         val localeString = language.toString()
 
@@ -316,18 +323,43 @@ object NStack {
                         "NStack appOpen "
                     )
 
+                    val appOpenCallbackCount = AppOpenCallbackCount(
+                        callsCount = appUpdate.localize.count { it.shouldUpdate }
+                    )
+
                     val languageFetchCallback = LanguageFetchCallback(appUpdate.localize.size)
 
                     appUpdate.localize.forEach { localizeIndex ->
                         if (localizeIndex.shouldUpdate) {
                             networkManager.loadTranslation(localizeIndex.url, {
                                 prefManager.setTranslations(localizeIndex.language.locale, it)
+
+                                try {
+                                    networkLanguages = networkLanguages?.toMutableMap()?.apply {
+                                        put(
+                                            localizeIndex.language.locale,
+                                            it.asJsonObject ?: return@apply
+                                        )
+                                    }?.toMap()
+                                } catch (e: Exception) {
+                                    NLog.e(this, e.toString())
+                                }
+
                                 if (localizeIndex.language.isBestFit) {
                                     onLanguagesChanged()
                                     onLanguageChanged()
                                 }
 
-                                languageFetchCallback.fetchedLangauge()
+                                appOpenCallbackCount.callsCount--
+                                if (appOpenCallbackCount.callsCount <= 0 && !appOpenCallbackCount.callbackRan) {
+                                    contextWrapper.runUiAction {
+                                        callback(true)
+                                        onAppUpdateListener?.invoke(appUpdate)
+                                    }
+                                    appOpenCallbackCount.callbackRan = true
+                                }
+
+                                languageFetchCallback.fetchedLanguage()
                             }, {
                                 NLog.e(
                                     this,
@@ -335,7 +367,16 @@ object NStack {
                                     it
                                 )
 
-                                languageFetchCallback.fetchedLangauge()
+                                appOpenCallbackCount.callsCount--
+                                if (appOpenCallbackCount.callsCount <= 0 && !appOpenCallbackCount.callbackRan) {
+                                    contextWrapper.runUiAction {
+                                        callback.invoke(true)
+                                        onAppUpdateListener?.invoke(appUpdate)
+                                    }
+                                    appOpenCallbackCount.callbackRan = true
+                                }
+
+                                languageFetchCallback.fetchedLanguage()
                             })
 
                             appOpenSettingsManager.setUpdateDate()
@@ -346,6 +387,14 @@ object NStack {
 
                         if (localizeIndex.language.isBestFit) {
                             language = localizeIndex.language.locale
+                        }
+
+                        if (appOpenCallbackCount.callsCount == 0 && !appOpenCallbackCount.callbackRan) {
+                            contextWrapper.runUiAction {
+                                callback.invoke(true)
+                                onAppUpdateListener?.invoke(appUpdate)
+                            }
+                            appOpenCallbackCount.callbackRan = true
                         }
                     }
 
@@ -366,14 +415,13 @@ object NStack {
             )
     }
 
+
     /**
      * Coroutine version of AppOpen: Callback method for when the app is first opened
      *
      */
     suspend fun appOpen(): AppOpenResult {
-        if (!isInitialized) {
-            throw IllegalStateException("init() has not been called")
-        }
+        check(isInitialized) { "init() has not been called" }
 
         val localeString = language.toString()
         val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
@@ -396,8 +444,10 @@ object NStack {
                         result.appUpdateResponse.data.localize.any { it.shouldUpdate }
                     if (shouldUpdateTranslationClass) {
                         NLog.e(this, "ShouldUpdate is set, updating Translations class...")
-                        onLanguagesChanged()
-                        onLanguageChanged()
+                        withContext(Dispatchers.Main) {
+                            onLanguagesChanged()
+                            onLanguageChanged()
+                        }
                     }
 
                     result
@@ -417,12 +467,21 @@ object NStack {
         if (index.shouldUpdate) {
             val translation = networkManager.loadTranslation(index.url) ?: return
             prefManager.setTranslations(index.language.locale, translation)
+
+            try {
+                networkLanguages = networkLanguages?.toMutableMap()?.apply {
+                    put(index.language.locale, translation.asJsonObject ?: return@apply)
+                }
+            } catch (e: Exception) {
+                NLog.e(this, e.toString())
+            }
+
             appOpenSettingsManager.setUpdateDate()
         }
         if (index.language.isDefault) {
             defaultLanguage = index.language.locale
         }
-        if(index.language.isBestFit) {
+        if (index.language.isBestFit) {
             language = index.language.locale
         }
     }

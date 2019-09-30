@@ -165,7 +165,6 @@ internal class NStackLayoutInflater internal constructor(
     @SuppressLint("ResourceType")
     private fun processView(name: String, context: Context, view: View?, attrs: AttributeSet) {
         if (view == null) {
-            NLog.d(this, "processView -> Null View Returning $name")
             return
         }
 

@@ -4,7 +4,7 @@ class LanguageFetchCallback constructor(private var numLanguages: Int) {
 
     var done: (() -> Unit)? = null
 
-    fun fetchedLangauge() {
+    fun fetchedLanguage() {
         numLanguages--
         if(numLanguages <= 0) {
             done?.invoke()

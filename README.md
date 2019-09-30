@@ -16,7 +16,7 @@ See the [NStack documentation](https://nstack-io.github.io/documentation/index.h
 2. Add NStack SDK dependency and sync your project
 ```groovy
 dependencies {
-    implementation "dk.nodes.nstack:nstack-kotlin:3.0.5"
+    implementation "dk.nodes.nstack:nstack-kotlin:3.2.0"
 }
 ```
 3. After synchronisation is complete, you can start using the SDK

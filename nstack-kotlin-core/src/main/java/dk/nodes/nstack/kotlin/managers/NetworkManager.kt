@@ -153,11 +153,9 @@ class NetworkManager(
                 .enqueue(object : Callback {
 
                     override fun onFailure(call: Call, e: IOException) {
-//                    NLog.e(this, "Failure posting message seen", e)
                     }
 
                     override fun onResponse(call: Call, response: Response) {
-//                    NLog.v(this, "Message seen")
                     }
                 })
     }
@@ -183,11 +181,9 @@ class NetworkManager(
                 .enqueue(object : Callback {
 
                     override fun onFailure(call: Call, e: IOException) {
-//                    NLog.e(this, "Failure posting rate reminder seen", e)
                     }
 
                     override fun onResponse(call: Call, response: Response) {
-//                    NLog.v(this, "Rate reminder seen")
                     }
                 })
     }

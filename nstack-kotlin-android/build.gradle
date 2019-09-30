@@ -28,6 +28,7 @@ dependencies {
     testImplementation "junit:junit:4.12"
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation "org.json:json:20180130"
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.1'
 }
 
 apply plugin: 'maven'
@@ -44,6 +45,7 @@ task installArchives(type: Upload) {
             repository url: repositories.mavenLocal().url
         }
     }
+
 }
 
 apply from: rootProject.file('gradle/maven-push.gradle')

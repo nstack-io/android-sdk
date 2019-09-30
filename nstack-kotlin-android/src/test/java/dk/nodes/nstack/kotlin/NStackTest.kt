@@ -9,13 +9,22 @@ import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.ContextWrapper
 import io.mockk.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.coroutines.test.setMain
 import org.json.JSONObject
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import java.util.*
 
 internal class NStackTest {
+
+    private val mainThreadSurrogate = newSingleThreadContext("UI thread")
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(mainThreadSurrogate)
+    }
 
     @Test
     fun `Test init`() {
@@ -153,7 +162,6 @@ internal class NStackTest {
         coEvery { networkManagerMock.loadTranslation(languageIndex2.url) } returns translations2
 
         val result = runBlocking { NStack.appOpen() }
-
         assert(result is AppOpenResult.Success)
         verify { prefManagerMock.setTranslations(language1.locale, translations1) }
         verify { prefManagerMock.setTranslations(language2.locale, translations2) }
@@ -168,7 +176,7 @@ internal class NStackTest {
         every { connectionManagerMock.isConnected } returns true
         coEvery { networkManagerMock.postAppOpen(any(), any()) } returns errorResult
 
-        val result = runBlocking { NStack.appOpen() }
+        val result = runBlocking(Dispatchers.Main) { NStack.appOpen() }
 
         assert(result is AppOpenResult.Failure)
     }
@@ -217,10 +225,10 @@ internal class NStackTest {
         private val oldVersion = "oldVersion"
         private val lastUpdated = Date()
         private val appOpenSettings = AppOpenSettings(
-            guid = guid,
-            version = version,
-            oldVersion = oldVersion,
-            lastUpdated = lastUpdated
+                guid = guid,
+                version = version,
+                oldVersion = oldVersion,
+                lastUpdated = lastUpdated
         )
 
         private val language1 = Language(0, "", Locale.ENGLISH, "", isDefault = false, isBestFit = false)
@@ -243,9 +251,9 @@ internal class NStackTest {
         private val translations3 = JSONObject("{\"default\":{\"hi\":\"Hi\",\"cancel\":\"Canceler\",\"no\":\"No\",\"yes\":\"Yes\",\"edit\":\"Edit\",\"next\":\"Next\",\"on\":\"On\",\"off\":\"Off\",\"ok\":\"Ok\"},\"errorBody\":{\"errorRandom\":\"Totally random errorBody\",\"errorTitle\":\"Error\",\"authenticationError\":\"Login expired, please login again.\",\"connectionError\":\"No or bad connection, please try again.\",\"unknownError\":\"Unknown errorBody, please try again.\"},\"test\":{\"title\":\"NStack Demo\",\"message\":\"Bacon ipsum dolor amet magna meatball jerky in, shank sunt do burgdoggen spare ribs. Lorem boudin eiusmod short ribs pastrami. Sausage bresaola do turkey, dolor qui tail ground round culpa boudin nulla minim sunt beef ribs ham. Cillum in pastrami adipisicing swine lorem, velit sunt meatloaf bresaola short loin fugiat tri-tip boudin.\",\"subTitle\":\"Subtitle demo\",\"on\":\"on\",\"off\":\"off\"}}")
 
         private val translations = mapOf(
-            locale1 to translations1,
-            locale2 to translations2,
-            locale3 to translations3
+                locale1 to translations1,
+                locale2 to translations2,
+                locale3 to translations3
         )
 
         private var languagesChanged = false
