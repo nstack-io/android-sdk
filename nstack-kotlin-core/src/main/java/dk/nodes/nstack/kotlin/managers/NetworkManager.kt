@@ -2,7 +2,6 @@ package dk.nodes.nstack.kotlin.managers
 
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
-import dk.nodes.nstack.kotlin.models.Answer
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
@@ -327,28 +326,22 @@ class NetworkManager(
             return SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(this)
         }
 
-    fun checkRateReminder(
-        settings: AppOpenSettings,
-        callback: (RateReminder2) -> Unit
-    ) {
+    suspend fun checkRateReminder(
+        settings: AppOpenSettings
+    ) : RateReminder2? {
         val request = Request.Builder()
             .url("$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}")
             .get()
             .build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    callback(response.body()?.string()?.asJsonObject?.let { RateReminder2(it) } ?: return)
-                }
-            }
-        })
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            return response.body()?.string()?.asJsonObject?.let { RateReminder2(it) }
+        }
+        return null
     }
 
-    fun callActionEvents(
+    suspend fun callActionEvents(
         settings: AppOpenSettings,
         action: String
     ) {
@@ -361,37 +354,23 @@ class NetworkManager(
             .post(body)
             .build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                println(response.body())
-            }
-        })
+        client.newCall(request).execute()
     }
 
-    fun callAnswers(
+    suspend fun callAnswers(
         settings: AppOpenSettings,
-        rateReminder2: RateReminder2,
-        answer: Answer
+        rateReminderId: Int,
+        answer: String
     ) {
         val body = FormBody.Builder()
             .add("guid", settings.guid)
-            .add("answer", answer.apiName)
+            .add("answer", answer)
             .build()
         val request = Request.Builder()
-            .url("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminder2.id}/answers")
+            .url("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminderId}/answers")
             .post(body)
             .build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-            }
-        })
+        client.newCall(request).execute()
     }
 }

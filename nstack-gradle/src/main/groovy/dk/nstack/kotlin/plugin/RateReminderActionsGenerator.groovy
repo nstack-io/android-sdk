@@ -21,8 +21,8 @@ class RateReminderActionsGenerator {
         }
         enumString += actionToEnumName(actions.last(), true)
         enumString += """
-    fun sendToNStack() {
-        NStack.rateReminderAction(apiName)
+    suspend fun sendToNStack() {
+        NStack.RateReminder.action(apiName)
     }
 }
 """

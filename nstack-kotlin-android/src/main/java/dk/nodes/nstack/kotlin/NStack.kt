@@ -22,11 +22,11 @@ import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.Answer
 import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
-import dk.nodes.nstack.kotlin.models.RateReminder
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackPlugin
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
@@ -53,6 +53,8 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * NStack
@@ -855,27 +857,67 @@ object NStack {
         }
     }
 
-    fun checkRateReminder(rateReminder: RateReminder) {
-        val settings = appOpenSettingsManager.getAppOpenSettings()
-        networkManager.checkRateReminder(settings) {
-            AlertDialog.Builder(contextWrapper.context)
-                .setTitle(rateReminder.title)
-                .setMessage(rateReminder.body)
-                .setPositiveButton(rateReminder.yesButton) { _, _ ->
-                    networkManager.callAnswers(settings, it, Answer.POSITIVE)
-                }
-                .setNegativeButton(rateReminder.noButton) { _, _ ->
-                    // TODO: feedback
-                    networkManager.callAnswers(settings, it, Answer.NEGATIVE)
-                }
-                .setNeutralButton(rateReminder.laterButton) { _, _ ->
-                    networkManager.callAnswers(settings, it, Answer.SKIP)
-                }
-                .show()
-        }
-    }
+    object RateReminder {
 
-    fun rateReminderAction(action: String) {
-        networkManager.callActionEvents(appOpenSettingsManager.getAppOpenSettings(), action)
+        private var title: String = ""
+        private var message: String = ""
+        private var yesButton: String = ""
+        private var noButton: String = ""
+        private var skipButton: String = ""
+
+        private lateinit var settings: AppOpenSettings
+
+        private var rateReminderId: Int = 0
+
+        suspend fun shouldShow(): Boolean {
+            val rateReminder = networkManager.checkRateReminder(settings) ?: return false
+            rateReminderId = rateReminder.id
+            return true
+        }
+
+        suspend fun action(action: String) {
+            networkManager.callActionEvents(appOpenSettingsManager.getAppOpenSettings(), action)
+        }
+
+        fun setup(
+            title: String,
+            message: String,
+            yesButton: String,
+            noButton: String,
+            skipButton: String
+        ) {
+            this.title = title
+            this.message = message
+            this.yesButton = yesButton
+            this.noButton = noButton
+            this.skipButton = skipButton
+            settings = appOpenSettingsManager.getAppOpenSettings()
+        }
+
+        suspend fun show(context: Context): Answer {
+            val answer = suspendCoroutine<Answer> {
+                AlertDialog.Builder(context)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton(yesButton) { _, _ ->
+                        it.resume(Answer.POSITIVE)
+                    }
+                    .setNegativeButton(noButton) { _, _ ->
+                        it.resume(Answer.NEGATIVE)
+                    }
+                    .setNeutralButton(skipButton) { _, _ ->
+                        it.resume(Answer.SKIP)
+                    }
+                    .setCancelable(false)
+                    .show()
+            }
+            withContext(Dispatchers.IO) { sendAnswer(answer) }
+            return answer
+        }
+
+        private suspend fun sendAnswer(answer: Answer) {
+            assert(rateReminderId != 0)
+            networkManager.callAnswers(settings, rateReminderId, answer.apiName)
+        }
     }
 }

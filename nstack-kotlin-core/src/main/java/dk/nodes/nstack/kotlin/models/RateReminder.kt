@@ -19,6 +19,6 @@ data class RateReminder2(
 ) {
 
     constructor(jsonObject: JsonObject) : this(
-        jsonObject.getAsJsonObject("data").getAsJsonObject("id").asInt
+        jsonObject.getAsJsonObject("data").getAsJsonPrimitive("id").asInt
     )
 }
