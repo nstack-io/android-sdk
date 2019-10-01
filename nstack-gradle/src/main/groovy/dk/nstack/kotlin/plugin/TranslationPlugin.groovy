@@ -8,10 +8,12 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 class TranslationPlugin implements Plugin<Project> {
+
     public static final String GROUP_NAME = "nstack"
     public static
     final String JAVA_SOURCE_PATH = "${File.separator}src${File.separator}main${File.separator}java"
     public static final String TRANSLATION_FILE_NAME = "Translation.java"
+    public static final String RATE_REMINDER_ACTIONS_FILE_NAME = "RateReminderAction.kt"
 
     def pathPrefix = ""
     public static Project project = null
@@ -40,24 +42,49 @@ class TranslationPlugin implements Plugin<Project> {
             // If we have auto run update then we should run it :D
 
             doLast {
-                if(project.hasProperty("nstackAppId")) {
-                    Log.info("Gradle task had custom appId set: " + project.getProperties().get("nstackAppId"))
-                    project.translation.appId = project.getProperties().get("nstackAppId")
-                }
-
-                if(project.hasProperty("nstackApiKey")) {
-                    Log.info("Gradle task had custom apiKey set: " + project.getProperties().get("nstackApiKey"))
-                    project.translation.apiKey = project.getProperties().get("nstackApiKey")
-                }
+                ensureProjectProperties()
                 generateTranslationClass()
+            }
+        }
+
+        project.task('generateRateReminderActions') {
+            group GROUP_NAME
+
+            doLast {
+                ensureProjectProperties()
+                generateRateReminderActions()
             }
         }
 
         project.afterEvaluate {
             if (project.translation.autoRunUpdate) {
                 generateTranslationClass()
+                generateRateReminderActions()
             }
         }
+    }
+
+    private static void ensureProjectProperties() {
+        if (project.hasProperty("nstackAppId")) {
+            Log.info("Gradle task had custom appId set: " + project.getProperties().get("nstackAppId"))
+            project.translation.appId = project.getProperties().get("nstackAppId")
+        }
+
+        if (project.hasProperty("nstackApiKey")) {
+            Log.info("Gradle task had custom apiKey set: " + project.getProperties().get("nstackApiKey"))
+            project.translation.apiKey = project.getProperties().get("nstackApiKey")
+        }
+    }
+
+    private static void generateRateReminderActions() {
+        getRateReminderActionsPath()
+        def packageName = project.translation.modelPath
+        def enumString = RateReminderActionsGenerator.generateActions(packageName)
+        def enumFile = new File(project.translation.classPath)
+        if (!enumFile.exists()) {
+            enumFile = new File('app/' + project.translation.classPath)
+        }
+        enumFile.write(enumString)
     }
 
     private void generateTranslationClass() {
@@ -112,6 +139,35 @@ class TranslationPlugin implements Plugin<Project> {
 
         int startOfIndex = possibleModelPath.indexOf(JAVA_SOURCE_PATH) + JAVA_SOURCE_PATH.size() + 1
         int endOfIndex = possibleModelPath.indexOf("Translation.java") - 1
+        possibleModelPath = possibleModelPath.substring(startOfIndex, endOfIndex)
+        possibleModelPath = possibleModelPath.replace(File.separator, ".")
+
+        project.translation.modelPath = possibleModelPath
+        project.translation.classPath = classFilePath
+    }
+
+    private static String getRateReminderActionsPath() {
+        String searchName = RATE_REMINDER_ACTIONS_FILE_NAME.toLowerCase()
+        String classFilePath = null
+
+        File searchPath = new File(project.projectDir, JAVA_SOURCE_PATH)
+
+        searchPath.eachFileRecurse { file ->
+            String filePath = file.path
+            if (filePath.toLowerCase().contains(searchName)) {
+                Log.debug("Found File -> " + filePath)
+                classFilePath = filePath
+            }
+        }
+
+        if (classFilePath == null) {
+            throw Exception("Unable to locate rate reminder actions file")
+        }
+
+        String possibleModelPath = classFilePath
+
+        int startOfIndex = possibleModelPath.indexOf(JAVA_SOURCE_PATH) + JAVA_SOURCE_PATH.size() + 1
+        int endOfIndex = possibleModelPath.indexOf(RATE_REMINDER_ACTIONS_FILE_NAME) - 1
         possibleModelPath = possibleModelPath.substring(startOfIndex, endOfIndex)
         possibleModelPath = possibleModelPath.replace(File.separator, ".")
 

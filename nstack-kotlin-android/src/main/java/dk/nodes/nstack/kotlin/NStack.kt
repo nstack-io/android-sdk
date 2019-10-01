@@ -875,7 +875,6 @@ object NStack {
         }
     }
 
-    // TODO: pass generated action
     fun rateReminderAction(action: String) {
         networkManager.callActionEvents(appOpenSettingsManager.getAppOpenSettings(), action)
     }
