@@ -920,4 +920,11 @@ object NStack {
             networkManager.callAnswers(settings, rateReminderId, answer.apiName)
         }
     }
+
+    object Feedback {
+
+        suspend fun send(feedback: dk.nodes.nstack.kotlin.models.Feedback) {
+            networkManager.sendFeedback(feedback.form)
+        }
+    }
 }

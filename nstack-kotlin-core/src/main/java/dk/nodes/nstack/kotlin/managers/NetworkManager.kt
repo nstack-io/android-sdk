@@ -373,4 +373,13 @@ class NetworkManager(
 
         client.newCall(request).execute()
     }
+
+    suspend fun sendFeedback(formBody: FormBody) {
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/ugc/feedbacks") // TODO: check
+            .post(formBody)
+            .build()
+
+        client.newCall(request).execute()
+    }
 }
