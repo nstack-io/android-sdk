@@ -1,6 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
-import dk.nodes.nstack.kotlin.util.ContextWrapper
+import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Test

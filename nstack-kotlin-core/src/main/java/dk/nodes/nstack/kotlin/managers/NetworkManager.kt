@@ -6,7 +6,9 @@ import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.Proposal
+import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.provider.HttpClientProvider
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import okhttp3.Call
@@ -324,4 +326,70 @@ class NetworkManager(
         get() {
             return SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(this)
         }
+
+    suspend fun checkRateReminder(
+        settings: AppOpenSettings
+    ) : RateReminder2? {
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}")
+            .get()
+            .build()
+
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            return response.body()?.string()?.asJsonObject?.let { RateReminder2(it) }
+        }
+        return null
+    }
+
+    suspend fun callActionEvents(
+        settings: AppOpenSettings,
+        action: String
+    ) {
+        val body = FormBody.Builder()
+            .add("guid", settings.guid)
+            .add("action", action)
+            .build()
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/notify/rate_reminder_v2/events")
+            .post(body)
+            .build()
+
+        client.newCall(request).execute()
+    }
+
+    suspend fun callAnswers(
+        settings: AppOpenSettings,
+        rateReminderId: Int,
+        answer: String
+    ) {
+        val body = FormBody.Builder()
+            .add("guid", settings.guid)
+            .add("answer", answer)
+            .build()
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminderId}/answers")
+            .post(body)
+            .build()
+
+        client.newCall(request).execute()
+    }
+
+    suspend fun sendFeedback(feedback: Feedback) {
+        val body = FormBody.Builder().apply {
+            feedback.appVersion?.let { add("app_version", it) }
+            feedback.deviceName?.let { add("device", it) }
+            feedback.name?.let { add("name", it) }
+            feedback.email?.let { add("email", it) }
+            feedback.message?.let { add("message", it) }
+        }
+            .build()
+
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/ugc/feedbacks")
+            .post(body)
+            .build()
+
+        client.newCall(request).execute()
+    }
 }

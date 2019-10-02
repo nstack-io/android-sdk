@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
@@ -19,9 +20,12 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
+import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.TranslationData
@@ -31,7 +35,6 @@ import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.AppOpenCallbackCount
-import dk.nodes.nstack.kotlin.util.ContextWrapper
 import dk.nodes.nstack.kotlin.util.LanguageFetchCallback
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
@@ -41,6 +44,7 @@ import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
+import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
@@ -50,6 +54,8 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * NStack
@@ -498,6 +504,7 @@ object NStack {
      * Call it to notify that the rate reminder was seen and doesn't need to appear any more
      * @param rated - true if user pressed Yes, false if user pressed No, not called if user pressed Later
      */
+    @Deprecated("use RateReminder to check and show rate reminder")
     fun onRateReminderAction(rated: Boolean) {
         val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
         networkManager.postRateReminderSeen(appOpenSettings, rated)
@@ -848,6 +855,90 @@ object NStack {
                 networkManager,
                 appOpenSettingsManager
             )
+        }
+    }
+
+    object RateReminder {
+
+        private var title: String = ""
+        private var message: String = ""
+        private var yesButton: String = ""
+        private var noButton: String = ""
+        private var skipButton: String = ""
+
+        private lateinit var settings: AppOpenSettings
+
+        private var rateReminderId: Int = 0
+
+        suspend fun shouldShow(): Boolean {
+            val rateReminder = networkManager.checkRateReminder(settings) ?: return false
+            rateReminderId = rateReminder.id
+            return true
+        }
+
+        suspend fun action(action: String) {
+            networkManager.callActionEvents(appOpenSettingsManager.getAppOpenSettings(), action)
+        }
+
+        fun setup(
+            title: String,
+            message: String,
+            yesButton: String,
+            noButton: String,
+            skipButton: String
+        ) {
+            this.title = title
+            this.message = message
+            this.yesButton = yesButton
+            this.noButton = noButton
+            this.skipButton = skipButton
+            settings = appOpenSettingsManager.getAppOpenSettings()
+        }
+
+        suspend fun show(context: Context): RateReminderAnswer {
+            val answer = suspendCoroutine<RateReminderAnswer> {
+                AlertDialog.Builder(context)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton(yesButton) { _, _ ->
+                        it.resume(RateReminderAnswer.POSITIVE)
+                    }
+                    .setNegativeButton(noButton) { _, _ ->
+                        it.resume(RateReminderAnswer.NEGATIVE)
+                    }
+                    .setNeutralButton(skipButton) { _, _ ->
+                        it.resume(RateReminderAnswer.SKIP)
+                    }
+                    .setCancelable(false)
+                    .show()
+            }
+            withContext(Dispatchers.IO) { sendAnswer(answer) }
+            return answer
+        }
+
+        private suspend fun sendAnswer(answer: RateReminderAnswer) {
+            assert(rateReminderId != 0)
+            networkManager.callAnswers(settings, rateReminderId, answer.apiName)
+        }
+    }
+
+    object Feedback {
+
+        suspend fun send(
+            appVersion: String? = null,
+            deviceName: String? = null,
+            name: String? = null,
+            email: String? = null,
+            message: String? = null
+        ) {
+            val feedback = Feedback(
+                appVersion = appVersion,
+                deviceName = deviceName,
+                name = name,
+                email = email,
+                message = message
+            )
+            networkManager.sendFeedback(feedback)
         }
     }
 }

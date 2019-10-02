@@ -1,6 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
-import dk.nodes.nstack.kotlin.util.ContextWrapper
+import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import org.json.JSONObject
 import java.util.Locale
