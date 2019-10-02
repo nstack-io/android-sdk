@@ -6,6 +6,7 @@ import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.Proposal
 import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.provider.HttpClientProvider
@@ -374,10 +375,19 @@ class NetworkManager(
         client.newCall(request).execute()
     }
 
-    suspend fun sendFeedback(formBody: FormBody) {
+    suspend fun sendFeedback(feedback: Feedback) {
+        val body = FormBody.Builder().apply {
+            feedback.appVersion?.let { add("app_version", it) }
+            feedback.deviceName?.let { add("device", it) }
+            feedback.name?.let { add("name", it) }
+            feedback.email?.let { add("email", it) }
+            feedback.message?.let { add("message", it) }
+        }
+            .build()
+
         val request = Request.Builder()
-            .url("$baseUrl/api/v2/ugc/feedbacks") // TODO: check
-            .post(formBody)
+            .url("$baseUrl/api/v2/ugc/feedbacks")
+            .post(body)
             .build()
 
         client.newCall(request).execute()

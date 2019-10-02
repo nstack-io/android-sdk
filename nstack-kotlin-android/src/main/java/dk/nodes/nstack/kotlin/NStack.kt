@@ -25,6 +25,7 @@ import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.TranslationData
@@ -923,8 +924,21 @@ object NStack {
 
     object Feedback {
 
-        suspend fun send(feedback: dk.nodes.nstack.kotlin.models.Feedback) {
-            networkManager.sendFeedback(feedback.form)
+        suspend fun send(
+            appVersion: String? = null,
+            deviceName: String? = null,
+            name: String? = null,
+            email: String? = null,
+            message: String? = null
+        ) {
+            val feedback = Feedback(
+                appVersion = appVersion,
+                deviceName = deviceName,
+                name = name,
+                email = email,
+                message = message
+            )
+            networkManager.sendFeedback(feedback)
         }
     }
 }
