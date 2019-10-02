@@ -19,7 +19,7 @@ task installArchives(type: Upload) {
         configuration = configurations.default
         pom.groupId = 'dk.nodes.nstack'
         pom.artifactId = 'translation'
-        pom.version = '3.0.3-LOCAL'
+        pom.version = '3.1.0-LOCAL'
         pom.packaging = 'jar'
     }
 }
