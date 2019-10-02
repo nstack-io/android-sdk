@@ -20,7 +20,7 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.Answer
+import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
@@ -504,7 +504,7 @@ object NStack {
      * Call it to notify that the rate reminder was seen and doesn't need to appear any more
      * @param rated - true if user pressed Yes, false if user pressed No, not called if user pressed Later
      */
-    @Deprecated("use checkRateReminder to check and show rate reminder")
+    @Deprecated("use RateReminder to check and show rate reminder")
     fun onRateReminderAction(rated: Boolean) {
         val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
         networkManager.postRateReminderSeen(appOpenSettings, rated)
@@ -895,19 +895,19 @@ object NStack {
             settings = appOpenSettingsManager.getAppOpenSettings()
         }
 
-        suspend fun show(context: Context): Answer {
-            val answer = suspendCoroutine<Answer> {
+        suspend fun show(context: Context): RateReminderAnswer {
+            val answer = suspendCoroutine<RateReminderAnswer> {
                 AlertDialog.Builder(context)
                     .setTitle(title)
                     .setMessage(message)
                     .setPositiveButton(yesButton) { _, _ ->
-                        it.resume(Answer.POSITIVE)
+                        it.resume(RateReminderAnswer.POSITIVE)
                     }
                     .setNegativeButton(noButton) { _, _ ->
-                        it.resume(Answer.NEGATIVE)
+                        it.resume(RateReminderAnswer.NEGATIVE)
                     }
                     .setNeutralButton(skipButton) { _, _ ->
-                        it.resume(Answer.SKIP)
+                        it.resume(RateReminderAnswer.SKIP)
                     }
                     .setCancelable(false)
                     .show()
@@ -916,7 +916,7 @@ object NStack {
             return answer
         }
 
-        private suspend fun sendAnswer(answer: Answer) {
+        private suspend fun sendAnswer(answer: RateReminderAnswer) {
             assert(rateReminderId != 0)
             networkManager.callAnswers(settings, rateReminderId, answer.apiName)
         }
