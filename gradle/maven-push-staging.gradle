@@ -1,0 +1,101 @@
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
+
+
+// Username & password for Sonatype, stored in gradle.properties
+def _ossrhUsername = System.getenv('NEXUS_USERNAME')
+def _ossrhPassword = System.getenv('NEXUS_PASSWORD')
+
+allprojects { ext."signing.keyId" = System.getenv('keyId') }
+allprojects { ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile') }
+allprojects { ext."signing.password" = System.getenv('password') }
+
+// Artifact settings
+final def _isReleaseVersion = !VERSION_NAME.endsWith("SNAPSHOT")
+
+nexusStaging {
+    packageGroup = "dk.nodes"
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': POM_NAME, 'Implementation-Version': VERSION_NAME
+    }
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar, androidJavadocsJar
+}
+
+publishing {
+    publications {
+        nstackKotlin(MavenPublication) {
+            pom {
+                name = POM_NAME
+                packaging = POM_PACKAGING
+                artifactId = POM_ARTIFACT_ID
+                groupId = GROUP
+                description = POM_DESCRIPTION
+                version = VERSION_NAME
+                url = POM_URL
+                inceptionYear = '2015'
+
+                artifact(sourcesJar)
+                artifact("$buildDir/outputs/aar/nstack-kotlin-android-debug.aar")
+
+                licenses {
+                    license {
+                        name = POM_LICENCE_NAME
+                        url = POM_LICENCE_URL
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = POM_DEVELOPER_ID
+                        name = POM_DEVELOPER_NAME
+                        email = POM_DEVELOPER_EMAIL
+                    }
+                }
+
+                scm {
+                    url = POM_SCM_URL
+                    connection = POM_SCM_CONNECTION
+                }
+
+                issueManagement {
+                    system = 'GitHub issues'
+                    url = 'https://github.com/nodes-android/nstack-kotlin/issues'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            final def releasesRepoUrl = "$buildDir/repos/releases"
+            final def snapshotsRepoUrl = "$buildDir/repos/snapshots"
+
+            url = _isReleaseVersion ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
