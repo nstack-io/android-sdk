@@ -116,6 +116,8 @@ object NStack {
     private val onLanguageChangedList = mutableListOf<LanguageListener?>()
     private val onLanguagesChangedList = mutableListOf<LanguagesListener?>()
     private val plugins = mutableListOf<Any>()
+    private val nstackViewPlugins: List<NStackViewPlugin>
+        get() = plugins.filterIsInstance<NStackViewPlugin>()
 
     /**
      * Device Change Broadcast Listener
@@ -557,14 +559,7 @@ object NStack {
             title = title,
             subtitle = subtitle
         )
-        plugins.forEach { plugin ->
-            if (plugin is NStackViewPlugin) {
-                plugin.addView(
-                    WeakReference(view),
-                    translationData
-                )
-            }
-        }
+        nstackViewPlugins.forEach { it.addView(WeakReference(view), translationData) }
     }
 
     private fun hasKey(key: String?): Boolean {
@@ -575,14 +570,14 @@ object NStack {
      * Triggers a translation of all currently cached views
      */
     fun translate() {
-        plugins.filterIsInstance(NStackPlugin::class.java).forEach { plugin -> plugin.translate() }
+        nstackViewPlugins.forEach { it.translate() }
     }
 
     /**
      * Clears all cached views
      */
     fun clearViewCache() {
-        plugins.filterIsInstance(NStackPlugin::class.java).forEach { plugin -> plugin.clear() }
+        nstackViewPlugins.forEach { it.clear() }
     }
 
     /**
@@ -791,13 +786,7 @@ object NStack {
     }
 
     fun addView(view: View, translationData: TranslationData) {
-        plugins.forEach { plugin ->
-            if (plugin is NStackViewPlugin)
-                plugin.addView(
-                    WeakReference(view),
-                    translationData
-                )
-        }
+        nstackViewPlugins.forEach { it.addView(WeakReference(view), translationData) }
     }
 
     fun hasKey(@StringRes resId: Int, context: Context): Boolean {
