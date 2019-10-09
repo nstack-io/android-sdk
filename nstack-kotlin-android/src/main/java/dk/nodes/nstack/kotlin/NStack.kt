@@ -866,18 +866,19 @@ object NStack {
         private var noButton: String = ""
         private var skipButton: String = ""
 
-        private lateinit var settings: AppOpenSettings
+        private var settings: AppOpenSettings? = null
 
         private var rateReminderId: Int = 0
 
         suspend fun shouldShow(): Boolean {
-            val rateReminder = networkManager.checkRateReminder(settings) ?: return false
+            val settings = requireNotNull(settings)
+            val rateReminder = networkManager.getRateReminder2(settings) ?: return false
             rateReminderId = rateReminder.id
             return true
         }
 
         suspend fun action(action: String) {
-            networkManager.callActionEvents(appOpenSettingsManager.getAppOpenSettings(), action)
+            networkManager.postRateReminderAction(appOpenSettingsManager.getAppOpenSettings(), action)
         }
 
         fun setup(
@@ -896,6 +897,7 @@ object NStack {
         }
 
         suspend fun show(context: Context): RateReminderAnswer {
+            require(rateReminderId != 0)
             val answer = suspendCoroutine<RateReminderAnswer> {
                 AlertDialog.Builder(context)
                     .setTitle(title)
@@ -917,8 +919,9 @@ object NStack {
         }
 
         private suspend fun sendAnswer(answer: RateReminderAnswer) {
-            assert(rateReminderId != 0)
-            networkManager.callAnswers(settings, rateReminderId, answer.apiName)
+            require(rateReminderId != 0)
+            val settings = requireNotNull(settings)
+            networkManager.postRateReminderAction(settings, rateReminderId, answer.apiName)
         }
     }
 
@@ -938,7 +941,7 @@ object NStack {
                 email = email,
                 message = message
             )
-            networkManager.sendFeedback(feedback)
+            networkManager.postFeedback(feedback)
         }
     }
 }

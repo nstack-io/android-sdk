@@ -327,7 +327,7 @@ class NetworkManager(
             return SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(this)
         }
 
-    suspend fun checkRateReminder(
+    suspend fun getRateReminder2(
         settings: AppOpenSettings
     ) : RateReminder2? {
         val request = Request.Builder()
@@ -342,7 +342,7 @@ class NetworkManager(
         return null
     }
 
-    suspend fun callActionEvents(
+    suspend fun postRateReminderAction(
         settings: AppOpenSettings,
         action: String
     ) {
@@ -358,7 +358,7 @@ class NetworkManager(
         client.newCall(request).execute()
     }
 
-    suspend fun callAnswers(
+    suspend fun postRateReminderAction(
         settings: AppOpenSettings,
         rateReminderId: Int,
         answer: String
@@ -375,7 +375,7 @@ class NetworkManager(
         client.newCall(request).execute()
     }
 
-    suspend fun sendFeedback(feedback: Feedback) {
+    suspend fun postFeedback(feedback: Feedback) {
         val body = FormBody.Builder().apply {
             feedback.appVersion?.let { add("app_version", it) }
             feedback.deviceName?.let { add("device", it) }
