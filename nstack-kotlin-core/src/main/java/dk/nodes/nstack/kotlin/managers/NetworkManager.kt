@@ -23,33 +23,33 @@ import java.util.Date
 import java.util.Locale
 
 class NetworkManager(
-        private val client: OkHttpClient,
-        private val baseUrl: String,
-        private val debugMode: Boolean
+    private val client: OkHttpClient,
+    private val baseUrl: String,
+    private val debugMode: Boolean
 ) {
 
     private val gson = HttpClientProvider.provideGson()
 
     fun loadTranslation(
-            url: String,
-            onSuccess: (String) -> Unit,
-            onError: (Exception) -> Unit
+        url: String,
+        onSuccess: (String) -> Unit,
+        onError: (Exception) -> Unit
     ) {
         client.newCall(Request.Builder().url(url).build())
-                .enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
+            .enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    onError(e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    try {
+                        val json = response.body()!!.string()
+                        onSuccess(json.asJsonObject!!.getAsJsonObject("data").toString())
+                    } catch (e: Exception) {
                         onError(e)
                     }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        try {
-                            val json = response.body()!!.string()
-                            onSuccess(json.asJsonObject!!.getAsJsonObject("data").toString())
-                        } catch (e: Exception) {
-                            onError(e)
-                        }
-                    }
-                })
+                }
+            })
     }
 
     suspend fun loadTranslation(url: String): String? {
@@ -57,109 +57,82 @@ class NetworkManager(
         val responseBody = response.body()
         return when {
             response.isSuccessful && responseBody != null -> responseBody.string().asJsonObject
-                    ?.getAsJsonObject("data").toString()
+                ?.getAsJsonObject("data").toString()
             else -> null
         }
     }
 
     fun postAppOpen(
-            settings: AppOpenSettings,
-            acceptLanguage: String,
-            onSuccess: (AppUpdateData) -> Unit,
-            onError: (Exception) -> Unit
+        settings: AppOpenSettings,
+        acceptLanguage: String,
+        onSuccess: (AppUpdateData) -> Unit,
+        onError: (Exception) -> Unit
     ) {
-        val formBuilder = FormBody.Builder()
-                .add("guid", settings.guid)
-                .add("version", settings.version)
-                .add("old_version", settings.oldVersion)
-                .add("platform", settings.platform)
-                .add("last_updated", settings.lastUpdated.formatted)
-                .add("dev", debugMode.toString())
-                .add("test", settings.versionUpdateTestMode.toString())
+        FormBody.Builder().also {
+            it["guid"] = settings.guid
+            it["version"] = settings.version
+            it["old_version"] = settings.oldVersion
+            it["platform"] = settings.platform
+            it["last_updated"] = settings.lastUpdated.formatted
+            it["dev"] = debugMode.toString()
+            it["test"] = settings.versionUpdateTestMode.toString()
+        }.buildRequest(
+            "$baseUrl/api/v2/open",
+            "Accept-Language" to acceptLanguage
+        ).call().enqueue(object : Callback {
+            override fun onFailure(call: Call?, e: IOException) {
+                onError.invoke(e)
+            }
 
-        val request = Request.Builder()
-                .url("$baseUrl/api/v2/open")
-                .header("Accept-Language", acceptLanguage)
-                .post(formBuilder.build())
-                .build()
-
-        client
-                .newCall(request)
-                .enqueue(object : Callback {
-                    override fun onFailure(call: Call?, e: IOException) {
-                        onError.invoke(e)
-                    }
-
-                    override fun onResponse(call: Call?, response: Response?) {
-                        try {
-                            val responseString = response?.body()?.string()!!
-                            val appUpdate = gson.fromJson(responseString, AppUpdateResponse::class.java)
-                            onSuccess.invoke(appUpdate.data)
-                        } catch (e: Exception) {
-                            onError(e)
-                        }
-                    }
-                })
+            override fun onResponse(call: Call?, response: Response?) {
+                try {
+                    val responseString = response?.body()?.string()!!
+                    val appUpdate = gson.fromJson(responseString, AppUpdateResponse::class.java)
+                    onSuccess.invoke(appUpdate.data)
+                } catch (e: Exception) {
+                    onError(e)
+                }
+            }
+        })
     }
 
-    suspend fun postAppOpen(
-            settings: AppOpenSettings,
-            acceptLanguage: String
-    ): AppOpenResult {
-        val formBuilder = FormBody.Builder()
-                .add("guid", settings.guid)
-                .add("version", settings.version)
-                .add("old_version", settings.oldVersion)
-                .add("platform", settings.platform)
-                .add("last_updated", settings.lastUpdated.formatted)
-                .add("dev", debugMode.toString())
-                .add("test", settings.versionUpdateTestMode.toString())
-
-        val request = Request.Builder()
-                .url("$baseUrl/api/v2/open")
-                .header("Accept-Language", acceptLanguage)
-                .post(formBuilder.build())
-                .build()
-
+    suspend fun postAppOpen(settings: AppOpenSettings, acceptLanguage: String): AppOpenResult =
         try {
-            val response = client
-                    .newCall(request)
-                    .execute()
-            val responseString = response?.body()?.string() ?: return AppOpenResult.Failure
-            return AppOpenResult.Success(
-                    gson.fromJson(
-                            responseString,
-                            AppUpdateResponse::class.java
-                    )
-            )
+            FormBody.Builder().also {
+                it["guid"] = settings.guid
+                it["version"] = settings.version
+                it["old_version"] = settings.oldVersion
+                it["platform"] = settings.platform
+                it["last_updated"] = settings.lastUpdated.formatted
+                it["dev"] = debugMode.toString()
+                it["test"] = settings.versionUpdateTestMode.toString()
+            }.buildRequest(
+                "$baseUrl/api/v2/open",
+                "Accept-Language" to acceptLanguage
+            ).execute().body()?.string()?.let {
+                AppOpenResult.Success(gson.fromJson(it, AppUpdateResponse::class.java))
+            } ?: AppOpenResult.Failure
         } catch (e: Exception) {
-            return AppOpenResult.Failure
+            AppOpenResult.Failure
         }
-    }
 
     /**
      * Notifies the backend that the message has been seen
      */
     fun postMessageSeen(guid: String, messageId: Int) {
-        val formBuilder = FormBody.Builder()
-                .add("guid", guid)
-                .add("message_id", messageId.toString())
+        FormBody.Builder().also {
+            it["guid"] = guid
+            it["message_id"] = messageId.toString()
+        }.buildRequest("$baseUrl/api/v1/notify/messages/views")
+            .call()
+            .enqueue(object : Callback {
 
-        val request = Request.Builder()
-                .url("$baseUrl/api/v1/notify/messages/views")
-                .post(formBuilder.build())
-                .build()
+                override fun onFailure(call: Call, e: IOException) {
+                }
 
-        client
-                .newCall(request)
-                .enqueue(object : Callback {
-
-                    override fun onFailure(call: Call, e: IOException) {
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                    }
-                })
+                override fun onResponse(call: Call, response: Response) {
+                }
+            })
     }
 
     /**
@@ -169,73 +142,65 @@ class NetworkManager(
         val answer = if (rated) "yes" else "no"
 
         val formBuilder = FormBody.Builder()
-                .add("guid", appOpenSettings.guid)
-                .add("platform", appOpenSettings.platform)
-                .add("answer", answer)
+            .add("guid", appOpenSettings.guid)
+            .add("platform", appOpenSettings.platform)
+            .add("answer", answer)
 
         val request = Request.Builder()
-                .url("$baseUrl/api/v1/notify/rate_reminder/views")
-                .post(formBuilder.build())
-                .build()
+            .url("$baseUrl/api/v1/notify/rate_reminder/views")
+            .post(formBuilder.build())
+            .build()
 
         client
-                .newCall(request)
-                .enqueue(object : Callback {
+            .newCall(request)
+            .enqueue(object : Callback {
 
-                    override fun onFailure(call: Call, e: IOException) {
-                    }
+                override fun onFailure(call: Call, e: IOException) {
+                }
 
-                    override fun onResponse(call: Call, response: Response) {
-                    }
-                })
+                override fun onResponse(call: Call, response: Response) {
+                }
+            })
     }
 
     /**
      * Get a Collection Response (as String) from NStack collections
      */
     fun getResponse(
-            slug: String,
-            onSuccess: (String) -> Unit,
-            onError: (Exception) -> Unit
+        slug: String,
+        onSuccess: (String) -> Unit,
+        onError: (Exception) -> Unit
     ) {
         val request = Request.Builder()
-                .url("$baseUrl/api/v1/content/responses/$slug")
-                .get()
-                .build()
+            .url("$baseUrl/api/v1/content/responses/$slug")
+            .get()
+            .build()
 
         client
-                .newCall(request)
-                .enqueue(object : Callback {
+            .newCall(request)
+            .enqueue(object : Callback {
 
-                    override fun onFailure(call: Call, e: IOException) {
-//                    NLog.e(this, "Failure getting slug: $slug", e)
-                        onError.invoke(e)
-                    }
+                override fun onFailure(call: Call, e: IOException) {
+                    onError.invoke(e)
+                }
 
-                    override fun onResponse(call: Call, response: Response) {
-                        val responseBody = response.body()
-                        when {
-                            response.isSuccessful && responseBody != null -> onSuccess.invoke(
-                                    responseBody.string()
-                            )
-                            else -> onError.invoke(RuntimeException("$slug returned: ${response.code()}"))
-                        }
+                override fun onResponse(call: Call, response: Response) {
+                    val responseBody = response.body()
+                    when {
+                        response.isSuccessful && responseBody != null -> onSuccess.invoke(
+                            responseBody.string()
+                        )
+                        else -> onError.invoke(RuntimeException("$slug returned: ${response.code()}"))
                     }
-                })
+                }
+            })
     }
 
     /**
      * Get a Collection Response (as String) synchronously in a coroutine from NStack collections
      */
     suspend fun getResponseSync(slug: String): String? {
-        val request = Request.Builder()
-                .url("$baseUrl/api/v1/content/responses/$slug")
-                .get()
-                .build()
-
-        val response = client
-                .newCall(request)
-                .execute()
+        val response = Request.Builder()["$baseUrl/api/v1/content/responses/$slug"]
         val responseBody = response.body()
 
         return when {
@@ -245,29 +210,24 @@ class NetworkManager(
     }
 
     fun postProposal(
-            settings: AppOpenSettings,
-            locale: String,
-            key: String,
-            section: String,
-            newValue: String,
-            onSuccess: () -> Unit,
-            onError: (Exception) -> Unit
+        settings: AppOpenSettings,
+        locale: String,
+        key: String,
+        section: String,
+        newValue: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
     ) {
-
-        val formBuilder = FormBody.Builder()
-                .add("key", key)
-                .add("section", section)
-                .add("value", newValue)
-                .add("locale", locale)
-                .add("guid", settings.guid)
-                .add("platform", "mobile")
-
-        val request = Request.Builder()
-                .url("$baseUrl/api/v2/content/localize/proposals")
-                .post(formBuilder.build())
-                .build()
-
-        client.newCall(request).enqueue(
+        FormBody.Builder().also {
+            it["key"] = key
+            it["section"] = section
+            it["value"] = newValue
+            it["locale"] = locale
+            it["guid"] = settings.guid
+            it["platform"] = "mobile"
+        }.buildRequest("$baseUrl/api/v2/content/localize/proposals")
+            .call()
+            .enqueue(
                 object : Callback {
                     override fun onFailure(call: Call, e: IOException) {
                         onError(e)
@@ -282,17 +242,17 @@ class NetworkManager(
                         }
                     }
                 }
-        )
+            )
     }
 
     fun fetchProposals(
-            onSuccess: (List<Proposal>) -> Unit,
-            onError: (Exception) -> Unit
+        onSuccess: (List<Proposal>) -> Unit,
+        onError: (Exception) -> Unit
     ) {
         val request = Request.Builder()
-                .url("$baseUrl/api/v2/content/localize/proposals")
-                .get()
-                .build()
+            .url("$baseUrl/api/v2/content/localize/proposals")
+            .get()
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -304,8 +264,8 @@ class NetworkManager(
                     val responseString = response.body()?.string()
                     val listType = object : TypeToken<List<Proposal>>() {}.type
                     val proposals = gson.fromJson<List<Proposal>>(
-                            responseString?.asJsonObject?.get("data")!!,
-                            listType
+                        responseString?.asJsonObject?.get("data")!!,
+                        listType
                     )
                     onSuccess(proposals)
                 } catch (e: Exception) {
@@ -329,33 +289,19 @@ class NetworkManager(
 
     suspend fun getRateReminder2(
         settings: AppOpenSettings
-    ) : RateReminder2? {
-        val request = Request.Builder()
-            .url("$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}")
-            .get()
-            .build()
-
-        val response = client.newCall(request).execute()
-        if (response.isSuccessful) {
-            return response.body()?.string()?.asJsonObject?.let { RateReminder2(it) }
-        }
-        return null
+    ): RateReminder2? {
+        return Request.Builder()["$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}"]
+            .parseJson { RateReminder2(it) }
     }
 
     suspend fun postRateReminderAction(
         settings: AppOpenSettings,
         action: String
     ) {
-        val body = FormBody.Builder()
-            .add("guid", settings.guid)
-            .add("action", action)
-            .build()
-        val request = Request.Builder()
-            .url("$baseUrl/api/v2/notify/rate_reminder_v2/events")
-            .post(body)
-            .build()
-
-        client.newCall(request).execute()
+        FormBody.Builder().also {
+            it["guid"] = settings.guid
+            it["action"] = action
+        }.post("$baseUrl/api/v2/notify/rate_reminder_v2/events")
     }
 
     suspend fun postRateReminderAction(
@@ -363,33 +309,64 @@ class NetworkManager(
         rateReminderId: Int,
         answer: String
     ) {
-        val body = FormBody.Builder()
-            .add("guid", settings.guid)
-            .add("answer", answer)
-            .build()
-        val request = Request.Builder()
-            .url("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminderId}/answers")
-            .post(body)
-            .build()
-
-        client.newCall(request).execute()
+        FormBody.Builder().also {
+            it["guid"] = settings.guid
+            it["answer"] = answer
+        }.post("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminderId}/answers")
     }
 
     suspend fun postFeedback(feedback: Feedback) {
-        val body = FormBody.Builder().apply {
-            feedback.appVersion?.let { add("app_version", it) }
-            feedback.deviceName?.let { add("device", it) }
-            feedback.name?.let { add("name", it) }
-            feedback.email?.let { add("email", it) }
-            feedback.message?.let { add("message", it) }
+        FormBody.Builder().also {
+            it["app_version"] = feedback.appVersion
+            it["device"] = feedback.deviceName
+            it["name"] = feedback.name
+            it["email"] = feedback.email
+            it["message"] = feedback.message
+        }.post("$baseUrl/api/v2/ugc/feedbacks")
+    }
+
+    private operator fun FormBody.Builder.set(field: String, value: String) {
+        if (value.isNotEmpty()) {
+            add(field, value)
         }
-            .build()
+    }
 
-        val request = Request.Builder()
-            .url("$baseUrl/api/v2/ugc/feedbacks")
-            .post(body)
-            .build()
+    private operator fun Request.Builder.get(url: String): Response {
+        return url(url).get().build().execute()
+    }
 
-        client.newCall(request).execute()
+    private fun Request.Builder.applyHeaders(vararg header: Pair<String, String>): Request.Builder {
+        header.forEach { addHeader(it.first, it.second) }
+        return this
+    }
+
+    private fun FormBody.Builder.buildRequest(url: String): Request {
+        return Request.Builder().url(url).post(build()).build()
+    }
+
+    private fun FormBody.Builder.buildRequest(
+        url: String,
+        vararg header: Pair<String, String>
+    ): Request {
+        return Request.Builder().url(url).applyHeaders(*header).url(url).post(build()).build()
+    }
+
+    private fun Request.execute(): Response {
+        return client.newCall(this).execute()
+    }
+
+    private fun Request.call(): Call {
+        return client.newCall(this)
+    }
+
+    private fun FormBody.Builder.post(url: String) {
+        buildRequest(url).execute()
+    }
+
+    private fun <T> Response.parseJson(transform: (JsonObject) -> T): T? {
+        if (isSuccessful) {
+            return body()?.string()?.asJsonObject?.let { transform(it) }
+        }
+        return null
     }
 }

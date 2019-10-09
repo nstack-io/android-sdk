@@ -20,7 +20,6 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
@@ -28,6 +27,7 @@ import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
+import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackPlugin
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
@@ -860,44 +860,56 @@ object NStack {
 
     object RateReminder {
 
-        private var title: String = ""
-        private var message: String = ""
-        private var yesButton: String = ""
-        private var noButton: String = ""
-        private var skipButton: String = ""
+        var title: String = "_rate reminder"
+        var message: String = "_rate reminder message"
+        var yesButton: String = "_yes"
+        var noButton: String = "_no"
+        var skipButton: String = "_later"
 
-        private var settings: AppOpenSettings? = null
+        private val settings: AppOpenSettings by lazy { appOpenSettingsManager.getAppOpenSettings() }
 
         private var rateReminderId: Int = 0
 
+        /**
+         * Call it in order to check whether the app should show rate reminder dialog
+         *
+         * if rate reminder should be shown call RateReminder#show in order to show it
+         *
+         * @return true if rate reminder dialog should be shown
+         */
         suspend fun shouldShow(): Boolean {
-            val settings = requireNotNull(settings)
-            val rateReminder = networkManager.getRateReminder2(settings) ?: return false
-            rateReminderId = rateReminder.id
-            return true
+            return networkManager.getRateReminder2(settings)?.also {
+                rateReminderId = it.id
+            } != null
         }
 
+        /**
+         * call this when user performs a rate reminder related action
+         *
+         * @param action - user performed rate reminder related action
+         *                  for convenience nstack gradle plugin generates enum RateReminderAction
+         *                  which contains actions' names
+         */
         suspend fun action(action: String) {
-            networkManager.postRateReminderAction(appOpenSettingsManager.getAppOpenSettings(), action)
+            networkManager.postRateReminderAction(
+                appOpenSettingsManager.getAppOpenSettings(),
+                action
+            )
         }
 
-        fun setup(
-            title: String,
-            message: String,
-            yesButton: String,
-            noButton: String,
-            skipButton: String
-        ) {
-            this.title = title
-            this.message = message
-            this.yesButton = yesButton
-            this.noButton = noButton
-            this.skipButton = skipButton
-            settings = appOpenSettingsManager.getAppOpenSettings()
-        }
-
+        /**
+         * Shows an alert dialog asking user whether they would rate the app
+         *
+         * title, message, yesButton, noButton, skipButton should be set before calling this method
+         *
+         * @throws IllegalStateException if RateReminder#show wasn't called or it returned false
+         * @return RateReminderAnswer, when answer is
+         *         POSITIVE - app should take user to the play store
+         *         NEGATIVE - app should take user to the feedback screen
+         *         SKIP - nothing for the app to do
+         */
         suspend fun show(context: Context): RateReminderAnswer {
-            require(rateReminderId != 0)
+            check(rateReminderId != 0)
             val answer = suspendCoroutine<RateReminderAnswer> {
                 AlertDialog.Builder(context)
                     .setTitle(title)
@@ -914,32 +926,30 @@ object NStack {
                     .setCancelable(false)
                     .show()
             }
-            withContext(Dispatchers.IO) { sendAnswer(answer) }
+            rateReminderId = 0
+            withContext(Dispatchers.IO) {
+                networkManager.postRateReminderAction(settings, rateReminderId, answer.apiName)
+            }
             return answer
-        }
-
-        private suspend fun sendAnswer(answer: RateReminderAnswer) {
-            require(rateReminderId != 0)
-            val settings = requireNotNull(settings)
-            networkManager.postRateReminderAction(settings, rateReminderId, answer.apiName)
         }
     }
 
     object Feedback {
 
+        var appVersion: String = ""
+        var deviceName: String = ""
+        var name: String = ""
+        var email: String = ""
+
         suspend fun send(
-            appVersion: String? = null,
-            deviceName: String? = null,
-            name: String? = null,
-            email: String? = null,
-            message: String? = null
+            message: String = ""
         ) {
             val feedback = Feedback(
-                appVersion = appVersion,
-                deviceName = deviceName,
-                name = name,
-                email = email,
-                message = message
+                appVersion,
+                deviceName,
+                name,
+                email,
+                message
             )
             networkManager.postFeedback(feedback)
         }
