@@ -1,5 +1,5 @@
 apply plugin: 'signing'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 // Username & password for Sonatype, stored in gradle.properties
 def _ossrhUsername = System.getenv('NEXUS_USERNAME')
@@ -9,6 +9,8 @@ allprojects { ext."signing.keyId" = System.getenv('keyId') }
 allprojects { ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile') }
 allprojects { ext."signing.password" = System.getenv('password') }
 
+// Artifact settings
+final def _isReleaseVersion = !VERSION_NAME.endsWith("SNAPSHOT")
 
 nexusStaging {
     packageGroup = "dk.nodes"
@@ -16,64 +18,73 @@ nexusStaging {
     stagingProfileId = "5a414403b5bf75"
 }
 
-afterEvaluate { project ->
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+afterEvaluate {
 
-                pom.groupId = GROUP
-                pom.artifactId = POM_ARTIFACT_ID
-                pom.version = VERSION_NAME
 
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: _ossrhUsername, password: _ossrhPassword)
-                }
 
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: _ossrhUsername, password: _ossrhPassword)
-                }
+    publishing {
+        publications {
+            nstackKotlin(MavenPublication) {
+                pom {
+                    name = POM_NAME
+                    packaging = POM_PACKAGING
+                    artifactId = POM_ARTIFACT_ID
+                    groupId = GROUP
+                    description = POM_DESCRIPTION
+                    version = VERSION_NAME
+                    url = POM_URL
+                    inceptionYear = '2015'
 
-                pom.project {
-                    name POM_NAME
-                    packaging POM_PACKAGING
-                    description POM_DESCRIPTION
-                    url POM_URL
-                    inceptionYear '2017'
+                    /*artifact project.sourcesJar {
+                        classifier "sources"
+                    }*/
 
-                    scm {
-                        url POM_SCM_URL
-                        connection POM_SCM_CONNECTION
-                    }
+
 
                     licenses {
                         license {
-                            name POM_LICENCE_NAME
-                            url POM_LICENCE_URL
+                            name = POM_LICENCE_NAME
+                            url = POM_LICENCE_URL
                         }
                     }
 
                     developers {
                         developer {
-                            id POM_DEVELOPER_ID
-                            name POM_DEVELOPER_NAME
-                            email POM_DEVELOPER_EMAIL
+                            id = POM_DEVELOPER_ID
+                            name = POM_DEVELOPER_NAME
+                            email = POM_DEVELOPER_EMAIL
                         }
                     }
 
+                    scm {
+                        url = POM_SCM_URL
+                        connection = POM_SCM_CONNECTION
+                    }
+
                     issueManagement {
-                        system 'GitHub issues'
-                        url 'https://github.com/nodes-android/nstack-kotlin/issues'
+                        system = 'GitHub issues'
+                        url = 'https://github.com/nodes-android/nstack-kotlin/issues'
                     }
                 }
             }
         }
+
+        repositories {
+            maven {
+
+                credentials {
+                    username _ossrhUsername
+                    password _ossrhPassword
+                }
+
+                final def releasesRepoUrl = 'https://oss.sonatype.org/content/repositories/releases'
+                final def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+
+                url = _isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
+            }
+        }
     }
 
-    signing {
-        required { gradle.taskGraph.hasTask("uploadArchives") }
-        sign configurations.archives
-    }
 
     def plugins = project.getPlugins()
     if (plugins.hasPlugin('com.android.application') || plugins.hasPlugin('com.android.library')) {
@@ -87,11 +98,10 @@ afterEvaluate { project ->
         }
     }
     else {
-        task sourcesJar(type: Jar, dependsOn: classes) {
+        task('sourcesJar', type: Jar, dependsOn: classes) {
             classifier = 'sources'
             from sourceSets.main.allSource
         }
-
         task javadocsJar(type: Jar, dependsOn: javadoc) {
             classifier = 'javadoc'
             from javadoc.destinationDir
@@ -110,4 +120,17 @@ afterEvaluate { project ->
             }
         }
     }
+
+
+
+
 }
+
+
+
+signing {
+    required { gradle.taskGraph.hasTask("publishNstackKotlinPublicationToMavenRepository") }
+    sign configurations.archives
+}
+
+
