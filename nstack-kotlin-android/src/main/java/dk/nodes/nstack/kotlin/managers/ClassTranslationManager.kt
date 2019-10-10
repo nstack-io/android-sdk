@@ -43,9 +43,10 @@ class ClassTranslationManager {
 
     private fun updateField(classType: Class<*>, key: String, value: String) {
         try {
-            val field = classType.getField(key)
-            field.isAccessible = true
-            field.set(null, value)
+            classType.getField(key).apply {
+                isAccessible = true
+                set(null, value)
+            }
         } catch (e: Exception) {
             NLog.d("", e.message ?: "")
             NLog.d("ClassTranslationManager", "Error updating field: $key : $value")

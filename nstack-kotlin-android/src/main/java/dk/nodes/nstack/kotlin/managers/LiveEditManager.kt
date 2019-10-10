@@ -5,7 +5,13 @@ import android.content.res.Resources
 import android.hardware.SensorManager
 import android.os.Handler
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -17,7 +23,12 @@ import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.ShakeDetector
-import dk.nodes.nstack.kotlin.util.extensions.*
+import dk.nodes.nstack.kotlin.util.extensions.attachLiveEditListener
+import dk.nodes.nstack.kotlin.util.extensions.detachLiveEditListener
+import dk.nodes.nstack.kotlin.util.extensions.dp
+import dk.nodes.nstack.kotlin.util.extensions.hide
+import dk.nodes.nstack.kotlin.util.extensions.setNavigationBarColor
+import dk.nodes.nstack.kotlin.util.extensions.show
 import dk.nodes.nstack.kotlin.view.KeyAndTranslationAdapter
 import dk.nodes.nstack.kotlin.view.ProposalsAdapter
 import java.lang.ref.WeakReference
@@ -38,7 +49,7 @@ internal class LiveEditManager(
         viewTranslationManager.addOnUpdateViewTranslationListener { view, translationData ->
             if (liveEditEnabled) {
                 val data = view.getTag(NStackViewTag) as? TranslationData
-                if (data.isValid()) {
+                if (data.isValid) {
                     viewQueue += WeakReference(view)
                     view.attachLiveEditListener {
                         showChooseOptionDialog(view, translationData)
@@ -88,7 +99,8 @@ internal class LiveEditManager(
         bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_edit)
         bottomSheetDialog.setOnShowListener {
-            val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+            val bottomSheetInternal =
+                bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
         }
         val contentView = bottomSheetDialog.findViewById<View>(R.id.contentView)
@@ -160,15 +172,15 @@ internal class LiveEditManager(
                         when (exception) {
                             is NStackException -> {
                                 Toast.makeText(
-                                        view.context,
-                                        exception.errorBody.localizedMessage
-                                                ?: exception.errorBody.message,
-                                        Toast.LENGTH_SHORT
+                                    view.context,
+                                    exception.errorBody.localizedMessage
+                                        ?: exception.errorBody.message,
+                                    Toast.LENGTH_SHORT
                                 ).show()
                             }
                             else -> {
                                 Toast.makeText(view.context, "Unknown Error", Toast.LENGTH_SHORT)
-                                        .show()
+                                    .show()
                             }
                         }
                     }
@@ -211,7 +223,8 @@ internal class LiveEditManager(
         bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_proposals)
 
-        val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+        val bottomSheetInternal =
+            bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
         val recyclerView = bottomSheetDialog.findViewById<RecyclerView>(R.id.recyclerView)
         val loadingView = bottomSheetDialog.findViewById<ProgressBar>(R.id.loadingView)
         val errorTextView = bottomSheetDialog.findViewById<TextView>(R.id.errorTextView)
@@ -223,36 +236,36 @@ internal class LiveEditManager(
         loadingView?.show()
         recyclerView?.hide()
         networkManager.fetchProposals(
-                { proposals ->
-                    runUiAction {
-                        if (proposals.isNotEmpty()) {
-                            errorTextView?.visibility = View.GONE
-                            recyclerView?.adapter = ProposalsAdapter().apply {
-                                val sectionAndKeyPairList =
-                                        translationPair?.toKeyAndTranslationList()
-                                                ?.map { getSectionAndKeyPair(it.key) }
-                                if (sectionAndKeyPairList.isNullOrEmpty()) {
-                                    update(proposals)
-                                } else {
-                                    update(proposals.filter { sectionAndKeyPairList.contains(it.section to it.key) })
-                                }
+            { proposals ->
+                runUiAction {
+                    if (proposals.isNotEmpty()) {
+                        errorTextView?.visibility = View.GONE
+                        recyclerView?.adapter = ProposalsAdapter().apply {
+                            val sectionAndKeyPairList =
+                                translationPair?.toKeyAndTranslationList()
+                                    ?.map { getSectionAndKeyPair(it.key) }
+                            if (sectionAndKeyPairList.isNullOrEmpty()) {
+                                update(proposals)
+                            } else {
+                                update(proposals.filter { sectionAndKeyPairList.contains(it.section to it.key) })
                             }
-
-                            loadingView?.hide()
-                            recyclerView?.show()
-                        } else {
-                            errorTextView?.text = "No proposals found"
-                            errorTextView?.visibility = View.VISIBLE
                         }
-                    }
-                },
-                {
-                    runUiAction {
-                        errorTextView?.text = "Could not load proposals"
-                        errorTextView?.visibility = View.VISIBLE
+
                         loadingView?.hide()
+                        recyclerView?.show()
+                    } else {
+                        errorTextView?.text = "No proposals found"
+                        errorTextView?.visibility = View.VISIBLE
                     }
                 }
+            },
+            {
+                runUiAction {
+                    errorTextView?.text = "Could not load proposals"
+                    errorTextView?.visibility = View.VISIBLE
+                    loadingView?.hide()
+                }
+            }
         )
         bottomSheetDialog.show()
     }
@@ -285,12 +298,15 @@ internal class LiveEditManager(
         bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_options)
         bottomSheetDialog.setOnShowListener {
-            val bottomSheetInternal = bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
+            val bottomSheetInternal =
+                bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
             BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
         }
 
-        val optionViewProposalTextView = bottomSheetDialog.findViewById<TextView>(R.id.optionViewProposalTextView)
-        val optionEditProposalTextView = bottomSheetDialog.findViewById<TextView>(R.id.optionEditProposalTextView)
+        val optionViewProposalTextView =
+            bottomSheetDialog.findViewById<TextView>(R.id.optionViewProposalTextView)
+        val optionEditProposalTextView =
+            bottomSheetDialog.findViewById<TextView>(R.id.optionEditProposalTextView)
 
         optionViewProposalTextView?.setOnClickListener {
             bottomSheetDialog.dismiss()
@@ -311,76 +327,23 @@ internal class LiveEditManager(
     }
 
     private fun Pair<TranslationData, TranslationData>.toKeyAndTranslationList(): List<KeyAndTranslation> {
-        val mutableList = mutableListOf<KeyAndTranslation>()
-        if (first.key != null && second.key != null) {
-            mutableList += KeyAndTranslation(
-                first.key!!,
-                second.key!!,
-                StyleableEnum.Key
-            )
+        fun StyleableEnum.toKeyAndTranslation(getter: (TranslationData) -> String?): KeyAndTranslation? {
+            val key = getter(first) ?: return null
+            val translation = getter(second) ?: return null
+            return KeyAndTranslation(key, translation, this)
         }
-        if (first.text != null && second.text != null) {
-            mutableList += KeyAndTranslation(
-                first.text!!,
-                second.text!!,
-                StyleableEnum.Text
-            )
-        }
-        if (first.hint != null && second.hint != null) {
-            mutableList += KeyAndTranslation(
-                first.hint!!,
-                second.hint!!,
-                StyleableEnum.Hint
-            )
-        }
-        if (first.description != null && second.description != null) {
-            mutableList += KeyAndTranslation(
-                first.description!!,
-                second.description!!,
-                StyleableEnum.Description
-            )
-        }
-        if (first.textOn != null && second.textOn != null) {
-            mutableList += KeyAndTranslation(
-                first.textOn!!,
-                second.textOn!!,
-                StyleableEnum.TextOn
-            )
-        }
-        if (first.textOff != null && second.textOff != null) {
-            mutableList += KeyAndTranslation(
-                first.textOff!!,
-                second.textOff!!,
-                StyleableEnum.TextOff
-            )
-        }
-        if (first.contentDescription != null && second.contentDescription != null) {
-            mutableList += KeyAndTranslation(
-                first.contentDescription!!,
-                second.contentDescription!!,
-                StyleableEnum.ContentDescription
-            )
-        }
-        if (first.title != null && second.title != null) {
-            mutableList += KeyAndTranslation(
-                first.title!!,
-                second.title!!,
-                StyleableEnum.Title
-            )
-        }
-        if (first.subtitle != null && second.subtitle != null) {
-            mutableList += KeyAndTranslation(
-                first.subtitle!!,
-                second.subtitle!!,
-                StyleableEnum.Subtitle
-            )
-        }
-        return mutableList
+        return listOfNotNull(
+            StyleableEnum.Key.toKeyAndTranslation { it.key },
+            StyleableEnum.Text.toKeyAndTranslation { it.text },
+            StyleableEnum.Hint.toKeyAndTranslation { it.hint },
+            StyleableEnum.Description.toKeyAndTranslation { it.description },
+            StyleableEnum.TextOn.toKeyAndTranslation { it.textOn },
+            StyleableEnum.TextOff.toKeyAndTranslation { it.textOff },
+            StyleableEnum.ContentDescription.toKeyAndTranslation { it.contentDescription },
+            StyleableEnum.Title.toKeyAndTranslation { it.title },
+            StyleableEnum.Subtitle.toKeyAndTranslation { it.subtitle }
+        )
     }
-
-    /**
-     * Run Ui Action
-     */
 
     private fun runUiAction(action: () -> Unit) {
         handler.post {
@@ -388,23 +351,21 @@ internal class LiveEditManager(
         }
     }
 
-    private fun TranslationData?.isValid(): Boolean {
-        return if (this == null) false
-        else {
-            when {
-                translationHolder.hasKey(key) -> true
-                translationHolder.hasKey(text) -> true
-                translationHolder.hasKey(hint) -> true
-                translationHolder.hasKey(description) -> true
-                translationHolder.hasKey(textOn) -> true
-                translationHolder.hasKey(textOff) -> true
-                translationHolder.hasKey(contentDescription) -> true
-                translationHolder.hasKey(title) -> true
-                translationHolder.hasKey(subtitle) -> true
-                else -> false
-            }
+    private val TranslationData?.isValid: Boolean
+        get() {
+            return this != null &&
+                listOf(
+                    key,
+                    text,
+                    hint,
+                    description,
+                    textOn,
+                    textOff,
+                    contentDescription,
+                    title,
+                    subtitle
+                ).any { translationHolder.hasKey(it) }
         }
-    }
 
     companion object {
         private val NStackViewTag = R.id.nstack_tag

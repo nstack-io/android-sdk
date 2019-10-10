@@ -73,24 +73,23 @@ class NStackRootLayout @JvmOverloads constructor(
 
         // TODO: Add support for other Views (Button, Toolbar, ...)
 
-        if (translationData.isValid()) {
+        if (translationData.isValid) {
             NStack.addView(view, translationData)
         } else {
             NLog.d(this, "processView -> Found no valid NStack keys ${view.javaClass.name}")
         }
     }
 
-    private fun TranslationData.isValid(): Boolean {
-        return !(key == null &&
-                text == null &&
-                hint == null &&
-                description == null &&
-                textOn == null &&
-                textOff == null &&
-                contentDescription == null &&
-                title == null &&
-                subtitle == null)
-    }
+    private val TranslationData.isValid: Boolean
+        get() = !(key == null &&
+            text == null &&
+            hint == null &&
+            description == null &&
+            textOn == null &&
+            textOff == null &&
+            contentDescription == null &&
+            title == null &&
+            subtitle == null)
 
     private fun String.obtainNStackKeyName(): String? {
         return when {
