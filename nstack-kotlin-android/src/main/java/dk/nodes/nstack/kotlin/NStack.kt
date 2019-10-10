@@ -891,6 +891,7 @@ object NStack {
          *
          * title, message, yesButton, noButton, skipButton should be set before calling this method
          *
+         * @param context change appearance of the dialog by passing ContextThemeWrapper
          * @throws IllegalStateException if RateReminder#show wasn't called or it returned false
          * @return RateReminderAnswer, when answer is
          *         POSITIVE - app should take user to the play store

@@ -4,19 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 
-/**
- * An interface for shared preferences
- */
 internal interface Preferences {
 
-    /**
-     * Saves value with key
-     */
     fun saveString(key: String, value: String)
-
-    /**
-     * Gets string by key
-     */
     fun loadString(key: String): String
 
     /**
@@ -26,9 +16,6 @@ internal interface Preferences {
     fun loadStringsWhereKey(predicate: (String) -> Boolean): Map<String, String>
 }
 
-/**
- * Preferences implementation
- */
 internal class PreferencesImpl(context: Context) : Preferences {
 
     private val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)

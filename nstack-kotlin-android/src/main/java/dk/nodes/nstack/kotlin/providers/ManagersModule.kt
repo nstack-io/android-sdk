@@ -7,6 +7,7 @@ import dk.nodes.nstack.kotlin.managers.PrefManager
 internal class ManagersModule(
     private val nStackModule: NStackModule
 ) {
+
     fun provideAppOpenSettingsManager(): AppOpenSettingsManager {
         return AppOpenSettingsManager(nStackModule.provideClientAppInfo(), nStackModule.providePreferences())
     }

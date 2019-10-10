@@ -6,21 +6,19 @@ import java.lang.reflect.Method
 object ReflectionUtils {
 
     fun getField(clazz: Class<*>, fieldName: String): Field? {
-        try {
-            val field = clazz.getDeclaredField(fieldName)
-            field.isAccessible = true
-            return field
-        } catch (ignored: NoSuchFieldException) {
+        return try {
+            clazz.getDeclaredField(fieldName).also { it.isAccessible = true }
+        } catch (e: NoSuchFileException) {
+            null
         }
-        return null
     }
 
     fun getValue(field: Field, obj: Any): Any? {
-        try {
-            return field.get(obj)
-        } catch (ignored: IllegalAccessException) {
+        return try {
+            field.get(obj)
+        } catch (e: IllegalAccessException) {
+            null
         }
-        return null
     }
 
     fun setValue(field: Field, obj: Any, value: Any) {
@@ -31,23 +29,13 @@ object ReflectionUtils {
     }
 
     fun getMethod(clazz: Class<*>, methodName: String): Method? {
-        val methods = clazz.methods
-        for (method in methods) {
-            if (method.name == methodName) {
-                method.isAccessible = true
-                return method
-            }
-        }
-        return null
+        return clazz.methods.firstOrNull { it.name == methodName }?.also { it.isAccessible = true }
     }
 
     fun invokeMethod(obj: Any, method: Method?, vararg args: Any) {
         try {
-            if (method == null) {
-                return
-            }
-            method.invoke(obj, args)
-        } catch (e: Exception) {
+            method?.invoke(obj, args)
+        } catch(e: Exception) {
         }
     }
 }
