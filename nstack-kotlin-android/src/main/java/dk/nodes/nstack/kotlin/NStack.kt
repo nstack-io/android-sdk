@@ -899,7 +899,7 @@ object NStack {
          *         SKIP - nothing for the app to do
          */
         suspend fun show(context: Context): RateReminderAnswer {
-            check(rateReminderId != 0)
+            check(rateReminderId != 0) { "check rate reminder with shouldShow before showing the dialog" }
             val answer = suspendCoroutine<RateReminderAnswer> {
                 AlertDialog.Builder(context)
                     .setTitle(title)
@@ -916,10 +916,10 @@ object NStack {
                     .setCancelable(false)
                     .show()
             }
-            rateReminderId = 0
             withContext(Dispatchers.IO) {
                 networkManager.postRateReminderAction(settings, rateReminderId, answer.apiName)
             }
+            rateReminderId = 0
             return answer
         }
     }

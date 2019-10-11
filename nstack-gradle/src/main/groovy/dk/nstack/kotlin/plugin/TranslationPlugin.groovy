@@ -13,7 +13,7 @@ class TranslationPlugin implements Plugin<Project> {
     public static
     final String JAVA_SOURCE_PATH = "${File.separator}src${File.separator}main${File.separator}java"
     public static final String TRANSLATION_FILE_NAME = "Translation.java"
-    public static final String RATE_REMINDER_ACTIONS_FILE_NAME = "RateReminderAction.kt"
+    public static final String RATE_REMINDER_ACTIONS_FILE_NAME = "RateReminderActions.kt"
 
     def pathPrefix = ""
     public static Project project = null
