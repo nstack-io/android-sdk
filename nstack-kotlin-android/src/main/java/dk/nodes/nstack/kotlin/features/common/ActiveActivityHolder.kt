@@ -14,8 +14,7 @@ class ActiveActivityHolder : Application.ActivityLifecycleCallbacks {
         get() = foregroundActivityReference.get()
         private set // Not used and shouldn't be! The weak reference is used for this!
 
-    var foregroundActivityReference: WeakReference<Activity?> = WeakReference(null)
-        private set
+    private var foregroundActivityReference: WeakReference<Activity?> = WeakReference(null)
 
     override fun onActivityPaused(activity: Activity) {
         if (foregroundActivity != null && foregroundActivity === activity) {
