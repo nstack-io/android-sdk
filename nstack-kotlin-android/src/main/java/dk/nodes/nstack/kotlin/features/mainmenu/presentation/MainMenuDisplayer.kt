@@ -22,7 +22,7 @@ internal class MainMenuDisplayer {
         this.mainMenuDialog = MainMenuDialogFactory
                 .create(context = activity)
                 .apply {
-                    setOnCancelListener { this@MainMenuDisplayer.mainMenuDialog = null  }
+                    setOnCancelListener { this@MainMenuDisplayer.mainMenuDialog = null }
                     setOnDismissListener { this@MainMenuDisplayer.mainMenuDialog = null }
                 }
                 .also { dialog ->
@@ -32,7 +32,7 @@ internal class MainMenuDisplayer {
     }
 
     private fun setDismissWithActivity(dialog: BottomSheetDialog, activity: Activity) {
-        activity.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks{
+        activity.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
 
             override fun onActivityStopped(activity: Activity) {
                 dialog.dismiss()
@@ -41,6 +41,7 @@ internal class MainMenuDisplayer {
             }
 
             // Unused
+
             override fun onActivityPaused(activity: Activity) = Unit
             override fun onActivityStarted(activity: Activity) = Unit
             override fun onActivityDestroyed(activity: Activity) = Unit
