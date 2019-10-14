@@ -50,15 +50,15 @@ internal class ViewTranslationManager(private val translationHolder: Translation
      * and removes garbage collected views
      */
     private fun updateViews() {
-        val it: MutableIterator<Map.Entry<WeakReference<View>, TranslationData>> =
+        val iterator: MutableIterator<Map.Entry<WeakReference<View>, TranslationData>> =
             viewMap.iterator()
 
-        while (it.hasNext()) {
-            val entry = it.next()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
             val view = entry.key.get()
             // If our view is null we should remove it from the map and return
             if (view == null) {
-                it.remove()
+                iterator.remove()
             } else
                 updateView(view, entry.value)
         }
