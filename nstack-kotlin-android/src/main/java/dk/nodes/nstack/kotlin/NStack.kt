@@ -2,6 +2,7 @@ package dk.nodes.nstack.kotlin
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
+import android.app.Activity
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -31,6 +32,7 @@ import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.TranslationData
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
@@ -244,10 +246,17 @@ object NStack {
         }
 
 
+
     /**
      * If flag is set to true this will auto change NStack's language when the device's locale is changed
      */
     var autoChangeLanguage: Boolean = false
+
+
+    /**
+     * Used to keep a reference and prevent double-opening of the same dialog
+     */
+    var mainMenuDialog: BottomSheetDialog? = null
 
     /**
      * Class Start
@@ -294,7 +303,21 @@ object NStack {
         networkManager = nstackModule.provideNetworkManager()
         loadCacheTranslations()
 
+        this.activeActivityHolder = ActiveActivityHolder()
+                .also { holder -> registerActiveActivityHolderToAppLifecycle(context, holder) }
+
         isInitialized = true
+    }
+
+    private fun registerActiveActivityHolderToAppLifecycle(
+            context: Context,
+            activeActivityHolder: ActiveActivityHolder
+    ) {
+        val appContext = context
+                .applicationContext as? Application
+                ?: throw IllegalStateException("Could not get application context")
+
+        appContext.registerActivityLifecycleCallbacks(activeActivityHolder)
     }
 
     /**
@@ -830,31 +853,28 @@ object NStack {
     )
     fun enableLiveEdit(context: Context) = enableMenuOnShake(context)
 
-    /**
-     * Enables
-     */
     fun enableMenuOnShake(context: Context) {
-        val appContext = context.applicationContext as? Application ?: throw IllegalStateException("Could not get application context")
-        this.activeActivityHolder = ActiveActivityHolder()
-        appContext.registerActivityLifecycleCallbacks(this.activeActivityHolder)
-
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
             override fun hearShake() {
-                if (debugMode) {
-                    val activity = this@NStack.activeActivityHolder?.foregroundActivity ?: return
-
-                    if (activity.isFinishing) {
-                        return
-                    }
-
-                    MainMenuDialogFactory
-                            .createDialog(activity)
-                            .show()
-                }
+                val activity = activeActivityHolder?.foregroundActivity ?: return
+                onMainMenuTriggered(activity)
             }
         })
+
         shakeDetector.start(sensorManager)
+    }
+
+    private fun onMainMenuTriggered(activity: Activity) {
+        val isMainMenuAlreadyShown = mainMenuDialog?.isShowing ?: false
+
+        if (isMainMenuAlreadyShown) {
+            return
+        }
+
+        this.mainMenuDialog = MainMenuDialogFactory
+                .create(context = activity)
+                .also { it.show() }
     }
 
     object RateReminder {
