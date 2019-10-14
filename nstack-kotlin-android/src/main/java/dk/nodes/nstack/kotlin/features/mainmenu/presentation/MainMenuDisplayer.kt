@@ -36,6 +36,8 @@ internal class MainMenuDisplayer {
 
             override fun onActivityStopped(activity: Activity) {
                 dialog.dismiss()
+
+                activity.unregisterActivityLifecycleCallbacks(this)
             }
 
             // Unused
