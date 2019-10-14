@@ -11,6 +11,10 @@ import java.lang.ref.WeakReference
  */
 internal class ActiveActivityHolder : Application.ActivityLifecycleCallbacks {
 
+    /**
+     * If there is a foreground activity and it is resumed, this will be true. Otherwise it's false
+     * for all other cases.
+     */
     @Suppress("MemberVisibilityCanBePrivate")
     var isInForeground: Boolean = false
         private set

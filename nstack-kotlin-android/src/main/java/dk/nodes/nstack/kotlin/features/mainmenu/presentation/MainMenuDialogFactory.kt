@@ -5,7 +5,7 @@ import android.content.Context
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dk.nodes.nstack.R
 
-object MainMenuDialogFactory {
+internal object MainMenuDialogFactory {
 
     @SuppressLint("InflateParams")
     fun create(context: Context): BottomSheetDialog {

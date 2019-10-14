@@ -7,7 +7,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 
 /**
  * Presents the main menu only under certain conditions. Also tries to assure memory and state
- * safety when displaying the menu
+ * safety when displaying the dialog
  */
 internal class MainMenuDisplayer {
 
