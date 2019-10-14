@@ -11,6 +11,7 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.hardware.SensorManager
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
@@ -34,6 +35,9 @@ import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.TranslationData
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
+import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
+import dk.nodes.nstack.kotlin.managers.*
+import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
@@ -118,6 +122,8 @@ object NStack {
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
 
     private val handler: Handler = Handler()
+
+    private val mainMenuDisplayer = MainMenuDisplayer()
 
     // Listener Lists
     private val onLanguageChangedList = mutableListOf<LanguageListener?>()
@@ -251,12 +257,6 @@ object NStack {
      * If flag is set to true this will auto change NStack's language when the device's locale is changed
      */
     var autoChangeLanguage: Boolean = false
-
-
-    /**
-     * Used to keep a reference and prevent double-opening of the same dialog
-     */
-    var mainMenuDialog: BottomSheetDialog? = null
 
     /**
      * Class Start
@@ -858,23 +858,11 @@ object NStack {
         val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
             override fun hearShake() {
                 val activity = activeActivityHolder?.foregroundActivity ?: return
-                onMainMenuTriggered(activity)
+                mainMenuDisplayer.display(activity)
             }
         })
 
         shakeDetector.start(sensorManager)
-    }
-
-    private fun onMainMenuTriggered(activity: Activity) {
-        val isMainMenuAlreadyShown = mainMenuDialog?.isShowing ?: false
-
-        if (isMainMenuAlreadyShown) {
-            return
-        }
-
-        this.mainMenuDialog = MainMenuDialogFactory
-                .create(context = activity)
-                .also { it.show() }
     }
 
     object RateReminder {

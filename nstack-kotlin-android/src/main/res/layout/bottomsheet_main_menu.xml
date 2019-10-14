@@ -2,6 +2,7 @@
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:minHeight="@dimen/bottom_sheet_min_height">
 
     <LinearLayout
@@ -30,5 +31,20 @@
             android:textColor="@color/white" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/optionViewProposalTextView"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="?selectableItemBackground"
+        android:drawableStart="@drawable/ic_visibility"
+        android:drawablePadding="16dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/review_translations"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>
