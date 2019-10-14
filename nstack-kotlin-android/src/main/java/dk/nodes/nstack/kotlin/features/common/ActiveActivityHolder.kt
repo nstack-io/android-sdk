@@ -11,6 +11,7 @@ import java.lang.ref.WeakReference
  */
 internal class ActiveActivityHolder : Application.ActivityLifecycleCallbacks {
 
+    @Suppress("MemberVisibilityCanBePrivate")
     var isInForeground: Boolean = false
         private set
 
