@@ -5,7 +5,11 @@ import android.app.Application
 import android.os.Bundle
 import java.lang.ref.WeakReference
 
-class ActiveActivityHolder : Application.ActivityLifecycleCallbacks {
+
+/**
+ * Used to access active activities, needs to be bound to the application context
+ */
+internal class ActiveActivityHolder : Application.ActivityLifecycleCallbacks {
 
     var isInForeground: Boolean = false
         private set
