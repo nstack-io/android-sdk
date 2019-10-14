@@ -10,9 +10,14 @@ class ActiveActivityHolder : Application.ActivityLifecycleCallbacks {
     var isInForeground: Boolean = false
         private set
 
-    var foregroundActivity: Activity? = null
+    var foregroundActivity: Activity?
         get() = foregroundActivityReference.get()
-        private set // Not used and shouldn't be! The weak reference is used for this!
+        private set(value) {
+            throw UnsupportedOperationException(
+                    "The foreground activity property should never be explicitly set! " +
+                    "Use foregroundActivityReference to hold on to the activity."
+            )
+        }
 
     private var foregroundActivityReference: WeakReference<Activity?> = WeakReference(null)
 
