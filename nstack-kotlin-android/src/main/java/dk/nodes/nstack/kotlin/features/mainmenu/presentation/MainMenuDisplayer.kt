@@ -3,7 +3,16 @@ package dk.nodes.nstack.kotlin.features.mainmenu.presentation
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.google.android.material.bottomsheet.BottomSheetDialog
+
+private enum class DisplayedFeature {
+    NONE,
+    MAIN_MENU,
+    TRANSLATION_EDIT,
+    TRANSLATION_MENUS
+}
 
 /**
  * Presents the main menu only under certain conditions. Also tries to assure memory and state
@@ -11,14 +20,26 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
  */
 internal class MainMenuDisplayer {
 
+    private var currentlyDisplayedFeature: DisplayedFeature = DisplayedFeature.NONE
     private var mainMenuDialog: BottomSheetDialog? = null
 
-    fun display(activity: Activity) {
+    init {
+        this.currentlyDisplayedFeature.value = DisplayedFeature.NONE
+    }
 
-        if (mainMenuDialog != null || activity.isFinishing) {
-            return
-        }
+    fun display(activity: Activity) = when(currentlyDisplayedFeature) {
+        DisplayedFeature.NONE -> displayFeature(DisplayedFeature.MAIN_MENU) { showMainMenu(activity) }
+        DisplayedFeature.TRANSLATION_EDIT -> displayFeature(DisplayedFeature.NONE) { disableEditing(activity) }
+        DisplayedFeature.MAIN_MENU -> { /* Do nothing, keep the menu open */ }
+        DisplayedFeature.TRANSLATION_MENUS -> { /* Do nothing, keep the menu open */ }
+    }
 
+    private inline fun displayFeature(newFeature: DisplayedFeature, display: () -> Unit) {
+        this.currentlyDisplayedFeature = newFeature
+        display()
+    }
+
+    private fun showMainMenu(activity: Activity) {
         this.mainMenuDialog = MainMenuDialogFactory
                 .create(context = activity)
                 .apply {
@@ -29,6 +50,10 @@ internal class MainMenuDisplayer {
                     setDismissWithActivity(dialog, activity)
                     dialog.show()
                 }
+    }
+
+    private fun disableEditing(activity: Activity) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private fun setDismissWithActivity(dialog: BottomSheetDialog, activity: Activity) {
