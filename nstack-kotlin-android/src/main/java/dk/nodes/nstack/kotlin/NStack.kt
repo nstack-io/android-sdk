@@ -291,6 +291,10 @@ object NStack {
         loadCacheTranslations()
 
         isInitialized = true
+
+        if (env == "production" || env == "prod") {
+            versionUpdateTestMode = false
+        }
     }
 
     /**

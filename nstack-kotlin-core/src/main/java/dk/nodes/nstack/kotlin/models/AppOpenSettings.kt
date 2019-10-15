@@ -8,5 +8,5 @@ data class AppOpenSettings(
     var version: String,
     var oldVersion: String,
     var lastUpdated: Date,
-    var versionUpdateTestMode: Boolean = false
+    var versionUpdateTestMode: Boolean = true
 )
