@@ -267,11 +267,12 @@ class NetworkManager(
     fun getLatestTerms(
             termsID: Long,
             acceptLanguage: String,
+            settings: AppOpenSettings,
             onSuccess: (TermDetails) -> Unit,
             onError: (Exception) -> Unit
     ) {
         val request = Request.Builder()
-                .url("$baseUrl/api/v2/content/terms/$termsID/versions/newest")
+                .url("$baseUrl/api/v2/content/terms/$termsID/versions/newest?guid=${settings.guid}")
                 .header("Accept-Language", acceptLanguage)
                 .get()
                 .build()
