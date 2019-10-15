@@ -1,15 +1,8 @@
 package dk.nodes.nstack.kotlin.provider
 
-import com.google.gson.FieldNamingPolicy
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import dk.nodes.nstack.kotlin.util.DateDeserializer
-import dk.nodes.nstack.kotlin.util.LocaleDeserializer
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import java.util.Date
-import java.util.Locale
 import kotlin.reflect.KClass
 
 object HttpClientProvider {
@@ -68,19 +61,8 @@ object HttpClientProvider {
                     )
                 )
                 .addInterceptor(provideHttpLoggingInterceptor(debugMode))
-                .addInterceptor(NodesErrorInterceptor(provideGson()))
+                .addInterceptor(NodesErrorInterceptor(GsonProvider.provideGson()))
                 .build()
-        }
-    }
-
-    internal fun provideGson(): Gson {
-        return getLazyDependency(Gson::class) {
-            GsonBuilder()
-                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapter(Date::class.java, DateDeserializer())
-                .registerTypeAdapter(Locale::class.java, LocaleDeserializer())
-                .setDateFormat(DateDeserializer.DATE_FORMAT)
-                .create()
         }
     }
 

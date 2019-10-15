@@ -8,4 +8,6 @@ object Constants {
     const val spk_nstack_version = "spk_nstack_version_v2"
     const val spk_nstack_old_version = "spk_nstack_old_version_v2"
     const val spk_nstack_last_updated = "spk_nstack_last_updated_v2"
+
+    const val spk_nstack_latest_terms = "spk_nstack_latest_terms"
 }

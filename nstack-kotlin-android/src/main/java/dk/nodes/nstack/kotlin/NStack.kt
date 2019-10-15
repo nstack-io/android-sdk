@@ -12,48 +12,21 @@ import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
-import dk.nodes.nstack.kotlin.managers.AssetCacheManager
-import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
-import dk.nodes.nstack.kotlin.managers.ConnectionManager
-import dk.nodes.nstack.kotlin.managers.LiveEditManager
-import dk.nodes.nstack.kotlin.managers.NetworkManager
-import dk.nodes.nstack.kotlin.managers.PrefManager
-import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenResult
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.AppUpdateData
-import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.Feedback
-import dk.nodes.nstack.kotlin.models.LocalizeIndex
-import dk.nodes.nstack.kotlin.models.Message
-import dk.nodes.nstack.kotlin.models.RateReminderAnswer
-import dk.nodes.nstack.kotlin.models.TranslationData
-import dk.nodes.nstack.kotlin.plugin.NStackPlugin
+import dk.nodes.nstack.kotlin.data.terms.TermsRepository
+import dk.nodes.nstack.kotlin.managers.*
+import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
-import dk.nodes.nstack.kotlin.util.AppOpenCallbackCount
-import dk.nodes.nstack.kotlin.util.LanguageFetchCallback
-import dk.nodes.nstack.kotlin.util.LanguageListener
-import dk.nodes.nstack.kotlin.util.LanguagesListener
-import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
-import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
-import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
-import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
-import dk.nodes.nstack.kotlin.util.extensions.languageCode
-import dk.nodes.nstack.kotlin.util.extensions.locale
+import dk.nodes.nstack.kotlin.providers.RepositoryModule
+import dk.nodes.nstack.kotlin.util.*
+import dk.nodes.nstack.kotlin.util.extensions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.lang.ref.WeakReference
-import java.util.ArrayList
-import java.util.Locale
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -105,6 +78,7 @@ object NStack {
     private lateinit var appOpenSettingsManager: AppOpenSettingsManager
     private lateinit var prefManager: PrefManager
     private lateinit var contextWrapper: ContextWrapper
+    private lateinit var termsRepository: TermsRepository
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
@@ -266,6 +240,7 @@ object NStack {
 
         val nstackModule = NStackModule(context, translationHolder)
         val managersModule = ManagersModule(nstackModule)
+        val repositoryModule = RepositoryModule(nstackModule)
 
         val nstackMeta = nstackModule.provideNStackMeta()
         appIdKey = nstackMeta.appIdKey
@@ -287,6 +262,9 @@ object NStack {
         prefManager = managersModule.providePrefManager()
         contextWrapper = nstackModule.provideContextWrapper()
         networkManager = nstackModule.provideNetworkManager()
+
+        termsRepository = repositoryModule.provideTermsRepository()
+
         loadCacheTranslations()
 
         isInitialized = true
@@ -388,6 +366,7 @@ object NStack {
                             })
 
                             appOpenSettingsManager.setUpdateDate()
+                            termsRepository.setLatestTerms(appUpdate.terms)
                         }
                         if (localizeIndex.language.isDefault) {
                             defaultLanguage = localizeIndex.language.locale
@@ -942,6 +921,48 @@ object NStack {
                 message
             )
             networkManager.postFeedback(feedback)
+        }
+    }
+
+    object Terms {
+
+        /**
+         * @return all new terms which are not yet viewed by this app instance (GUID).
+         *
+         * This result is a local copy of to the terms provided via [AppOpenResult].
+         */
+        fun getAppOpenTerms() : List<Term> {
+            return termsRepository.getLatestTerms()
+        }
+
+        /**
+         * Provides the latest [TermDetails] for the given [termsID]
+         */
+        fun getLatestTerms(termsID: Long,
+                           onSuccess: (TermDetails) -> Unit,
+                           onError: (Exception) -> Unit) {
+            networkManager.getLatestTerms(
+                    termsID = termsID,
+                    acceptLanguage = language.toString(),
+                    onSuccess = onSuccess,
+                    onError = onError
+            )
+        }
+
+        /**
+         * Provides the latest [TermDetails] for the given [termsID]
+         */
+        fun acceptTerms(versionID : Long,
+                        userID : String,
+                        onSuccess: () -> Unit,
+                        onError: (Exception) -> Unit) {
+            networkManager.acceptTerms(
+                    versionID = versionID,
+                    userID = userID,
+                    settings = appOpenSettingsManager.getAppOpenSettings(),
+                    onSuccess = onSuccess,
+                    onError = onError
+            )
         }
     }
 }

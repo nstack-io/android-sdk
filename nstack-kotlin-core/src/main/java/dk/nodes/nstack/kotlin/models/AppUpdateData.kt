@@ -10,5 +10,6 @@ data class AppUpdateData(
     val createdAt: Date = Date(),
     val lastUpdated: Date = Date(),
     val message: Message? = null,
-    val rateReminder: RateReminder? = null
+    val rateReminder: RateReminder? = null,
+    val terms : List<Term> = listOf()
 )
