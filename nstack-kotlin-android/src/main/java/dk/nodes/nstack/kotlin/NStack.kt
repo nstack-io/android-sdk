@@ -309,6 +309,8 @@ object NStack {
                         "NStack appOpen "
                     )
 
+                    termsRepository.setLatestTerms(appUpdate.terms)
+
                     val appOpenCallbackCount = AppOpenCallbackCount(
                         callsCount = appUpdate.localize.count { it.shouldUpdate }
                     )
@@ -366,7 +368,6 @@ object NStack {
                             })
 
                             appOpenSettingsManager.setUpdateDate()
-                            termsRepository.setLatestTerms(appUpdate.terms)
                         }
                         if (localizeIndex.language.isDefault) {
                             defaultLanguage = localizeIndex.language.locale
@@ -927,7 +928,7 @@ object NStack {
     object Terms {
 
         /**
-         * @return all new terms which are not yet viewed by this app instance (GUID).
+         * @return all new terms which are not yet viewed by this app instance (GUID)? TBD
          *
          * This result is a local copy of to the terms provided via [AppOpenResult].
          */

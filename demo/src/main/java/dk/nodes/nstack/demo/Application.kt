@@ -9,6 +9,7 @@ class Application : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        NStack.baseUrl = "https://nstack-staging.vapor.cloud"
         NStack.translationClass = Translation::class.java
         NStack.init(this, BuildConfig.DEBUG)
         if (BuildConfig.DEBUG) {
@@ -16,6 +17,16 @@ class Application : Application() {
         }
         NStack.appOpen {
             Log.d("AppOpen", it.toString())
+
+            val terms = NStack.Terms.getAppOpenTerms()
+
+            Log.d("AppOpenTerms", terms.toString())
         }
+
+
+        //NStack.Terms.getLatestTerms(1)
+        // NStack.Terms.getTerms(1)
+
+        NStack.Feedback.appVersion
     }
 }
