@@ -57,20 +57,12 @@ internal class LiveEditManager(
                 }
             }
         }
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val shakeDetector = ShakeDetector(object :
-            ShakeDetector.Listener {
-            override fun hearShake() {
-                liveEditEnabled = !liveEditEnabled
-            }
-        })
-        shakeDetector.start(sensorManager)
     }
 
     /**
      * Enable/Disable live editing
      */
-    var liveEditEnabled: Boolean = false
+    private var liveEditEnabled: Boolean = false
         set(value) {
             field = value
             if (value) {
@@ -79,6 +71,15 @@ internal class LiveEditManager(
                 disableLiveEdit()
             }
         }
+
+    /**
+     * Toggles live edit and returns true if live edit is (still) on or false otherwise.
+     */
+    fun toggleLiveEdit(): Boolean {
+        liveEditEnabled = !liveEditEnabled
+
+        return liveEditEnabled
+    }
 
     /**
      * Removes background and long click listener
@@ -96,6 +97,7 @@ internal class LiveEditManager(
         keyAndTranslation: KeyAndTranslation
     ) {
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+
         bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_edit)
         bottomSheetDialog.setOnShowListener {

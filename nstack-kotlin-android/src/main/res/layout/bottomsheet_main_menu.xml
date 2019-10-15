@@ -33,7 +33,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/optionViewProposalTextView"
+        android:id="@+id/editTranslationsButton"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="?selectableItemBackground"
@@ -44,7 +44,7 @@
         android:paddingEnd="16dp"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-medium"
-        android:text="@string/review_translations"
+        android:text="@string/edit_translations"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

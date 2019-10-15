@@ -1,78 +1,101 @@
 package dk.nodes.nstack.kotlin.features.mainmenu.presentation
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
+import android.content.DialogInterface
 import android.os.Bundle
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import dk.nodes.nstack.R
+import dk.nodes.nstack.kotlin.managers.LiveEditManager
 
 private enum class DisplayedFeature {
     NONE,
     MAIN_MENU,
-    TRANSLATION_EDIT,
-    TRANSLATION_MENUS
+    OTHER
 }
 
 /**
  * Presents the main menu only under certain conditions. Also tries to assure memory and state
  * safety when displaying the dialog
  */
-internal class MainMenuDisplayer {
+internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
 
     private var currentlyDisplayedFeature: DisplayedFeature = DisplayedFeature.NONE
     private var mainMenuDialog: BottomSheetDialog? = null
 
-    init {
-        this.currentlyDisplayedFeature.value = DisplayedFeature.NONE
+    private val mainMenuClickListener = View.OnClickListener { view ->
+        when (view.id) {
+            R.id.editTranslationsButton -> triggerLiveEdit()
+        }
     }
 
-    fun display(activity: Activity) = when(currentlyDisplayedFeature) {
-        DisplayedFeature.NONE -> displayFeature(DisplayedFeature.MAIN_MENU) { showMainMenu(activity) }
-        DisplayedFeature.TRANSLATION_EDIT -> displayFeature(DisplayedFeature.NONE) { disableEditing(activity) }
-        DisplayedFeature.MAIN_MENU -> { /* Do nothing, keep the menu open */ }
-        DisplayedFeature.TRANSLATION_MENUS -> { /* Do nothing, keep the menu open */ }
+    /**
+     * Presents the main menu by default, but can also cancel subsequent actions caused by the
+     * selection made in the dialog.
+     */
+    fun trigger(activity: Activity) = when (currentlyDisplayedFeature) {
+        DisplayedFeature.NONE -> showMainMenu(activity)
+        DisplayedFeature.MAIN_MENU -> Unit // Do nothing, keep the menu open
+        DisplayedFeature.OTHER -> triggerLiveEdit()
     }
 
-    private inline fun displayFeature(newFeature: DisplayedFeature, display: () -> Unit) {
-        this.currentlyDisplayedFeature = newFeature
-        display()
-    }
-
+    @SuppressLint("InflateParams")
     private fun showMainMenu(activity: Activity) {
-        this.mainMenuDialog = MainMenuDialogFactory
-                .create(context = activity)
+        val inflater = activity.layoutInflater
+        val view = inflater.inflate(R.layout.bottomsheet_main_menu, null, false)
+        val editTranslationsButton: View = view.findViewById(R.id.editTranslationsButton)
+
+        this.mainMenuDialog = BottomSheetDialog(activity, R.style.NstackBottomSheetTheme)
                 .apply {
-                    setOnCancelListener { this@MainMenuDisplayer.mainMenuDialog = null }
-                    setOnDismissListener { this@MainMenuDisplayer.mainMenuDialog = null }
+                    setContentView(view)
+                    setOnCancelListener {
+                        with (this@MainMenuDisplayer) {
+                            mainMenuDialog = null
+                            currentlyDisplayedFeature = DisplayedFeature.NONE
+                        }
+                    }
+                    setCancelOnStop(activity)
                 }
                 .also { dialog ->
-                    setDismissWithActivity(dialog, activity)
+                    editTranslationsButton.setOnClickListener { view ->
+                        mainMenuClickListener.onClick(view)
+                        dialog.dismiss()
+                    }
+
                     dialog.show()
+                    this.currentlyDisplayedFeature = DisplayedFeature.MAIN_MENU
                 }
     }
 
-    private fun disableEditing(activity: Activity) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun triggerLiveEdit() {
+        val isEditingStillEnabled = liveEditManager.toggleLiveEdit()
+
+        this.currentlyDisplayedFeature = if (isEditingStillEnabled) {
+            DisplayedFeature.OTHER
+        } else {
+            DisplayedFeature.NONE
+        }
     }
+}
 
-    private fun setDismissWithActivity(dialog: BottomSheetDialog, activity: Activity) {
-        activity.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
+private fun BottomSheetDialog.setCancelOnStop(activity: Activity) {
+    activity.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
 
-            override fun onActivityStopped(activity: Activity) {
-                dialog.dismiss()
+        override fun onActivityStopped(activity: Activity) {
+            cancel()
 
-                activity.unregisterActivityLifecycleCallbacks(this)
-            }
+            activity.unregisterActivityLifecycleCallbacks(this)
+        }
 
-            // Unused
+        // Unused
 
-            override fun onActivityPaused(activity: Activity) = Unit
-            override fun onActivityStarted(activity: Activity) = Unit
-            override fun onActivityDestroyed(activity: Activity) = Unit
-            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
-            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
-            override fun onActivityResumed(activity: Activity) = Unit
-        })
-    }
+        override fun onActivityPaused(activity: Activity) = Unit
+        override fun onActivityStarted(activity: Activity) = Unit
+        override fun onActivityDestroyed(activity: Activity) = Unit
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+        override fun onActivityResumed(activity: Activity) = Unit
+    })
 }

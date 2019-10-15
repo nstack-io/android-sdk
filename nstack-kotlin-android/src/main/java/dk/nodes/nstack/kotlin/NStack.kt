@@ -2,7 +2,6 @@ package dk.nodes.nstack.kotlin
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.app.Activity
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -11,7 +10,6 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.hardware.SensorManager
 import android.os.Build
-import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
@@ -33,11 +31,8 @@ import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.TranslationData
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
-import dk.nodes.nstack.kotlin.managers.*
-import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
@@ -116,14 +111,13 @@ object NStack {
     private lateinit var appOpenSettingsManager: AppOpenSettingsManager
     private lateinit var prefManager: PrefManager
     private lateinit var contextWrapper: ContextWrapper
+    private lateinit var mainMenuDisplayer: MainMenuDisplayer
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
 
     private val handler: Handler = Handler()
-
-    private val mainMenuDisplayer = MainMenuDisplayer()
 
     // Listener Lists
     private val onLanguageChangedList = mutableListOf<LanguageListener?>()
@@ -252,7 +246,6 @@ object NStack {
         }
 
 
-
     /**
      * If flag is set to true this will auto change NStack's language when the device's locale is changed
      */
@@ -301,12 +294,26 @@ object NStack {
         prefManager = managersModule.providePrefManager()
         contextWrapper = nstackModule.provideContextWrapper()
         networkManager = nstackModule.provideNetworkManager()
+        mainMenuDisplayer = createMainMenuDisplayer(context)
         loadCacheTranslations()
 
         this.activeActivityHolder = ActiveActivityHolder()
                 .also { holder -> registerActiveActivityHolderToAppLifecycle(context, holder) }
 
         isInitialized = true
+    }
+
+    private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
+
+        val liveEditManager = LiveEditManager(
+                context,
+                translationHolder,
+                viewTranslationManager,
+                networkManager,
+                appOpenSettingsManager
+        )
+
+        return MainMenuDisplayer(liveEditManager)
     }
 
     private fun registerActiveActivityHolderToAppLifecycle(
@@ -855,10 +862,11 @@ object NStack {
 
     fun enableMenuOnShake(context: Context) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
         val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
             override fun hearShake() {
                 val activity = activeActivityHolder?.foregroundActivity ?: return
-                mainMenuDisplayer.display(activity)
+                mainMenuDisplayer.trigger(activity)
             }
         })
 
