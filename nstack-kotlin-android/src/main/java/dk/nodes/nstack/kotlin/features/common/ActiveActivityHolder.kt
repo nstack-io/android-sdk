@@ -22,10 +22,7 @@ internal class ActiveActivityHolder : Application.ActivityLifecycleCallbacks {
     var foregroundActivity: Activity?
         get() = foregroundActivityReference.get()
         private set(value) {
-            throw UnsupportedOperationException(
-                    "The foreground activity property should never be explicitly set! " +
-                    "Use foregroundActivityReference to hold on to the activity."
-            )
+            foregroundActivityReference = WeakReference(value)
         }
 
     private var foregroundActivityReference: WeakReference<Activity?> = WeakReference(null)
@@ -37,12 +34,12 @@ internal class ActiveActivityHolder : Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityStarted(activity: Activity) {
-        foregroundActivityReference = WeakReference(activity)
+        foregroundActivity = activity
     }
 
     override fun onActivityStopped(activity: Activity) {
         if (foregroundActivity != null && foregroundActivity === activity) {
-            foregroundActivityReference = WeakReference(null)
+            foregroundActivity = null
         }
     }
 
