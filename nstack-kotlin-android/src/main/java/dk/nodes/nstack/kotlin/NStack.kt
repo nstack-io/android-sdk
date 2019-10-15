@@ -944,8 +944,9 @@ object NStack {
             networkManager.getLatestTerms(
                     termsID = termsID,
                     acceptLanguage = language.toString(),
-                    onSuccess = onSuccess,
-                    onError = onError
+                    settings = appOpenSettingsManager.getAppOpenSettings(),
+                    onSuccess = { runUiAction { onSuccess(it) }},
+                    onError = { runUiAction { onError(it) }}
             )
         }
 
@@ -960,8 +961,8 @@ object NStack {
                     versionID = versionID,
                     userID = userID,
                     settings = appOpenSettingsManager.getAppOpenSettings(),
-                    onSuccess = onSuccess,
-                    onError = onError
+                    onSuccess = { runUiAction { onSuccess() }},
+                    onError = { runUiAction { onError(it) }}
             )
         }
     }
