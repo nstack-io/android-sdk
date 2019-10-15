@@ -53,6 +53,7 @@ import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
+import dk.nodes.nstack.kotlin.util.ShakeDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -306,7 +307,6 @@ object NStack {
     private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
 
         val liveEditManager = LiveEditManager(
-                context,
                 translationHolder,
                 viewTranslationManager,
                 networkManager,

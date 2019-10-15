@@ -1,8 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.content.Context
 import android.content.res.Resources
-import android.hardware.SensorManager
 import android.os.Handler
 import android.view.View
 import android.widget.Button
@@ -22,7 +20,6 @@ import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.util.ShakeDetector
 import dk.nodes.nstack.kotlin.util.extensions.attachLiveEditListener
 import dk.nodes.nstack.kotlin.util.extensions.detachLiveEditListener
 import dk.nodes.nstack.kotlin.util.extensions.dp
@@ -35,11 +32,10 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedQueue
 
 internal class LiveEditManager(
-    context: Context,
-    private val translationHolder: TranslationHolder,
-    private val viewTranslationManager: ViewTranslationManager,
-    private val networkManager: NetworkManager,
-    private val appOpenSettingsManager: AppOpenSettingsManager
+        private val translationHolder: TranslationHolder,
+        private val viewTranslationManager: ViewTranslationManager,
+        private val networkManager: NetworkManager,
+        private val appOpenSettingsManager: AppOpenSettingsManager
 ) {
 
     private val handler: Handler = Handler()
