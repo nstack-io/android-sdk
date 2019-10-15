@@ -10,4 +10,19 @@ data class TranslationData(
     val contentDescription: String? = null,
     val title: String? = null,
     val subtitle: String? = null
-)
+) {
+
+    val isValid: Boolean
+        get() = !(
+            key == null &&
+                text == null &&
+                hint == null &&
+                description == null &&
+                textOn == null &&
+                textOff == null &&
+                contentDescription == null &&
+                title == null &&
+                subtitle == null
+            )
+
+}
