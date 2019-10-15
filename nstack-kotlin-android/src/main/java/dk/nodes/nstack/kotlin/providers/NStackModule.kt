@@ -2,6 +2,7 @@ package dk.nodes.nstack.kotlin.providers
 
 import android.content.Context
 import android.os.Build
+import dk.nodes.nstack.BuildConfig
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
@@ -54,6 +55,7 @@ internal class NStackModule(
                 HttpClientProvider.getHttpClient(
                     appIdKey = NStack.appIdKey,
                     appApiKey = NStack.appApiKey,
+                    sdkVersion = BuildConfig.SDK_VERSION,
                     environment = NStack.env,
                     versionName = NStack.appClientInfo.versionName,
                     versionRelease = Build.VERSION.RELEASE,

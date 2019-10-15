@@ -29,7 +29,6 @@ import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.TranslationData
-import dk.nodes.nstack.kotlin.plugin.NStackPlugin
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
@@ -46,8 +45,10 @@ import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
+import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
+import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -563,7 +564,7 @@ object NStack {
     }
 
     private fun hasKey(key: String?): Boolean {
-        return currentLanguage?.has(cleanKeyName(key)) ?: false
+        return currentLanguage?.has(key?.cleanKeyName) ?: false
     }
 
     /**
@@ -693,7 +694,6 @@ object NStack {
     /**
      * Run Ui Action
      */
-
     fun runUiAction(action: () -> Unit) {
         handler.post {
             action()
@@ -715,10 +715,7 @@ object NStack {
     }
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedListener) {
-        val listenerContainer =
-            onLanguageChangedList.firstOrNull { it?.onLanguageChangedListener == listener }
-                ?: return
-        onLanguageChangedList.remove(listenerContainer)
+        onLanguageChangedList.removeFirst { it.onLanguageChangedListener == listener }
     }
 
     // Function
@@ -732,10 +729,7 @@ object NStack {
     }
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedFunction) {
-        val listenerContainer =
-            onLanguageChangedList.firstOrNull { it?.onLanguageChangedFunction == listener }
-                ?: return
-        onLanguageChangedList.remove(listenerContainer)
+        onLanguageChangedList.removeFirst { it.onLanguageChangedFunction == listener }
     }
 
     // Languages Listeners
@@ -751,10 +745,7 @@ object NStack {
     }
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedListener) {
-        val listenerContainer =
-            onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedListener == listener }
-                ?: return
-        onLanguagesChangedList.remove(listenerContainer)
+        onLanguagesChangedList.removeFirst { it.onLanguagesChangedListener == listener }
     }
 
     // Function
@@ -768,10 +759,7 @@ object NStack {
     }
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
-        val listenerContainer =
-            onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedFunction == listener }
-                ?: return
-        onLanguagesChangedList.remove(listenerContainer)
+        onLanguagesChangedList.removeFirst { it.onLanguagesChangedFunction == listener }
     }
 
     /**
@@ -779,10 +767,7 @@ object NStack {
      */
 
     private fun getTranslationByKey(key: String?): String? {
-        if (key == null) {
-            return null
-        }
-        return currentLanguage?.optString(cleanKeyName(key), null)
+        return currentLanguage?.optString(key?.cleanKeyName ?: return null, null)
     }
 
     fun addView(view: View, translationData: TranslationData) {
@@ -819,20 +804,9 @@ object NStack {
      */
 
     private fun parseSubsection(sectionName: String, jsonSection: JSONObject) {
-        val sectionKeys = jsonSection.keys()
-
-        sectionKeys.forEach { sectionKey ->
-            val newSectionKey = "${sectionName}_$sectionKey"
-            val sectionValue = jsonSection.getString(sectionKey)
-            currentLanguage?.put(newSectionKey, sectionValue)
+        jsonSection.keys().forEach {
+            currentLanguage?.put("${sectionName}_$it", jsonSection.getString(it))
         }
-    }
-
-    private fun cleanKeyName(keyName: String?): String? {
-        val key = keyName ?: return null
-        return if (key.startsWith("{") && key.endsWith("}")) {
-            key.substring(1, key.length - 1)
-        } else key
     }
 
     fun enableLiveEdit(context: Context) {

@@ -12,6 +12,7 @@ import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
+import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import org.xmlpull.v1.XmlPullParser
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
@@ -90,21 +91,13 @@ internal class NStackLayoutInflater internal constructor(
 
     @Throws(ClassNotFoundException::class)
     override fun onCreateView(name: String, attrs: AttributeSet): View? {
-        var view: View? = null
-
-        for (prefix in classPrefix) {
+        return classPrefix.asSequence().mapNotNull {
             try {
-                view = createView(name, prefix, attrs)
-            } catch (ignored: ClassNotFoundException) {
-                // Do nothing
+                createView(name, it, attrs)
+            } catch (e: ClassNotFoundException) {
+                null
             }
-        }
-
-        if (view == null) {
-            view = super.onCreateView(name, attrs)
-        }
-
-        return view
+        }.firstOrNull() ?: super.onCreateView(name, attrs)
     }
 
     private fun createCustomViewInternal(view: View?, name: String, viewContext: Context, attrs: AttributeSet): View? {
@@ -263,15 +256,15 @@ internal class NStackLayoutInflater internal constructor(
             subtitle = appSubtitle
         }
 
-        key = cleanKeyName(key)
-        text = cleanKeyName(text)
-        hint = cleanKeyName(hint)
-        description = cleanKeyName(description)
-        textOn = cleanKeyName(textOn)
-        textOff = cleanKeyName(textOff)
-        contentDescription = cleanKeyName(contentDescription)
-        title = cleanKeyName(title)
-        subtitle = cleanKeyName(subtitle)
+        key = key?.cleanKeyName
+        text = text?.cleanKeyName
+        hint = hint?.cleanKeyName
+        description = description?.cleanKeyName
+        textOn = textOn?.cleanKeyName
+        textOff = textOff?.cleanKeyName
+        contentDescription = contentDescription?.cleanKeyName
+        title = title?.cleanKeyName
+        subtitle = subtitle?.cleanKeyName
 
         if (key == null &&
             text == null &&
@@ -299,16 +292,6 @@ internal class NStackLayoutInflater internal constructor(
         )
 
         NStack.addView(view, translationData)
-    }
-
-    private fun cleanKeyName(keyName: String?): String? {
-        var key: String? = keyName ?: return null
-
-        if (key!!.startsWith("{") && key.endsWith("}")) {
-            key = key.substring(1, key.length - 1)
-        }
-
-        return key
     }
 
     private class WrapperFactory constructor(

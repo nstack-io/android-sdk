@@ -19,3 +19,6 @@ fun Context.getNSString(@StringRes stringRes: Int): String? {
 fun Fragment.getNSString(@StringRes stringRes: Int): String? {
     return NStack.getTranslation(stringRes, context ?: return null)
 }
+
+internal val String.cleanKeyName: String
+    get() = takeIf { startsWith("{") && endsWith("}") }?.substring(1, length - 1) ?: this
