@@ -961,6 +961,7 @@ object NStack {
             networkManager.acceptTerms(
                     versionID = versionID,
                     userID = userID,
+                    locale = language.toString().replace("_", "-"),
                     settings = appOpenSettingsManager.getAppOpenSettings(),
                     onSuccess = { runUiAction { onSuccess() }},
                     onError = { runUiAction { onError(it) }}

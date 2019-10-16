@@ -329,6 +329,7 @@ class NetworkManager(
 
     fun acceptTerms(versionID: Long,
                     userID: String,
+                    locale: String,
                     settings: AppOpenSettings,
                     onSuccess: () -> Unit,
                     onError: (Exception) -> Unit) {
@@ -337,6 +338,7 @@ class NetworkManager(
                 .add("guid", settings.guid)
                 .add("term_version_id", versionID.toString())
                 .add("identifier", userID)
+                .add("locale", locale)
                 .build()
 
         val request = Request.Builder()
