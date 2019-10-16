@@ -2,19 +2,36 @@ package dk.nodes.nstack.kotlin
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import dk.nodes.nstack.kotlin.data.terms.TermsRepository
-import dk.nodes.nstack.kotlin.managers.*
-import dk.nodes.nstack.kotlin.models.*
+import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
+import dk.nodes.nstack.kotlin.managers.AssetCacheManager
+import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
+import dk.nodes.nstack.kotlin.managers.ConnectionManager
+import dk.nodes.nstack.kotlin.managers.LiveEditManager
+import dk.nodes.nstack.kotlin.managers.NetworkManager
+import dk.nodes.nstack.kotlin.managers.PrefManager
+import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
+import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppUpdateData
+import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.Feedback
+import dk.nodes.nstack.kotlin.models.LocalizeIndex
+import dk.nodes.nstack.kotlin.models.Message
+import dk.nodes.nstack.kotlin.models.RateReminderAnswer
+import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.plugin.NStackPlugin
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
@@ -68,6 +85,8 @@ object NStack {
 
     private var currentLanguage: JSONObject? = null
 
+    private var activeActivityHolder: ActiveActivityHolder? = null
+
     // Internally used classes
     private lateinit var classTranslationManager: ClassTranslationManager
     private lateinit var viewTranslationManager: ViewTranslationManager
@@ -78,6 +97,7 @@ object NStack {
     private lateinit var appOpenSettingsManager: AppOpenSettingsManager
     private lateinit var prefManager: PrefManager
     private lateinit var contextWrapper: ContextWrapper
+    private lateinit var mainMenuDisplayer: MainMenuDisplayer
     private lateinit var termsRepository: TermsRepository
 
     // Cache Maps
@@ -223,8 +243,8 @@ object NStack {
      */
 
     @Deprecated(
-        "Use init sending debug mode",
-        ReplaceWith("init(context, boolean)", "dk.nodes.nstack.kotlin.NStack.init")
+            "Use init sending debug mode",
+            ReplaceWith("init(context, boolean)", "dk.nodes.nstack.kotlin.NStack.init")
     )
     fun init(context: Context) {
         init(context, false)
@@ -262,12 +282,43 @@ object NStack {
         prefManager = managersModule.providePrefManager()
         contextWrapper = nstackModule.provideContextWrapper()
         networkManager = nstackModule.provideNetworkManager()
+        mainMenuDisplayer = createMainMenuDisplayer(context)
 
         termsRepository = repositoryModule.provideTermsRepository()
 
         loadCacheTranslations()
 
+        this.activeActivityHolder = ActiveActivityHolder()
+                .also { holder -> registerActiveActivityHolderToAppLifecycle(context, holder) }
+
+        if (Environment(env).shouldEnableTestMode) {
+            versionUpdateTestMode = true
+        }
+
         isInitialized = true
+    }
+
+    private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
+
+        val liveEditManager = LiveEditManager(
+                translationHolder,
+                viewTranslationManager,
+                networkManager,
+                appOpenSettingsManager
+        )
+
+        return MainMenuDisplayer(liveEditManager)
+    }
+
+    private fun registerActiveActivityHolderToAppLifecycle(
+            context: Context,
+            activeActivityHolder: ActiveActivityHolder
+    ) {
+        val appContext = context
+                .applicationContext as? Application
+                ?: throw IllegalStateException("Could not get application context")
+
+        appContext.registerActivityLifecycleCallbacks(activeActivityHolder)
     }
 
     /**
@@ -429,7 +480,7 @@ object NStack {
                     result.appUpdateResponse.data.localize.forEach { handleLocalizeIndex(it) }
 
                     val shouldUpdateTranslationClass =
-                        result.appUpdateResponse.data.localize.any { it.shouldUpdate }
+                            result.appUpdateResponse.data.localize.any { it.shouldUpdate }
                     if (shouldUpdateTranslationClass) {
                         NLog.e(this, "ShouldUpdate is set, updating Translations class...")
                         withContext(Dispatchers.Main) {
@@ -497,9 +548,9 @@ object NStack {
      * @param slug - copy paste the text slug from the list of responses
      */
     fun getCollectionResponse(
-        slug: String,
-        onSuccess: (String) -> Unit,
-        onError: (Exception) -> Unit
+            slug: String,
+            onSuccess: (String) -> Unit,
+            onError: (Exception) -> Unit
     ) {
         networkManager.getResponse(slug, onSuccess, onError)
     }
@@ -517,33 +568,33 @@ object NStack {
      * Triggers translation and add view to cached views
      */
     fun setTranslation(
-        view: View,
-        nstackKey: String,
-        hint: String? = null,
-        description: String? = null,
-        textOn: String? = null,
-        textOff: String? = null,
-        contentDescription: String? = null,
-        title: String? = null,
-        subtitle: String? = null
+            view: View,
+            nstackKey: String,
+            hint: String? = null,
+            description: String? = null,
+            textOn: String? = null,
+            textOff: String? = null,
+            contentDescription: String? = null,
+            title: String? = null,
+            subtitle: String? = null
     ) {
         if (!hasKey(nstackKey)) return
 
         val translationData = TranslationData(
-            key = nstackKey,
-            hint = hint,
-            description = description,
-            textOn = textOn,
-            textOff = textOff,
-            contentDescription = contentDescription,
-            title = title,
-            subtitle = subtitle
+                key = nstackKey,
+                hint = hint,
+                description = description,
+                textOn = textOn,
+                textOff = textOff,
+                contentDescription = contentDescription,
+                title = title,
+                subtitle = subtitle
         )
         nstackViewPlugins.forEach { it.addView(WeakReference(view), translationData) }
     }
 
     private fun hasKey(key: String?): Boolean {
-        return currentLanguage?.has(cleanKeyName(key)) ?: false
+        return currentLanguage?.has(key?.cleanKeyName) ?: false
     }
 
     /**
@@ -660,20 +711,19 @@ object NStack {
         } else {
             // Search our available languages for any keys that might match
             availableLanguages
-                .asSequence()
-                // Do our languages match
-                .filter { it.languageCode == locale.languageCode }
-                // Find the value for that language
-                .map { languages[it] }
-                // Return the first value or null
-                .firstOrNull()
+                    .asSequence()
+                    // Do our languages match
+                    .filter { it.languageCode == locale.languageCode }
+                    // Find the value for that language
+                    .map { languages[it] }
+                    // Return the first value or null
+                    .firstOrNull()
         }
     }
 
     /**
      * Run Ui Action
      */
-
     fun runUiAction(action: () -> Unit) {
         handler.post {
             action()
@@ -688,34 +738,28 @@ object NStack {
 
     fun addLanguageChangeListener(listener: OnLanguageChangedListener) {
         onLanguageChangedList.add(
-            LanguageListener(
-                onLanguageChangedListener = listener
-            )
+                LanguageListener(
+                        onLanguageChangedListener = listener
+                )
         )
     }
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedListener) {
-        val listenerContainer =
-            onLanguageChangedList.firstOrNull { it?.onLanguageChangedListener == listener }
-                ?: return
-        onLanguageChangedList.remove(listenerContainer)
+        onLanguageChangedList.removeFirst { it.onLanguageChangedListener == listener }
     }
 
     // Function
 
     fun addLanguageChangeListener(listener: OnLanguageChangedFunction) {
         onLanguageChangedList.add(
-            LanguageListener(
-                onLanguageChangedFunction = listener
-            )
+                LanguageListener(
+                        onLanguageChangedFunction = listener
+                )
         )
     }
 
     fun removeLanguageChangeListener(listener: OnLanguageChangedFunction) {
-        val listenerContainer =
-            onLanguageChangedList.firstOrNull { it?.onLanguageChangedFunction == listener }
-                ?: return
-        onLanguageChangedList.remove(listenerContainer)
+        onLanguageChangedList.removeFirst { it.onLanguageChangedFunction == listener }
     }
 
     // Languages Listeners
@@ -724,34 +768,28 @@ object NStack {
 
     fun addLanguagesChangeListener(listener: OnLanguagesChangedListener) {
         onLanguagesChangedList.add(
-            LanguagesListener(
-                onLanguagesChangedListener = listener
-            )
+                LanguagesListener(
+                        onLanguagesChangedListener = listener
+                )
         )
     }
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedListener) {
-        val listenerContainer =
-            onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedListener == listener }
-                ?: return
-        onLanguagesChangedList.remove(listenerContainer)
+        onLanguagesChangedList.removeFirst { it.onLanguagesChangedListener == listener }
     }
 
     // Function
 
     fun addLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
         onLanguagesChangedList.add(
-            LanguagesListener(
-                onLanguagesChangedFunction = listener
-            )
+                LanguagesListener(
+                        onLanguagesChangedFunction = listener
+                )
         )
     }
 
     fun removeLanguagesChangeListener(listener: OnLanguagesChangedFunction) {
-        val listenerContainer =
-            onLanguagesChangedList.firstOrNull { it?.onLanguagesChangedFunction == listener }
-                ?: return
-        onLanguagesChangedList.remove(listenerContainer)
+        onLanguagesChangedList.removeFirst { it.onLanguagesChangedFunction == listener }
     }
 
     /**
@@ -759,10 +797,7 @@ object NStack {
      */
 
     private fun getTranslationByKey(key: String?): String? {
-        if (key == null) {
-            return null
-        }
-        return currentLanguage?.optString(cleanKeyName(key), null)
+        return currentLanguage?.optString(key?.cleanKeyName ?: return null, null)
     }
 
     fun addView(view: View, translationData: TranslationData) {
@@ -799,32 +834,39 @@ object NStack {
      */
 
     private fun parseSubsection(sectionName: String, jsonSection: JSONObject) {
-        val sectionKeys = jsonSection.keys()
-
-        sectionKeys.forEach { sectionKey ->
-            val newSectionKey = "${sectionName}_$sectionKey"
-            val sectionValue = jsonSection.getString(sectionKey)
-            currentLanguage?.put(newSectionKey, sectionValue)
+        jsonSection.keys().forEach {
+            currentLanguage?.put("${sectionName}_$it", jsonSection.getString(it))
         }
     }
 
-    private fun cleanKeyName(keyName: String?): String? {
-        val key = keyName ?: return null
-        return if (key.startsWith("{") && key.endsWith("}")) {
-            key.substring(1, key.length - 1)
-        } else key
-    }
-
-    fun enableLiveEdit(context: Context) {
-        if (debugMode) {
-            LiveEditManager(
-                context,
-                translationHolder,
-                viewTranslationManager,
-                networkManager,
-                appOpenSettingsManager
+    /**
+     * Enables the live editing feature for text in the UI
+     *
+     * Please note that the recent versions of NStack support additional features triggered with the
+     * shake gesture so this method is now deprecated and just calls [enableMenuOnShake]
+     *
+     * @see enableMenuOnShake
+     */
+    @Deprecated(
+            "Deprecated to support more features on shake.",
+            ReplaceWith(
+                    "enableMenuOnShake(context)",
+                    "dk.nodes.nstack.kotlin.NStack.enableMenuOnShake"
             )
-        }
+    )
+    fun enableLiveEdit(context: Context) = enableMenuOnShake(context)
+
+    fun enableMenuOnShake(context: Context) {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
+            override fun hearShake() {
+                val activity = activeActivityHolder?.foregroundActivity ?: return
+                mainMenuDisplayer.trigger(activity)
+            }
+        })
+
+        shakeDetector.start(sensorManager)
     }
 
     object RateReminder {
@@ -861,8 +903,8 @@ object NStack {
          */
         suspend fun action(action: String) {
             networkManager.postRateReminderAction(
-                appOpenSettingsManager.getAppOpenSettings(),
-                action
+                    appOpenSettingsManager.getAppOpenSettings(),
+                    action
             )
         }
 
@@ -882,19 +924,19 @@ object NStack {
             check(rateReminderId != 0) { "check rate reminder with shouldShow before showing the dialog" }
             val answer = suspendCoroutine<RateReminderAnswer> {
                 AlertDialog.Builder(context)
-                    .setTitle(title)
-                    .setMessage(message)
-                    .setPositiveButton(yesButton) { _, _ ->
-                        it.resume(RateReminderAnswer.POSITIVE)
-                    }
-                    .setNegativeButton(noButton) { _, _ ->
-                        it.resume(RateReminderAnswer.NEGATIVE)
-                    }
-                    .setNeutralButton(skipButton) { _, _ ->
-                        it.resume(RateReminderAnswer.SKIP)
-                    }
-                    .setCancelable(false)
-                    .show()
+                        .setTitle(title)
+                        .setMessage(message)
+                        .setPositiveButton(yesButton) { _, _ ->
+                            it.resume(RateReminderAnswer.POSITIVE)
+                        }
+                        .setNegativeButton(noButton) { _, _ ->
+                            it.resume(RateReminderAnswer.NEGATIVE)
+                        }
+                        .setNeutralButton(skipButton) { _, _ ->
+                            it.resume(RateReminderAnswer.SKIP)
+                        }
+                        .setCancelable(false)
+                        .show()
             }
             withContext(Dispatchers.IO) {
                 networkManager.postRateReminderAction(settings, rateReminderId, answer.apiName)
@@ -912,14 +954,14 @@ object NStack {
         var email: String = ""
 
         suspend fun send(
-            message: String = ""
+                message: String = ""
         ) {
             val feedback = Feedback(
-                appVersion,
-                deviceName,
-                name,
-                email,
-                message
+                    appVersion,
+                    deviceName,
+                    name,
+                    email,
+                    message
             )
             networkManager.postFeedback(feedback)
         }

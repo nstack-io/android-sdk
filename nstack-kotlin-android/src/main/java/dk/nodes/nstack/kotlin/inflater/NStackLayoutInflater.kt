@@ -1,8 +1,8 @@
 package dk.nodes.nstack.kotlin.inflater
 
-import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
+import android.content.res.TypedArray
 import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -12,6 +12,7 @@ import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
+import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import org.xmlpull.v1.XmlPullParser
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
@@ -90,21 +91,13 @@ internal class NStackLayoutInflater internal constructor(
 
     @Throws(ClassNotFoundException::class)
     override fun onCreateView(name: String, attrs: AttributeSet): View? {
-        var view: View? = null
-
-        for (prefix in classPrefix) {
+        return classPrefix.asSequence().mapNotNull {
             try {
-                view = createView(name, prefix, attrs)
-            } catch (ignored: ClassNotFoundException) {
-                // Do nothing
+                createView(name, it, attrs)
+            } catch (e: ClassNotFoundException) {
+                null
             }
-        }
-
-        if (view == null) {
-            view = super.onCreateView(name, attrs)
-        }
-
-        return view
+        }.firstOrNull() ?: super.onCreateView(name, attrs)
     }
 
     private fun createCustomViewInternal(view: View?, name: String, viewContext: Context, attrs: AttributeSet): View? {
@@ -162,153 +155,33 @@ internal class NStackLayoutInflater internal constructor(
     /**
      * Take our view strip whatever values were put into the XML and then add that to our NStack Translation Library Cache
      */
-    @SuppressLint("ResourceType")
-    private fun processView(name: String, context: Context, view: View?, attrs: AttributeSet) {
-        if (view == null) {
-            return
-        }
-
+    private fun processView(name: String, context: Context, view: View, attrs: AttributeSet) {
         if (name.contains("Layout")) return
 
-        // try to pull our value from it
-
-        var androidText: String? = null
-        var androidHint: String? = null
-        var androidDescription: String? = null
-        var androidTextOn: String? = null
-        var androidTextOff: String? = null
-        var androidContentDescription: String? = null
-        var appTitle: String? = null
-        var appSubtitle: String? = null
+        operator fun TypedArray.get(i: Int): String? = getString(i)
 
         val androidAttributes = context.obtainStyledAttributes(attrs, set)
+        val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.nstack, 0, 0)
 
-        if (androidAttributes.getText(0) != null) {
-            androidText = androidAttributes.getText(0).toString()
+        fun attribute(androidIndex: Int, typedIndex: Int): String? {
+            return (androidAttributes[androidIndex] ?: typedArray[typedIndex])?.cleanKeyName
         }
-        if (androidAttributes.getText(1) != null) {
-            androidHint = androidAttributes.getText(1).toString()
-        }
-        if (androidAttributes.getText(2) != null) {
-            androidDescription = androidAttributes.getText(2).toString()
-        }
-        if (androidAttributes.getText(3) != null) {
-            androidTextOn = androidAttributes.getText(3).toString()
-        }
-        if (androidAttributes.getText(4) != null) {
-            androidTextOff = androidAttributes.getText(4).toString()
-        }
-        if (androidAttributes.getText(5) != null) {
-            androidContentDescription = androidAttributes.getText(5).toString()
-        }
-        if (androidAttributes.getText(6) != null) {
-            appTitle = androidAttributes.getText(6).toString()
-        }
-        if (androidAttributes.getText(7) != null) {
-            appSubtitle = androidAttributes.getText(7).toString()
-        }
+
+        TranslationData(
+            key = typedArray.getString(R.styleable.nstack_key)?.cleanKeyName,
+            text = attribute(0, R.styleable.nstack_text),
+            hint = attribute(1, R.styleable.nstack_hint),
+            description = attribute(2, R.styleable.nstack_description),
+            textOn = attribute(3, R.styleable.nstack_textOn),
+            textOff = attribute(4, R.styleable.nstack_textOff),
+            contentDescription = attribute(5, R.styleable.nstack_contentDescription),
+            title = attribute(6, R.styleable.nstack_title),
+            subtitle = attribute(7, R.styleable.nstack_subtitle)
+        ).takeIf { it.isValid }
+            ?.let { NStack.addView(view, it) }
+            ?: NLog.d(this, "processView -> Found no valid NStack keys $name")
 
         androidAttributes.recycle()
-
-        // Get our typed array
-        val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.nstack, 0, 0)
-        // Custom nstack:* attributes
-        var key: String?
-        var text: String?
-        var hint: String?
-        var description: String?
-        var textOn: String?
-        var textOff: String?
-        var contentDescription: String?
-        var title: String?
-        var subtitle: String?
-
-        try {
-            key = typedArray.getString(R.styleable.nstack_key)
-            text = typedArray.getString(R.styleable.nstack_text)
-            hint = typedArray.getString(R.styleable.nstack_hint)
-            description = typedArray.getString(R.styleable.nstack_description)
-            textOn = typedArray.getString(R.styleable.nstack_textOn)
-            textOff = typedArray.getString(R.styleable.nstack_textOff)
-            contentDescription = typedArray.getString(R.styleable.nstack_contentDescription)
-            title = typedArray.getString(R.styleable.nstack_title)
-            subtitle = typedArray.getString(R.styleable.nstack_subtitle)
-        } finally {
-            typedArray.recycle()
-        }
-
-        if (androidText != null) {
-            text = androidText
-        }
-        if (androidHint != null) {
-            hint = androidHint
-        }
-        if (androidDescription != null) {
-            description = androidDescription
-        }
-
-        if (androidTextOn != null) {
-            textOn = androidTextOn
-        }
-        if (androidTextOff != null) {
-            textOff = androidTextOff
-        }
-        if (androidContentDescription != null) {
-            contentDescription = androidContentDescription
-        }
-        if (appTitle != null) {
-            title = appTitle
-        }
-        if (appSubtitle != null) {
-            subtitle = appSubtitle
-        }
-
-        key = cleanKeyName(key)
-        text = cleanKeyName(text)
-        hint = cleanKeyName(hint)
-        description = cleanKeyName(description)
-        textOn = cleanKeyName(textOn)
-        textOff = cleanKeyName(textOff)
-        contentDescription = cleanKeyName(contentDescription)
-        title = cleanKeyName(title)
-        subtitle = cleanKeyName(subtitle)
-
-        if (key == null &&
-            text == null &&
-            hint == null &&
-            description == null &&
-            textOn == null &&
-            textOff == null &&
-            contentDescription == null &&
-            title == null &&
-            subtitle == null) {
-            NLog.d(this, "processView -> Found no valid NStack keys $name")
-            return
-        }
-
-        val translationData = TranslationData(
-            key,
-            text,
-            hint,
-            description,
-            textOn,
-            textOff,
-            contentDescription,
-            title,
-            subtitle
-        )
-
-        NStack.addView(view, translationData)
-    }
-
-    private fun cleanKeyName(keyName: String?): String? {
-        var key: String? = keyName ?: return null
-
-        if (key!!.startsWith("{") && key.endsWith("}")) {
-            key = key.substring(1, key.length - 1)
-        }
-
-        return key
     }
 
     private class WrapperFactory constructor(
@@ -322,7 +195,7 @@ internal class NStackLayoutInflater internal constructor(
             // If this fails then we should just try to brute force
             view = layoutInflater.doDirtyInflation(view, name, context, attrs)
             // After brute forcing we should add it to the NStack View Cache
-            layoutInflater.processView(name, context, view, attrs)
+            view?.let { layoutInflater.processView(name, context, it, attrs) }
             return view
         }
     }
@@ -338,7 +211,7 @@ internal class NStackLayoutInflater internal constructor(
             // If this fails then we should just try to brute force
             view = layoutInflater.doDirtyInflation(view, name, context, attrs)
             // After brute forcing we should add it to the NStack View Cache
-            layoutInflater.processView(name, context, view, attrs)
+            view?.let { layoutInflater.processView(name, context, it, attrs) }
             return view
         }
 
@@ -348,7 +221,7 @@ internal class NStackLayoutInflater internal constructor(
             // If this fails then we should just try to brute force
             view = layoutInflater.doDirtyInflation(view, name, context, attrs)
             // After brute forcing we should add it to the NStack View Cache
-            layoutInflater.processView(name, context, view, attrs)
+            view?.let { layoutInflater.processView(name, context, it, attrs) }
             return view
         }
     }

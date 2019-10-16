@@ -80,17 +80,6 @@ class NStackRootLayout @JvmOverloads constructor(
         }
     }
 
-    private val TranslationData.isValid: Boolean
-        get() = !(key == null &&
-            text == null &&
-            hint == null &&
-            description == null &&
-            textOn == null &&
-            textOff == null &&
-            contentDescription == null &&
-            title == null &&
-            subtitle == null)
-
     private fun String.obtainNStackKeyName(): String? {
         return when {
             startsWith("{") && endsWith("}") -> substring(1, length - 1)

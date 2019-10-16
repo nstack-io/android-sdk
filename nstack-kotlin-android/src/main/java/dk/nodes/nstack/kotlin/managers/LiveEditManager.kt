@@ -1,8 +1,7 @@
 package dk.nodes.nstack.kotlin.managers
 
-import android.content.Context
+import android.content.DialogInterface
 import android.content.res.Resources
-import android.hardware.SensorManager
 import android.os.Handler
 import android.view.View
 import android.widget.Button
@@ -22,7 +21,6 @@ import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.KeyAndTranslation
 import dk.nodes.nstack.kotlin.models.local.StyleableEnum
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.util.ShakeDetector
 import dk.nodes.nstack.kotlin.util.extensions.attachLiveEditListener
 import dk.nodes.nstack.kotlin.util.extensions.detachLiveEditListener
 import dk.nodes.nstack.kotlin.util.extensions.dp
@@ -35,7 +33,6 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedQueue
 
 internal class LiveEditManager(
-    context: Context,
     private val translationHolder: TranslationHolder,
     private val viewTranslationManager: ViewTranslationManager,
     private val networkManager: NetworkManager,
@@ -44,6 +41,7 @@ internal class LiveEditManager(
 
     private val handler: Handler = Handler()
     private val viewQueue: ConcurrentLinkedQueue<WeakReference<View>> = ConcurrentLinkedQueue()
+    private val openDialogs: MutableMap<String, WeakReference<BottomSheetDialog>> = mutableMapOf()
 
     init {
         viewTranslationManager.addOnUpdateViewTranslationListener { view, translationData ->
@@ -57,20 +55,22 @@ internal class LiveEditManager(
                 }
             }
         }
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val shakeDetector = ShakeDetector(object :
-            ShakeDetector.Listener {
-            override fun hearShake() {
-                liveEditEnabled = !liveEditEnabled
-            }
-        })
-        shakeDetector.start(sensorManager)
+    }
+
+    /**
+     * Removes nulls and the calling dialog from the open dialogs map
+     */
+    private val onDialogCancelListener = { dialog: DialogInterface ->
+        openDialogs
+            .filterValues { it.get() === dialog || it.get() == null }
+            .keys
+            .forEach { key -> openDialogs.remove(key) }
     }
 
     /**
      * Enable/Disable live editing
      */
-    var liveEditEnabled: Boolean = false
+    private var liveEditEnabled: Boolean = false
         set(value) {
             field = value
             if (value) {
@@ -79,6 +79,25 @@ internal class LiveEditManager(
                 disableLiveEdit()
             }
         }
+
+    /**
+     * Turns live edit on
+     */
+    fun turnLiveEditOn() {
+        liveEditEnabled = true
+    }
+
+    /**
+     * Cancels all dialogs and disables live edit
+     */
+    fun reset() {
+        liveEditEnabled = false
+
+        openDialogs
+            .values
+            .mapNotNull { weakReference -> weakReference.get() }
+            .forEach { dialog -> dialog.cancel() }
+    }
 
     /**
      * Removes background and long click listener
@@ -96,6 +115,7 @@ internal class LiveEditManager(
         keyAndTranslation: KeyAndTranslation
     ) {
         val bottomSheetDialog = BottomSheetDialog(view.context, R.style.NstackBottomSheetTheme)
+
         bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_edit)
         bottomSheetDialog.setOnShowListener {
@@ -187,6 +207,8 @@ internal class LiveEditManager(
                 }
             )
         }
+
+        bottomSheetDialog.makeCancellableOnReset(dialogKey = "live_edit")
         bottomSheetDialog.show()
     }
 
@@ -212,6 +234,8 @@ internal class LiveEditManager(
         recyclerView!!.layoutParams = recyclerView.layoutParams.apply {
             height = getWindowHeight() * 2 / 3
         }
+
+        bottomSheetDialog.makeCancellableOnReset(dialogKey = "section")
         bottomSheetDialog.show()
     }
 
@@ -267,6 +291,8 @@ internal class LiveEditManager(
                 }
             }
         )
+
+        bottomSheetDialog.makeCancellableOnReset(dialogKey = "proposals")
         bottomSheetDialog.show()
     }
 
@@ -323,6 +349,7 @@ internal class LiveEditManager(
             }
         }
 
+        bottomSheetDialog.makeCancellableOnReset(dialogKey = "option")
         bottomSheetDialog.show()
     }
 
@@ -369,5 +396,14 @@ internal class LiveEditManager(
 
     companion object {
         private val NStackViewTag = R.id.nstack_tag
+    }
+
+    /**
+     * Cancels this dialog if reset() is called. The method also adds an `OnCancelListener` to your
+     * dialog, so please make sure you haven't set any on your own.
+     */
+    private fun BottomSheetDialog.makeCancellableOnReset(dialogKey: String) {
+        this.setOnCancelListener(onDialogCancelListener)
+        openDialogs[dialogKey] = WeakReference(this)
     }
 }

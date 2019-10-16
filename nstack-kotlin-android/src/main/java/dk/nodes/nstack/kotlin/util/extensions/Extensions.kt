@@ -93,3 +93,7 @@ val Locale.languageCode: String
             ""
         }
     }
+
+internal inline fun <T : Any> MutableList<T?>.removeFirst(predicate: (T) -> Boolean) {
+    asSequence().filterNotNull().indexOfFirst(predicate).takeUnless { it == -1 }?.let { removeAt(it) }
+}

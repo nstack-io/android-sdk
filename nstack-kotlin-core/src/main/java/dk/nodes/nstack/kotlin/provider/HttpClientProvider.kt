@@ -11,8 +11,12 @@ object HttpClientProvider {
     private const val WRITE_TIMEOUT_SECONDS = 10L
     private const val READ_TIMEOUT_SECONDS = 10L
 
-    private fun provideNStackInterceptor(appIdKey: String, appApiKey: String): Interceptor {
-        return NStackInterceptor(appIdKey, appApiKey)
+    private fun provideNStackInterceptor(
+        appIdKey: String,
+        appApiKey: String,
+        sdkVersion: String
+    ): Interceptor {
+        return NStackInterceptor(appIdKey, appApiKey, sdkVersion)
     }
 
     private fun provideHttpLoggingInterceptor(debugMode: Boolean): Interceptor {
@@ -39,6 +43,7 @@ object HttpClientProvider {
     fun getHttpClient(
         appIdKey: String,
         appApiKey: String,
+        sdkVersion: String,
         environment: String,
         versionName: String,
         versionRelease: String,
@@ -51,7 +56,7 @@ object HttpClientProvider {
                 .connectTimeout(CONNECT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
                 .writeTimeout(WRITE_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
                 .readTimeout(READ_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
-                .addInterceptor(provideNStackInterceptor(appIdKey = appIdKey, appApiKey = appApiKey))
+                .addInterceptor(provideNStackInterceptor(appIdKey = appIdKey, appApiKey = appApiKey, sdkVersion = sdkVersion))
                 .addInterceptor(
                     provideNMetaInterceptor(
                         environment = environment,

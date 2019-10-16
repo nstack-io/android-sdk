@@ -18,7 +18,7 @@ class Application : Application() {
         NStack.translationClass = Translation::class.java
         NStack.init(this, BuildConfig.DEBUG)
         if (BuildConfig.DEBUG) {
-            NStack.enableLiveEdit(this)
+            NStack.enableMenuOnShake(this)
         }
 
         GlobalScope.launch {

@@ -10,6 +10,7 @@ android {
         versionCode 230
         versionName "2.3.0"
         manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder"]
+        buildConfigField "String", "SDK_VERSION", "\"$VERSION_NAME\""
     }
 }
 
