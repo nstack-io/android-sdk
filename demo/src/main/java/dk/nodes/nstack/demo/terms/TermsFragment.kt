@@ -44,8 +44,8 @@ class TermsFragment : Fragment(R.layout.fragment_terms) {
 
     private fun showViewState(state: TermsViewState) {
         swipeRefreshLayout.isRefreshing = state.isLoading
-        emptyView.setVisibleOrGone(!state.isLoading && state.termsContent.isNullOrEmpty())
-        termsAcceptButton.setVisibleOrGone(state.isAccepted != null)
+        emptyView.isVisible = !state.isLoading && state.termsContent.isNullOrEmpty()
+        termsAcceptButton.isVisible = state.isAccepted != null
 
         state.termsName?.let {
             toolbar.title = it
@@ -81,4 +81,14 @@ class TermsFragment : Fragment(R.layout.fragment_terms) {
             View.GONE
         }
     }
+
+    private var View.isVisible: Boolean
+        get() = visibility == View.VISIBLE
+        set(value) {
+            visibility = if (value) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        }
 }
