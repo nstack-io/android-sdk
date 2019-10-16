@@ -13,7 +13,7 @@ import java.util.UUID
 internal class AppOpenSettingsManager(
         private val clientAppInfo: ClientAppInfo,
         private val preferences: Preferences,
-        var versionUpdateTestMode: Boolean = true
+        var versionUpdateTestMode: Boolean = false
 ) {
 
     fun getAppOpenSettings(): AppOpenSettings {

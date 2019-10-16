@@ -29,6 +29,7 @@ import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.models.local.Environment
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
@@ -292,8 +293,8 @@ object NStack {
 
         isInitialized = true
 
-        if (env == "production" || env == "prod") {
-            versionUpdateTestMode = false
+        if (Environment(env).shouldEnableTestMode) {
+            versionUpdateTestMode = true
         }
     }
 
