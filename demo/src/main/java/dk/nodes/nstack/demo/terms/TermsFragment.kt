@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
-import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
+import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.google.android.material.button.MaterialButton
 import dk.nodes.nstack.demo.R
 import dk.nodes.nstack.demo.Translation
 import kotlinx.android.synthetic.main.fragment_terms.*
@@ -39,8 +39,11 @@ class TermsFragment : Fragment(R.layout.fragment_terms) {
         contentView.setVisibleOrGone(!state.isLoading && !state.termsContent.isNullOrEmpty())
         emptyView.setVisibleOrGone(!state.isLoading && state.termsContent.isNullOrEmpty())
 
-        termsContentTextView.text = state.termsContent
         termsAcceptButton.showAccepted(state.isAccepted)
+
+        state.termsContent?.let {
+            termsContentTextView.text = HtmlCompat.fromHtml(it, FROM_HTML_MODE_LEGACY)
+        }
 
         state.errorMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
