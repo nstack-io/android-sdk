@@ -960,14 +960,14 @@ object NStack {
         /**
          * @return all new terms which are not yet viewed by this app instance (GUID)? TBD
          *
-         * This result is a local copy of to the terms provided via [AppOpenResult].
+         * This result is a local copy of to the terms provided via [AppOpenResult]
          */
         fun getAppOpenTerms() : List<Term> {
             return termsRepository.getLatestTerms()
         }
 
         /**
-         * Provides the latest [TermDetails] for the given [termsID]
+         * Provides the latest [TermDetails] for given [termsID]
          */
         fun getLatestTerms(termsID: Long,
                            onSuccess: (TermDetails) -> Unit,
@@ -982,7 +982,7 @@ object NStack {
         }
 
         /**
-         * Provides the latest [TermDetails] for the given [termsID]
+         * Accepts a terms version for this app instance (GUID)
          */
         fun acceptTerms(versionID : Long,
                         userID : String,
