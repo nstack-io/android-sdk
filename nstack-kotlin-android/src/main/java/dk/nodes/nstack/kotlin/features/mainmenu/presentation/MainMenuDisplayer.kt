@@ -3,7 +3,6 @@ package dk.nodes.nstack.kotlin.features.mainmenu.presentation
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -13,7 +12,7 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 private enum class DisplayedFeature {
     NONE,
     MAIN_MENU,
-    OTHER
+    LIVE_EDIT
 }
 
 /**
@@ -27,7 +26,7 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
 
     private val mainMenuClickListener = View.OnClickListener { view ->
         when (view.id) {
-            R.id.editTranslationsButton -> triggerLiveEdit()
+            R.id.editTranslationsButton -> startLiveEdit()
         }
     }
 
@@ -35,10 +34,18 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
      * Presents the main menu by default, but can also cancel subsequent actions caused by the
      * selection made in the dialog.
      */
-    fun trigger(activity: Activity) = when (currentlyDisplayedFeature) {
-        DisplayedFeature.NONE -> showMainMenu(activity)
-        DisplayedFeature.MAIN_MENU -> Unit // Do nothing, keep the menu open
-        DisplayedFeature.OTHER -> triggerLiveEdit()
+    fun trigger(activity: Activity) {
+
+        activity.setOnStopAction {
+            mainMenuDialog?.cancel()
+            liveEditManager.reset()
+        }
+
+        return when (currentlyDisplayedFeature) {
+            DisplayedFeature.NONE -> showMainMenu(activity)
+            DisplayedFeature.MAIN_MENU -> Unit // Do nothing, keep the menu open
+            DisplayedFeature.LIVE_EDIT -> stopLiveEdit()
+        }
     }
 
     @SuppressLint("InflateParams")
@@ -56,7 +63,6 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
                             currentlyDisplayedFeature = DisplayedFeature.NONE
                         }
                     }
-                    setCancelOnStop(activity)
                 }
                 .also { dialog ->
                     editTranslationsButton.setOnClickListener { view ->
@@ -69,23 +75,23 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
                 }
     }
 
-    private fun triggerLiveEdit() {
-        val isEditingStillEnabled = liveEditManager.toggleLiveEdit()
+    private fun startLiveEdit() {
+        liveEditManager.turnLiveEditOn()
+        currentlyDisplayedFeature = DisplayedFeature.LIVE_EDIT
+    }
 
-        this.currentlyDisplayedFeature = if (isEditingStillEnabled) {
-            DisplayedFeature.OTHER
-        } else {
-            DisplayedFeature.NONE
-        }
+    private fun stopLiveEdit() {
+        liveEditManager.reset()
+        currentlyDisplayedFeature = DisplayedFeature.NONE
     }
 }
 
-private fun BottomSheetDialog.setCancelOnStop(activity: Activity) {
-    activity.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
-
+private fun Activity.setOnStopAction(action: (Activity) -> Unit) {
+    this.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
         override fun onActivityStopped(activity: Activity) {
-            cancel()
+            action(this@setOnStopAction)
 
+            // Cleanup after stop
             activity.unregisterActivityLifecycleCallbacks(this)
         }
 
