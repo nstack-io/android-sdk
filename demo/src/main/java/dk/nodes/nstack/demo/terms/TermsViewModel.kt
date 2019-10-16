@@ -8,6 +8,8 @@ class TermsViewModel : ViewModel() {
 
     val viewState: MutableLiveData<TermsViewState> = MutableLiveData()
 
+    private var termVersionID = -1L
+
     init {
         viewState.value = TermsViewState(
                 isLoading = false,
@@ -18,9 +20,13 @@ class TermsViewModel : ViewModel() {
     }
 
     fun loadTerms(termsID: Long) {
+        viewState.value = viewState.value?.copy(
+                isLoading = true
+        )
         NStack.Terms.getLatestTerms(
                 termsID = termsID,
                 onSuccess = {
+                    termVersionID = it.versionID
                     viewState.value = viewState.value?.copy(
                             isLoading = false,
                             errorMessage = null,
@@ -38,8 +44,11 @@ class TermsViewModel : ViewModel() {
     }
 
     fun acceptTerms() {
+        viewState.value = viewState.value?.copy(
+                isLoading = true
+        )
         NStack.Terms.acceptTerms(
-                versionID = 4,
+                versionID = termVersionID,
                 userID = "unknown",
                 onSuccess = {
                     viewState.value = viewState.value?.copy(

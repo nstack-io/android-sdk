@@ -4,7 +4,8 @@ import com.google.gson.annotations.SerializedName
 import java.util.*
 
 data class TermDetails(
-        val id: Long,
+        @SerializedName("id")
+        val versionID: Long,
         val version: Long,
         @SerializedName("version_name")
         val versionName: String,
