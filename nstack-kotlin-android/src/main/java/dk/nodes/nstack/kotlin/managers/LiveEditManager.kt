@@ -1,5 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
+import android.content.DialogInterface
 import android.content.res.Resources
 import android.os.Handler
 import android.view.View
@@ -32,14 +33,15 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentLinkedQueue
 
 internal class LiveEditManager(
-        private val translationHolder: TranslationHolder,
-        private val viewTranslationManager: ViewTranslationManager,
-        private val networkManager: NetworkManager,
-        private val appOpenSettingsManager: AppOpenSettingsManager
+    private val translationHolder: TranslationHolder,
+    private val viewTranslationManager: ViewTranslationManager,
+    private val networkManager: NetworkManager,
+    private val appOpenSettingsManager: AppOpenSettingsManager
 ) {
 
     private val handler: Handler = Handler()
     private val viewQueue: ConcurrentLinkedQueue<WeakReference<View>> = ConcurrentLinkedQueue()
+    private val openDialogs: MutableMap<String, WeakReference<BottomSheetDialog>> = mutableMapOf()
 
     init {
         viewTranslationManager.addOnUpdateViewTranslationListener { view, translationData ->
@@ -56,6 +58,16 @@ internal class LiveEditManager(
     }
 
     /**
+     * Removes nulls and the calling dialog from the open dialogs map
+     */
+    private val onDialogCancelListener = { dialog: DialogInterface ->
+        openDialogs
+            .filterValues { it.get() === dialog || it.get() == null }
+            .keys
+            .forEach { key -> openDialogs.remove(key) }
+    }
+
+    /**
      * Enable/Disable live editing
      */
     private var liveEditEnabled: Boolean = false
@@ -69,12 +81,22 @@ internal class LiveEditManager(
         }
 
     /**
-     * Toggles live edit and returns true if live edit is (still) on or false otherwise.
+     * Turns live edit on
      */
-    fun toggleLiveEdit(): Boolean {
-        liveEditEnabled = !liveEditEnabled
+    fun turnLiveEditOn() {
+        liveEditEnabled = true
+    }
 
-        return liveEditEnabled
+    /**
+     * Cancels all dialogs and disables live edit
+     */
+    fun reset() {
+        liveEditEnabled = false
+
+        openDialogs
+            .values
+            .mapNotNull { weakReference -> weakReference.get() }
+            .forEach { dialog -> dialog.cancel() }
     }
 
     /**
@@ -185,6 +207,8 @@ internal class LiveEditManager(
                 }
             )
         }
+
+        bottomSheetDialog.makeCancellableOnReset(dialogKey = "live_edit")
         bottomSheetDialog.show()
     }
 
@@ -210,6 +234,8 @@ internal class LiveEditManager(
         recyclerView!!.layoutParams = recyclerView.layoutParams.apply {
             height = getWindowHeight() * 2 / 3
         }
+
+        bottomSheetDialog.makeCancellableOnReset(dialogKey = "section")
         bottomSheetDialog.show()
     }
 
@@ -265,6 +291,8 @@ internal class LiveEditManager(
                 }
             }
         )
+
+        bottomSheetDialog.makeCancellableOnReset(dialogKey = "proposals")
         bottomSheetDialog.show()
     }
 
@@ -321,6 +349,7 @@ internal class LiveEditManager(
             }
         }
 
+        bottomSheetDialog.makeCancellableOnReset(dialogKey = "option")
         bottomSheetDialog.show()
     }
 
@@ -367,5 +396,14 @@ internal class LiveEditManager(
 
     companion object {
         private val NStackViewTag = R.id.nstack_tag
+    }
+
+    /**
+     * Cancels this dialog if reset() is called. The method also adds an `OnCancelListener` to your
+     * dialog, so please make sure you haven't set any on your own.
+     */
+    private fun BottomSheetDialog.makeCancellableOnReset(dialogKey: String) {
+        this.setOnCancelListener(onDialogCancelListener)
+        openDialogs[dialogKey] = WeakReference(this)
     }
 }
