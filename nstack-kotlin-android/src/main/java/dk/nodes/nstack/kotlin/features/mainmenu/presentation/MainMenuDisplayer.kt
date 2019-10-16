@@ -58,7 +58,7 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
                 .apply {
                     setContentView(view)
                     setOnCancelListener {
-                        with (this@MainMenuDisplayer) {
+                        with(this@MainMenuDisplayer) {
                             mainMenuDialog = null
                             currentlyDisplayedFeature = DisplayedFeature.NONE
                         }
