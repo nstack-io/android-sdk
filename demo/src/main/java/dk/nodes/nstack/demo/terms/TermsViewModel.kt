@@ -14,8 +14,9 @@ class TermsViewModel : ViewModel() {
         viewState.value = TermsViewState(
                 isLoading = false,
                 errorMessage = null,
+                termsName = null,
                 termsContent = null,
-                isAccepted = false
+                isAccepted = null
         )
     }
 
@@ -30,6 +31,7 @@ class TermsViewModel : ViewModel() {
                     viewState.value = viewState.value?.copy(
                             isLoading = false,
                             errorMessage = null,
+                            termsName = it.versionName,
                             termsContent = it.content.data,
                             isAccepted = it.hasViewed
                     )

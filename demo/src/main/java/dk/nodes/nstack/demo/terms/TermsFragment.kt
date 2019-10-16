@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.fragment.app.Fragment
@@ -12,6 +13,8 @@ import androidx.lifecycle.ViewModelProviders
 import dk.nodes.nstack.demo.R
 import dk.nodes.nstack.demo.Translation
 import kotlinx.android.synthetic.main.fragment_terms.*
+
+const val TERMS_ID = 3L
 
 class TermsFragment : Fragment(R.layout.fragment_terms) {
 
@@ -22,24 +25,31 @@ class TermsFragment : Fragment(R.layout.fragment_terms) {
 
         viewModel = ViewModelProviders.of(this)[TermsViewModel::class.java]
         viewModel.viewState.observe(this, Observer(this::showViewState))
+        viewModel.loadTerms(TERMS_ID)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.loadTerms(3)
-
         termsAcceptButton.setOnClickListener {
             viewModel.acceptTerms()
+        }
+
+        val colorAccent = ContextCompat.getColor(view.context, R.color.colorAccent)
+        swipeRefreshLayout.setColorSchemeColors(colorAccent)
+        swipeRefreshLayout.setOnRefreshListener {
+            viewModel.loadTerms(TERMS_ID)
         }
     }
 
     private fun showViewState(state: TermsViewState) {
-        loadingView.setVisibleOrGone(state.isLoading)
-        contentView.setVisibleOrGone(!state.isLoading && !state.termsContent.isNullOrEmpty())
+        swipeRefreshLayout.isRefreshing = state.isLoading
         emptyView.setVisibleOrGone(!state.isLoading && state.termsContent.isNullOrEmpty())
+        termsAcceptButton.setVisibleOrGone(state.isAccepted != null)
 
-        termsAcceptButton.showAccepted(state.isAccepted)
+        state.termsName?.let {
+            toolbar.title = it
+        }
 
         state.termsContent?.let {
             termsContentTextView.text = HtmlCompat.fromHtml(it, FROM_HTML_MODE_LEGACY)
@@ -47,6 +57,10 @@ class TermsFragment : Fragment(R.layout.fragment_terms) {
 
         state.errorMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+
+        state.isAccepted?.let {
+            termsAcceptButton.showAccepted(it)
         }
     }
 
