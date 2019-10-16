@@ -31,6 +31,7 @@ import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.models.local.Environment
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
@@ -300,6 +301,10 @@ object NStack {
 
         this.activeActivityHolder = ActiveActivityHolder()
                 .also { holder -> registerActiveActivityHolderToAppLifecycle(context, holder) }
+
+        if (Environment(env).shouldEnableTestMode) {
+            versionUpdateTestMode = true
+        }
 
         isInitialized = true
     }
