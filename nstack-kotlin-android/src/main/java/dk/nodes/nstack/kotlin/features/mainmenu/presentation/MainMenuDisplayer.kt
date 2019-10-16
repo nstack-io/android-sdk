@@ -55,24 +55,24 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
         val editTranslationsButton: View = view.findViewById(R.id.editTranslationsButton)
 
         this.mainMenuDialog = BottomSheetDialog(activity, R.style.NstackBottomSheetTheme)
-                .apply {
-                    setContentView(view)
-                    setOnCancelListener {
-                        with(this@MainMenuDisplayer) {
-                            mainMenuDialog = null
-                            currentlyDisplayedFeature = DisplayedFeature.NONE
-                        }
+            .apply {
+                setContentView(view)
+                setOnCancelListener {
+                    with(this@MainMenuDisplayer) {
+                        mainMenuDialog = null
+                        currentlyDisplayedFeature = DisplayedFeature.NONE
                     }
                 }
-                .also { dialog ->
-                    editTranslationsButton.setOnClickListener { view ->
-                        mainMenuClickListener.onClick(view)
-                        dialog.dismiss()
-                    }
+            }
+            .also { dialog ->
+                editTranslationsButton.setOnClickListener { view ->
+                    mainMenuClickListener.onClick(view)
+                    dialog.dismiss()
+                }
 
-                    dialog.show()
-                    this.currentlyDisplayedFeature = DisplayedFeature.MAIN_MENU
-                }
+                dialog.show()
+                this.currentlyDisplayedFeature = DisplayedFeature.MAIN_MENU
+            }
     }
 
     private fun startLiveEdit() {
