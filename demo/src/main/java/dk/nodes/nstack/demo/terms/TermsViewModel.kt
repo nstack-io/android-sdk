@@ -1,17 +1,20 @@
 package dk.nodes.nstack.demo.terms
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import dk.nodes.nstack.kotlin.NStack
 
 class TermsViewModel : ViewModel() {
 
-    val viewState: MutableLiveData<TermsViewState> = MutableLiveData()
-
     private var termVersionID = -1L
 
+    private val viewStateInternal: MutableLiveData<TermsViewState> = MutableLiveData()
+
+    val viewState : LiveData<TermsViewState> = viewStateInternal
+
     init {
-        viewState.value = TermsViewState(
+        viewStateInternal.value = TermsViewState(
                 isLoading = false,
                 errorMessage = null,
                 termsName = null,
@@ -21,14 +24,14 @@ class TermsViewModel : ViewModel() {
     }
 
     fun loadTerms(termsID: Long) {
-        viewState.value = viewState.value?.copy(
+        viewStateInternal.value = viewStateInternal.value?.copy(
                 isLoading = true
         )
         NStack.Terms.getLatestTerms(
                 termsID = termsID,
                 onSuccess = {
                     termVersionID = it.versionID
-                    viewState.value = viewState.value?.copy(
+                    viewStateInternal.value = viewStateInternal.value?.copy(
                             isLoading = false,
                             errorMessage = null,
                             termsName = it.versionName,
@@ -37,7 +40,7 @@ class TermsViewModel : ViewModel() {
                     )
                 },
                 onError = {
-                    viewState.value = viewState.value?.copy(
+                    viewStateInternal.value = viewStateInternal.value?.copy(
                             isLoading = false,
                             errorMessage = it.localizedMessage
                     )
@@ -46,21 +49,21 @@ class TermsViewModel : ViewModel() {
     }
 
     fun acceptTerms() {
-        viewState.value = viewState.value?.copy(
+        viewStateInternal.value = viewStateInternal.value?.copy(
                 isLoading = true
         )
         NStack.Terms.acceptTerms(
                 versionID = termVersionID,
                 userID = "unknown",
                 onSuccess = {
-                    viewState.value = viewState.value?.copy(
+                    viewStateInternal.value = viewStateInternal.value?.copy(
                             isLoading = false,
                             errorMessage = null,
                             isAccepted = true
                     )
                 },
                 onError = {
-                    viewState.value = viewState.value?.copy(
+                    viewStateInternal.value = viewStateInternal.value?.copy(
                             isLoading = false,
                             errorMessage = it.localizedMessage
                     )
