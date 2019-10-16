@@ -294,9 +294,6 @@ class NetworkManager(
         })
     }
 
-    /**
-     * @return the [TermDetails] for given term [versionID]
-     */
     fun getTerms(
             versionID : Long,
             settings: AppOpenSettings,
