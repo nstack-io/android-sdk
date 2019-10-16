@@ -14,47 +14,19 @@ import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
-import dk.nodes.nstack.kotlin.managers.AssetCacheManager
-import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
-import dk.nodes.nstack.kotlin.managers.ConnectionManager
-import dk.nodes.nstack.kotlin.managers.LiveEditManager
-import dk.nodes.nstack.kotlin.managers.NetworkManager
-import dk.nodes.nstack.kotlin.managers.PrefManager
-import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenResult
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.AppUpdateData
-import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.Feedback
-import dk.nodes.nstack.kotlin.models.LocalizeIndex
-import dk.nodes.nstack.kotlin.models.Message
-import dk.nodes.nstack.kotlin.models.RateReminderAnswer
-import dk.nodes.nstack.kotlin.models.TranslationData
-import dk.nodes.nstack.kotlin.models.local.Environment
+import dk.nodes.nstack.kotlin.data.terms.TermsRepository
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
+import dk.nodes.nstack.kotlin.managers.*
+import dk.nodes.nstack.kotlin.models.*
+import dk.nodes.nstack.kotlin.models.local.Environment
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
-import dk.nodes.nstack.kotlin.util.AppOpenCallbackCount
-import dk.nodes.nstack.kotlin.util.LanguageFetchCallback
-import dk.nodes.nstack.kotlin.util.LanguageListener
-import dk.nodes.nstack.kotlin.util.LanguagesListener
-import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
-import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
-import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
-import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
-import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
-import dk.nodes.nstack.kotlin.util.extensions.languageCode
-import dk.nodes.nstack.kotlin.util.extensions.locale
-import dk.nodes.nstack.kotlin.util.extensions.removeFirst
-import dk.nodes.nstack.kotlin.util.ShakeDetector
+import dk.nodes.nstack.kotlin.providers.RepositoryModule
+import dk.nodes.nstack.kotlin.util.*
+import dk.nodes.nstack.kotlin.util.extensions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -114,6 +86,7 @@ object NStack {
     private lateinit var prefManager: PrefManager
     private lateinit var contextWrapper: ContextWrapper
     private lateinit var mainMenuDisplayer: MainMenuDisplayer
+    private lateinit var termsRepository: TermsRepository
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
@@ -275,6 +248,7 @@ object NStack {
 
         val nstackModule = NStackModule(context, translationHolder)
         val managersModule = ManagersModule(nstackModule)
+        val repositoryModule = RepositoryModule(nstackModule)
 
         val nstackMeta = nstackModule.provideNStackMeta()
         appIdKey = nstackMeta.appIdKey
@@ -297,6 +271,9 @@ object NStack {
         contextWrapper = nstackModule.provideContextWrapper()
         networkManager = nstackModule.provideNetworkManager()
         mainMenuDisplayer = createMainMenuDisplayer(context)
+
+        termsRepository = repositoryModule.provideTermsRepository()
+
         loadCacheTranslations()
 
         this.activeActivityHolder = ActiveActivityHolder()
@@ -364,103 +341,105 @@ object NStack {
         }
 
         networkManager
-                .postAppOpen(appOpenSettings, localeString,
-                        { appUpdate ->
-                            NLog.d(
-                                    this,
-                                    "NStack appOpen "
-                            )
+            .postAppOpen(appOpenSettings, localeString,
+                { appUpdate ->
+                    NLog.d(
+                        this,
+                        "NStack appOpen "
+                    )
 
-                            val appOpenCallbackCount = AppOpenCallbackCount(
-                                    callsCount = appUpdate.localize.count { it.shouldUpdate }
-                            )
+                    termsRepository.setLatestTerms(appUpdate.terms)
 
-                            val languageFetchCallback = LanguageFetchCallback(appUpdate.localize.size)
+                    val appOpenCallbackCount = AppOpenCallbackCount(
+                        callsCount = appUpdate.localize.count { it.shouldUpdate }
+                    )
 
-                            appUpdate.localize.forEach { localizeIndex ->
-                                if (localizeIndex.shouldUpdate) {
-                                    networkManager.loadTranslation(localizeIndex.url, {
-                                        prefManager.setTranslations(localizeIndex.language.locale, it)
+                    val languageFetchCallback = LanguageFetchCallback(appUpdate.localize.size)
 
-                                        try {
-                                            networkLanguages = networkLanguages?.toMutableMap()?.apply {
-                                                put(
-                                                        localizeIndex.language.locale,
-                                                        it.asJsonObject ?: return@apply
-                                                )
-                                            }?.toMap()
-                                        } catch (e: Exception) {
-                                            NLog.e(this, e.toString())
-                                        }
+                    appUpdate.localize.forEach { localizeIndex ->
+                        if (localizeIndex.shouldUpdate) {
+                            networkManager.loadTranslation(localizeIndex.url, {
+                                prefManager.setTranslations(localizeIndex.language.locale, it)
 
-                                        if (localizeIndex.language.isBestFit) {
-                                            onLanguagesChanged()
-                                            onLanguageChanged()
-                                        }
-
-                                        appOpenCallbackCount.callsCount--
-                                        if (appOpenCallbackCount.callsCount <= 0 && !appOpenCallbackCount.callbackRan) {
-                                            contextWrapper.runUiAction {
-                                                callback(true)
-                                                onAppUpdateListener?.invoke(appUpdate)
-                                            }
-                                            appOpenCallbackCount.callbackRan = true
-                                        }
-
-                                        languageFetchCallback.fetchedLanguage()
-                                    }, {
-                                        NLog.e(
-                                                this,
-                                                "Could not load translations for ${localizeIndex.language.locale}",
-                                                it
+                                try {
+                                    networkLanguages = networkLanguages?.toMutableMap()?.apply {
+                                        put(
+                                            localizeIndex.language.locale,
+                                            it.asJsonObject ?: return@apply
                                         )
-
-                                        appOpenCallbackCount.callsCount--
-                                        if (appOpenCallbackCount.callsCount <= 0 && !appOpenCallbackCount.callbackRan) {
-                                            contextWrapper.runUiAction {
-                                                callback.invoke(true)
-                                                onAppUpdateListener?.invoke(appUpdate)
-                                            }
-                                            appOpenCallbackCount.callbackRan = true
-                                        }
-
-                                        languageFetchCallback.fetchedLanguage()
-                                    })
-
-                                    appOpenSettingsManager.setUpdateDate()
-                                }
-                                if (localizeIndex.language.isDefault) {
-                                    defaultLanguage = localizeIndex.language.locale
+                                    }?.toMap()
+                                } catch (e: Exception) {
+                                    NLog.e(this, e.toString())
                                 }
 
                                 if (localizeIndex.language.isBestFit) {
-                                    language = localizeIndex.language.locale
+                                    onLanguagesChanged()
+                                    onLanguageChanged()
                                 }
 
-                                if (appOpenCallbackCount.callsCount == 0 && !appOpenCallbackCount.callbackRan) {
+                                appOpenCallbackCount.callsCount--
+                                if (appOpenCallbackCount.callsCount <= 0 && !appOpenCallbackCount.callbackRan) {
+                                    contextWrapper.runUiAction {
+                                        callback(true)
+                                        onAppUpdateListener?.invoke(appUpdate)
+                                    }
+                                    appOpenCallbackCount.callbackRan = true
+                                }
+
+                                languageFetchCallback.fetchedLanguage()
+                            }, {
+                                NLog.e(
+                                    this,
+                                    "Could not load translations for ${localizeIndex.language.locale}",
+                                    it
+                                )
+
+                                appOpenCallbackCount.callsCount--
+                                if (appOpenCallbackCount.callsCount <= 0 && !appOpenCallbackCount.callbackRan) {
                                     contextWrapper.runUiAction {
                                         callback.invoke(true)
                                         onAppUpdateListener?.invoke(appUpdate)
                                     }
                                     appOpenCallbackCount.callbackRan = true
                                 }
-                            }
 
-                            languageFetchCallback.done = {
-                                contextWrapper.runUiAction {
-                                    callback.invoke(true)
-                                    onAppUpdateListener?.invoke(appUpdate)
-                                }
-                            }
-                        },
-                        {
-                            NLog.e(this, "Error: onAppOpened", it)
+                                languageFetchCallback.fetchedLanguage()
+                            })
 
-                            // If our update failed for whatever reason we should still send an no update start
-                            callback.invoke(false)
-                            onAppUpdateListener?.invoke(AppUpdateData())
+                            appOpenSettingsManager.setUpdateDate()
                         }
-                )
+                        if (localizeIndex.language.isDefault) {
+                            defaultLanguage = localizeIndex.language.locale
+                        }
+
+                        if (localizeIndex.language.isBestFit) {
+                            language = localizeIndex.language.locale
+                        }
+
+                        if (appOpenCallbackCount.callsCount == 0 && !appOpenCallbackCount.callbackRan) {
+                            contextWrapper.runUiAction {
+                                callback.invoke(true)
+                                onAppUpdateListener?.invoke(appUpdate)
+                            }
+                            appOpenCallbackCount.callbackRan = true
+                        }
+                    }
+
+                    languageFetchCallback.done = {
+                        contextWrapper.runUiAction {
+                            callback.invoke(true)
+                            onAppUpdateListener?.invoke(appUpdate)
+                        }
+                    }
+                },
+                {
+                    NLog.e(this, "Error: onAppOpened", it)
+
+                    // If our update failed for whatever reason we should still send an no update start
+                    callback.invoke(false)
+                    onAppUpdateListener?.invoke(AppUpdateData())
+                }
+            )
     }
 
 
@@ -973,6 +952,50 @@ object NStack {
                     message
             )
             networkManager.postFeedback(feedback)
+        }
+    }
+
+    object Terms {
+
+        /**
+         * @return all new terms which are not yet viewed by this app instance (GUID)? TBD
+         *
+         * This result is a local copy of to the terms provided via [AppOpenResult]
+         */
+        fun getAppOpenTerms() : List<Term> {
+            return termsRepository.getLatestTerms()
+        }
+
+        /**
+         * Provides the latest [TermDetails] for given [termsID]
+         */
+        fun getLatestTerms(termsID: Long,
+                           onSuccess: (TermDetails) -> Unit,
+                           onError: (Exception) -> Unit) {
+            networkManager.getLatestTerms(
+                    termsID = termsID,
+                    acceptLanguage = language.toString(),
+                    settings = appOpenSettingsManager.getAppOpenSettings(),
+                    onSuccess = { runUiAction { onSuccess(it) }},
+                    onError = { runUiAction { onError(it) }}
+            )
+        }
+
+        /**
+         * Accepts a terms version for this app instance (GUID)
+         */
+        fun acceptTerms(versionID : Long,
+                        userID : String,
+                        onSuccess: () -> Unit,
+                        onError: (Exception) -> Unit) {
+            networkManager.acceptTerms(
+                    versionID = versionID,
+                    userID = userID,
+                    locale = language.toString().replace("_", "-"),
+                    settings = appOpenSettingsManager.getAppOpenSettings(),
+                    onSuccess = { runUiAction { onSuccess() }},
+                    onError = { runUiAction { onError(it) }}
+            )
         }
     }
 }
