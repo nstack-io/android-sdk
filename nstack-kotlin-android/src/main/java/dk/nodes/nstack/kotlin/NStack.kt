@@ -960,20 +960,18 @@ object NStack {
     object Terms {
 
         /**
-         * @return all new terms which are not yet viewed by this app instance (GUID)? TBD
+         * A list of terms which are not yet accepted by this app instance (GUID)
          *
-         * This result is a local copy of to the terms provided via [AppOpenResult]
+         * This is a local copy of terms provided via [AppOpenResult]
          */
-        fun getAppOpenTerms() : List<Term> {
-            return termsRepository.getLatestTerms()
-        }
+        val latestTerms = termsRepository.getLatestTerms().filter { it.version != null }
 
         /**
-         * Provides the latest [TermDetails] for given [termsID]
+         * Provides latest [TermsDetails] for given [termsID]
          */
-        fun getLatestTerms(termsID: Long,
-                           onSuccess: (TermDetails) -> Unit,
-                           onError: (Exception) -> Unit) {
+        fun getTermsDetails(termsID: Long,
+                            onSuccess: (TermsDetails) -> Unit,
+                            onError: (Exception) -> Unit) {
             networkManager.getLatestTerms(
                     termsID = termsID,
                     acceptLanguage = language.toString(),
@@ -984,7 +982,7 @@ object NStack {
         }
 
         /**
-         * Accepts a terms version for this app instance (GUID)
+         * Accepts a version of terms for this app instance (GUID)
          */
         fun acceptTerms(versionID : Long,
                         userID : String,

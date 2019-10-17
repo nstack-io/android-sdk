@@ -3,7 +3,7 @@ package dk.nodes.nstack.kotlin.models
 import com.google.gson.annotations.SerializedName
 import java.util.*
 
-data class Term(
+data class Terms(
         val id: Long,
         val type: Type,
         val name: String,

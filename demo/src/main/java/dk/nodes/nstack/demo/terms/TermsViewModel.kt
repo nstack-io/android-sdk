@@ -27,7 +27,7 @@ class TermsViewModel : ViewModel() {
         viewStateInternal.value = viewStateInternal.value?.copy(
                 isLoading = true
         )
-        NStack.Terms.getLatestTerms(
+        NStack.Terms.getTermsDetails(
                 termsID = termsID,
                 onSuccess = {
                     termVersionID = it.versionID
