@@ -52,7 +52,7 @@ class TermsViewModel : ViewModel() {
         viewStateInternal.value = viewStateInternal.value?.copy(
                 isLoading = true
         )
-        NStack.Terms.acceptTerms(
+        NStack.Terms.setTermsViewed(
                 versionID = termVersionID,
                 userID = "unknown",
                 onSuccess = {
