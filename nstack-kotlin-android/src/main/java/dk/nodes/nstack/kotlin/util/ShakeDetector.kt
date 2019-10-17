@@ -194,15 +194,15 @@ internal class ShakeDetector(private val listener: Listener) : SensorEventListen
         companion object {
 
             /** Window size in ns. Used to compute the average.  */
-            private val MAX_WINDOW_SIZE: Long = 500000000 // 0.5s
-            private val MIN_WINDOW_SIZE = MAX_WINDOW_SIZE shr 1 // 0.25s
+            private const val MAX_WINDOW_SIZE: Long = 500000000 // 0.5s
+            private const val MIN_WINDOW_SIZE = MAX_WINDOW_SIZE shr 1 // 0.25s
 
             /**
              * Ensure the queue size never falls below this size, even if the device
              * fails to deliver this many events during the time window. The LG Ally
              * is one such device.
              */
-            private val MIN_QUEUE_SIZE = 4
+            private const val MIN_QUEUE_SIZE = 4
         }
     }
 
