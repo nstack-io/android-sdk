@@ -216,13 +216,13 @@ internal class NStackTest {
         private val contextMock = mockk<Context>(relaxUnitFun = true)
         private val intentMock = mockk<Intent>()
 
-        private val appId = "appId"
-        private val apiKey = "apiKey"
-        private val env = "env"
+        private const val appId = "appId"
+        private const val apiKey = "apiKey"
+        private const val env = "env"
 
-        private val guid = "guid"
-        private val version = "version"
-        private val oldVersion = "oldVersion"
+        private const val guid = "guid"
+        private const val version = "version"
+        private const val oldVersion = "oldVersion"
         private val lastUpdated = Date()
         private val appOpenSettings = AppOpenSettings(
                 guid = guid,
