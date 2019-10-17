@@ -8,6 +8,7 @@ import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.managers.LiveEditManager
+import dk.nodes.nstack.kotlin.util.extensions.setNavigationBarColor
 
 private enum class DisplayedFeature {
     NONE,
@@ -56,6 +57,7 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
 
         this.mainMenuDialog = BottomSheetDialog(activity, R.style.NstackBottomSheetTheme)
             .apply {
+                setNavigationBarColor()
                 setContentView(view)
                 setOnCancelListener {
                     with(this@MainMenuDisplayer) {
