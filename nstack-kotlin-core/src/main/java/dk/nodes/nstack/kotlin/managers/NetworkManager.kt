@@ -324,12 +324,12 @@ class NetworkManager(
         })
     }
 
-    fun acceptTerms(versionID: Long,
-                    userID: String,
-                    locale: String,
-                    settings: AppOpenSettings,
-                    onSuccess: () -> Unit,
-                    onError: (Exception) -> Unit) {
+    fun setTermsViewed(versionID: Long,
+                       userID: String,
+                       locale: String,
+                       settings: AppOpenSettings,
+                       onSuccess: () -> Unit,
+                       onError: (Exception) -> Unit) {
 
         val requestBody = FormBody.Builder()
                 .add("guid", settings.guid)

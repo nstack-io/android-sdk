@@ -982,13 +982,13 @@ object NStack {
         }
 
         /**
-         * Accepts a version of terms for this app instance (GUID)
+         * Set a version of terms to viewed by this app instance (GUID)
          */
-        fun acceptTerms(versionID : Long,
-                        userID : String,
-                        onSuccess: () -> Unit,
-                        onError: (Exception) -> Unit) {
-            networkManager.acceptTerms(
+        fun setTermsViewed(versionID : Long,
+                           userID : String,
+                           onSuccess: () -> Unit,
+                           onError: (Exception) -> Unit) {
+            networkManager.setTermsViewed(
                     versionID = versionID,
                     userID = userID,
                     locale = language.toString().replace("_", "-"),
