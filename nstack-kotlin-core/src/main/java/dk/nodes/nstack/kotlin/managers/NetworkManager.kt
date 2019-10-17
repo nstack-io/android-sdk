@@ -268,7 +268,7 @@ class NetworkManager(
             termsID: Long,
             acceptLanguage: String,
             settings: AppOpenSettings,
-            onSuccess: (TermDetails) -> Unit,
+            onSuccess: (TermsDetails) -> Unit,
             onError: (Exception) -> Unit
     ) {
         val request = Request.Builder()
@@ -298,7 +298,7 @@ class NetworkManager(
             versionID : Long,
             settings: AppOpenSettings,
             acceptLanguage: String,
-            onSuccess: (TermDetails) -> Unit,
+            onSuccess: (TermsDetails) -> Unit,
             onError: (Exception) -> Unit
     ) {
         val request = Request.Builder()
