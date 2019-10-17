@@ -465,6 +465,8 @@ object NStack {
             return when (val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
                 is AppOpenResult.Success -> {
                     NLog.d(this, "NStack appOpen")
+
+                    termsRepository.setLatestTerms(result.appUpdateResponse.data.terms)
                     result.appUpdateResponse.data.localize.forEach { handleLocalizeIndex(it) }
 
                     val shouldUpdateTranslationClass =
