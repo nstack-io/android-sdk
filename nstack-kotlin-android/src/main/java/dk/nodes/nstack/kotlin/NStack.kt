@@ -46,17 +46,11 @@ object NStack {
 
     // Variables
     var appIdKey: String = ""
-        private set(value) {
-            field = value
-        }
+        private set
     var appApiKey: String = ""
-        private set(value) {
-            field = value
-        }
+        private set
     var env: String = ""
-        private set(value) {
-            field = value
-        }
+        private set
 
     val appClientInfo: ClientAppInfo
         get() = appInfo
