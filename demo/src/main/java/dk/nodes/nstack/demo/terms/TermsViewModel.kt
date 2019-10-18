@@ -32,7 +32,6 @@ class TermsViewModel : ViewModel() {
         viewStateInternal.value = viewStateInternal.value?.copy(
                 isLoading = true
         )
-
         when (val result = withContext(Dispatchers.IO) {
             NStack.Terms.getTermsDetails(
                     termsID = termsID
