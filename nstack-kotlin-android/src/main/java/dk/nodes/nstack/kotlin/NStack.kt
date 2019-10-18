@@ -963,32 +963,23 @@ object NStack {
         /**
          * Provides latest [TermsDetails] for given [termsID]
          */
-        fun getTermsDetails(termsID: Long,
-                            onSuccess: (TermsDetails) -> Unit,
-                            onError: (Exception) -> Unit) {
-            networkManager.getLatestTerms(
+        suspend fun getTermsDetails(termsID: Long) : Result<TermsDetails> {
+            return networkManager.getLatestTerms(
                     termsID = termsID,
                     acceptLanguage = language.toString(),
-                    settings = appOpenSettingsManager.getAppOpenSettings(),
-                    onSuccess = { runUiAction { onSuccess(it) }},
-                    onError = { runUiAction { onError(it) }}
+                    settings = appOpenSettingsManager.getAppOpenSettings()
             )
         }
 
         /**
          * Set a version of terms to viewed by this app instance (GUID)
          */
-        fun setTermsViewed(versionID : Long,
-                           userID : String,
-                           onSuccess: () -> Unit,
-                           onError: (Exception) -> Unit) {
-            networkManager.setTermsViewed(
+        suspend fun setTermsViewed(versionID : Long, userID : String) : Result<Empty> {
+            return networkManager.setTermsViewed(
                     versionID = versionID,
                     userID = userID,
                     locale = language.toString().replace("_", "-"),
-                    settings = appOpenSettingsManager.getAppOpenSettings(),
-                    onSuccess = { runUiAction { onSuccess() }},
-                    onError = { runUiAction { onError(it) }}
+                    settings = appOpenSettingsManager.getAppOpenSettings()
             )
         }
     }
