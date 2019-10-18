@@ -56,8 +56,6 @@ val View.children: List<View>
 
 typealias LogFunction = (tag: String, msg: String) -> Unit
 
-typealias AppOpenCallback = (success: Boolean) -> Unit
-
 internal var nLog: LogFunction = fun(tag, msg) {
     println("$tag : $msg")
 }
