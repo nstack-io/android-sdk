@@ -1,6 +1,5 @@
-package dk.nodes.nstack.kotlin.models
+package dk.nodes.nstack.kotlin.features.feedback.domain.model
 
-typealias Base64String = String
 
 data class Feedback(
     val appVersion: String,
@@ -8,5 +7,5 @@ data class Feedback(
     val name: String,
     val email: String,
     val message: String,
-    val image: Base64String?
+    val image: ImageData?
 )

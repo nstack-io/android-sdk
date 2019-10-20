@@ -9,7 +9,7 @@ import okhttp3.*
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-
+import kotlin.coroutines.coroutineContext
 
 class NetworkManager(
     private val client: OkHttpClient,
@@ -405,6 +405,11 @@ class NetworkManager(
             it["name"] = feedback.name
             it["email"] = feedback.email
             it["message"] = feedback.message
+
+            feedback.image?.let { image ->
+                it["image"] = image
+            }
+
         }.post("$baseUrl/api/v2/ugc/feedbacks")
     }
 
