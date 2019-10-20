@@ -40,7 +40,7 @@ data class ImageData internal constructor(
      * Creates a new Base64 string out of the contained data
      */
     fun asJpegBase64String(): String {
-        return Base64.encodeToString(asJpegBytes(), Base64.DEFAULT)
+        return Base64.encodeToString(asJpegBytes(), Base64.NO_WRAP)
     }
 }
 
