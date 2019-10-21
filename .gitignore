@@ -41,7 +41,6 @@ captures/
 !.idea/codeStyles/Project.xml
 !.idea/inspectionProfiles/profiles_settings.xml
 !.idea/inspectionProfiles/ktlint.xml
-!.idea/workspace.xml
 
 
 # Keystore files
