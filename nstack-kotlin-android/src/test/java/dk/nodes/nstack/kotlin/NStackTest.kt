@@ -3,19 +3,43 @@ package dk.nodes.nstack.kotlin
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import dk.nodes.nstack.kotlin.managers.*
-import dk.nodes.nstack.kotlin.models.*
+import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
+import dk.nodes.nstack.kotlin.managers.AssetCacheManager
+import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
+import dk.nodes.nstack.kotlin.managers.ConnectionManager
+import dk.nodes.nstack.kotlin.managers.NetworkManager
+import dk.nodes.nstack.kotlin.managers.PrefManager
+import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
+import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppUpdateData
+import dk.nodes.nstack.kotlin.models.AppUpdateMeta
+import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.Language
+import dk.nodes.nstack.kotlin.models.LocalizeIndex
+import dk.nodes.nstack.kotlin.models.Message
+import dk.nodes.nstack.kotlin.models.NStackMeta
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
-import io.mockk.*
-import kotlinx.coroutines.*
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.mockkStatic
+import io.mockk.slot
+import io.mockk.verify
+import java.util.Date
+import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.setMain
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
-import java.util.*
 
 internal class NStackTest {
 
@@ -71,7 +95,14 @@ internal class NStackTest {
         NStack.onAppUpdateListener = { updated = true }
         NStack.appOpen { }
 
-        verify { networkManagerMock.postAppOpen(appOpenSettings, any(), capture(successCallbackSlot), any()) }
+        verify {
+            networkManagerMock.postAppOpen(
+                appOpenSettings,
+                any(),
+                capture(successCallbackSlot),
+                any()
+            )
+        }
 
         successCallbackSlot.captured(appUpdateDate)
         verify { appOpenSettingsManagerMock.setUpdateDate() }
@@ -103,8 +134,20 @@ internal class NStackTest {
         val loadTranslations1Slot = slot<(String) -> Unit>()
         val loadTranslations2Slot = slot<(String) -> Unit>()
 
-        verify { networkManagerMock.loadTranslation(languageIndex1.url, capture(loadTranslations1Slot), any()) }
-        verify { networkManagerMock.loadTranslation(languageIndex2.url, capture(loadTranslations2Slot), any()) }
+        verify {
+            networkManagerMock.loadTranslation(
+                languageIndex1.url,
+                capture(loadTranslations1Slot),
+                any()
+            )
+        }
+        verify {
+            networkManagerMock.loadTranslation(
+                languageIndex2.url,
+                capture(loadTranslations2Slot),
+                any()
+            )
+        }
         verify(exactly = 0) { networkManagerMock.loadTranslation(languageIndex3.url, any(), any()) }
 
         loadTranslations1Slot.captured(translations1)
@@ -132,7 +175,14 @@ internal class NStackTest {
         NStack.onAppUpdateListener = { updated = true }
         NStack.appOpen { }
 
-        verify { networkManagerMock.postAppOpen(appOpenSettings, any(), any(), capture(errorCallbackSlot)) }
+        verify {
+            networkManagerMock.postAppOpen(
+                appOpenSettings,
+                any(),
+                any(),
+                capture(errorCallbackSlot)
+            )
+        }
         errorCallbackSlot.captured(RuntimeException())
 
         assert(updated)
@@ -208,7 +258,8 @@ internal class NStackTest {
         private val nstackMeta = mockk<NStackMeta>()
         private val clientAppInfoMock = mockk<ClientAppInfo>()
         private val viewTranslationManagerMock = mockk<ViewTranslationManager>(relaxUnitFun = true)
-        private val classTranslationManagerMock = mockk<ClassTranslationManager>(relaxUnitFun = true)
+        private val classTranslationManagerMock =
+            mockk<ClassTranslationManager>(relaxUnitFun = true)
         private val connectionManagerMock = mockk<ConnectionManager>()
         private val networkManagerMock = mockk<NetworkManager>(relaxUnitFun = true)
         private val contextWrapperMock = mockk<ContextWrapper>(relaxUnitFun = true)
@@ -225,20 +276,28 @@ internal class NStackTest {
         private const val oldVersion = "oldVersion"
         private val lastUpdated = Date()
         private val appOpenSettings = AppOpenSettings(
-                guid = guid,
-                version = version,
-                oldVersion = oldVersion,
-                lastUpdated = lastUpdated
+            guid = guid,
+            version = version,
+            oldVersion = oldVersion,
+            lastUpdated = lastUpdated
         )
 
-        private val language1 = Language(0, "", Locale.ENGLISH, "", isDefault = false, isBestFit = false)
-        private val language2 = Language(0, "", Locale.GERMAN, "", isDefault = true, isBestFit = false)
-        private val language3 = Language(0, "", Locale.FRENCH, "", isDefault = false, isBestFit = false)
-        private val languageIndex1 = LocalizeIndex(0, "url1", Date(), shouldUpdate = true, language = language1)
-        private val languageIndex2 = LocalizeIndex(0, "url2", Date(), shouldUpdate = true, language = language2)
-        private val languageIndex3 = LocalizeIndex(0, "url3", Date(), shouldUpdate = false, language = language3)
-        private val appUpdateDate = AppUpdateData(localize = listOf(languageIndex1, languageIndex2, languageIndex3))
-        private val appUpdateResponse = AppUpdateResponse(appUpdateDate, AppUpdateMeta(language1.locale.toString()))
+        private val language1 =
+            Language(0, "", Locale.ENGLISH, "", isDefault = false, isBestFit = false)
+        private val language2 =
+            Language(0, "", Locale.GERMAN, "", isDefault = true, isBestFit = false)
+        private val language3 =
+            Language(0, "", Locale.FRENCH, "", isDefault = false, isBestFit = false)
+        private val languageIndex1 =
+            LocalizeIndex(0, "url1", Date(), shouldUpdate = true, language = language1)
+        private val languageIndex2 =
+            LocalizeIndex(0, "url2", Date(), shouldUpdate = true, language = language2)
+        private val languageIndex3 =
+            LocalizeIndex(0, "url3", Date(), shouldUpdate = false, language = language3)
+        private val appUpdateDate =
+            AppUpdateData(localize = listOf(languageIndex1, languageIndex2, languageIndex3))
+        private val appUpdateResponse =
+            AppUpdateResponse(appUpdateDate, AppUpdateMeta(language1.locale.toString()))
 
         private val locale1 = Locale("it-IT")
         private val translations1 = mockk<JSONObject>()
@@ -248,12 +307,13 @@ internal class NStackTest {
 
         private val locale3 = Locale.getDefault()
         // private val translations3 = mockk<JSONObject>()
-        private val translations3 = JSONObject("{\"default\":{\"hi\":\"Hi\",\"cancel\":\"Canceler\",\"no\":\"No\",\"yes\":\"Yes\",\"edit\":\"Edit\",\"next\":\"Next\",\"on\":\"On\",\"off\":\"Off\",\"ok\":\"Ok\"},\"errorBody\":{\"errorRandom\":\"Totally random errorBody\",\"errorTitle\":\"Error\",\"authenticationError\":\"Login expired, please login again.\",\"connectionError\":\"No or bad connection, please try again.\",\"unknownError\":\"Unknown errorBody, please try again.\"},\"test\":{\"title\":\"NStack Demo\",\"message\":\"Bacon ipsum dolor amet magna meatball jerky in, shank sunt do burgdoggen spare ribs. Lorem boudin eiusmod short ribs pastrami. Sausage bresaola do turkey, dolor qui tail ground round culpa boudin nulla minim sunt beef ribs ham. Cillum in pastrami adipisicing swine lorem, velit sunt meatloaf bresaola short loin fugiat tri-tip boudin.\",\"subTitle\":\"Subtitle demo\",\"on\":\"on\",\"off\":\"off\"}}")
+        private val translations3 =
+            JSONObject("{\"default\":{\"hi\":\"Hi\",\"cancel\":\"Canceler\",\"no\":\"No\",\"yes\":\"Yes\",\"edit\":\"Edit\",\"next\":\"Next\",\"on\":\"On\",\"off\":\"Off\",\"ok\":\"Ok\"},\"errorBody\":{\"errorRandom\":\"Totally random errorBody\",\"errorTitle\":\"Error\",\"authenticationError\":\"Login expired, please login again.\",\"connectionError\":\"No or bad connection, please try again.\",\"unknownError\":\"Unknown errorBody, please try again.\"},\"test\":{\"title\":\"NStack Demo\",\"message\":\"Bacon ipsum dolor amet magna meatball jerky in, shank sunt do burgdoggen spare ribs. Lorem boudin eiusmod short ribs pastrami. Sausage bresaola do turkey, dolor qui tail ground round culpa boudin nulla minim sunt beef ribs ham. Cillum in pastrami adipisicing swine lorem, velit sunt meatloaf bresaola short loin fugiat tri-tip boudin.\",\"subTitle\":\"Subtitle demo\",\"on\":\"on\",\"off\":\"off\"}}")
 
         private val translations = mapOf(
-                locale1 to translations1,
-                locale2 to translations2,
-                locale3 to translations3
+            locale1 to translations1,
+            locale2 to translations2,
+            locale3 to translations3
         )
 
         private var languagesChanged = false

@@ -1,18 +1,31 @@
 package dk.nodes.nstack.lint
 
 import com.android.tools.lint.client.api.UElementHandler
-import com.android.tools.lint.detector.api.*
+import com.android.tools.lint.detector.api.Context
+import com.android.tools.lint.detector.api.Detector
+import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.LintFix
+import com.android.tools.lint.detector.api.Location
+import com.android.tools.lint.detector.api.XmlContext
 import com.android.xml.AndroidManifest
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
-import dk.nodes.nstack.lint.issues.*
-import org.jetbrains.uast.*
+import dk.nodes.nstack.lint.issues.AppOpenMissingIssue
+import dk.nodes.nstack.lint.issues.NStackHardcodedIssue
+import dk.nodes.nstack.lint.issues.NStackTestIssue
+import dk.nodes.nstack.lint.issues.TextViewSetterIssue
+import dk.nodes.nstack.lint.issues.VersionControlIssue
+import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UElement
+import org.jetbrains.uast.ULiteralExpression
+import org.jetbrains.uast.UReferenceExpression
+import org.jetbrains.uast.getValueIfStringLiteral
 import org.w3c.dom.Element
 
 class NStackIssuesDetector :
-        Detector(),
-        Detector.UastScanner,
-        Detector.XmlScanner {
+    Detector(),
+    Detector.UastScanner,
+    Detector.XmlScanner {
 
     private var appOpenCalled: Boolean = false
     private var nstackInitLocation: Location? = null
@@ -28,9 +41,17 @@ class NStackIssuesDetector :
         // When all methods/classes visited check if we required methods were implemented
         nstackInitLocation?.let { initLocation ->
             when {
-                !appOpenCalled -> context.report(AppOpenMissingIssue.ISSUE, initLocation, "AppOpen is not called")
+                !appOpenCalled -> context.report(
+                    AppOpenMissingIssue.ISSUE,
+                    initLocation,
+                    "AppOpen is not called"
+                )
                 !versionControlUsed -> {
-                    context.report(VersionControlIssue.ISSUE, initLocation, "onAppUpdateListener is not called")
+                    context.report(
+                        VersionControlIssue.ISSUE,
+                        initLocation,
+                        "onAppUpdateListener is not called"
+                    )
                 }
             }
         }
@@ -42,8 +63,9 @@ class NStackIssuesDetector :
 
     override fun visitElement(context: XmlContext, element: Element) {
         // Don't check library manifests
-        if (context.project != context.mainProject
-                || context.mainProject.isLibrary) {
+        if (context.project != context.mainProject ||
+            context.mainProject.isLibrary
+        ) {
             return
         }
 
@@ -53,8 +75,17 @@ class NStackIssuesDetector :
                 val value = element.getAttributeNS(ANDROID_URI, AndroidManifest.ATTRIBUTE_VALUE)
                 val lastPathSegment = name.split(".").last()
                 if (!value.contains("\${")) {
-                    val fix: LintFix = fix().set(ANDROID_URI, AndroidManifest.ATTRIBUTE_VALUE, "\${$lastPathSegment}").build()
-                    context.report(NStackHardcodedIssue.ISSUE, context.getLocation(element), "You can not hardcoded NStack Environment variables", fix)
+                    val fix: LintFix = fix().set(
+                        ANDROID_URI,
+                        AndroidManifest.ATTRIBUTE_VALUE,
+                        "\${$lastPathSegment}"
+                    ).build()
+                    context.report(
+                        NStackHardcodedIssue.ISSUE,
+                        context.getLocation(element),
+                        "You can not hardcoded NStack Environment variables",
+                        fix
+                    )
                 }
             }
         }
@@ -75,7 +106,11 @@ class NStackIssuesDetector :
                 METHOD_SET_TEXT -> {
                     val caller = node.receiverType ?: return
                     if (caller.canonicalText == "android.widget.TextView") {
-                        context.report(TextViewSetterIssue.ISSUE, context.getLocation(node), "Found text view, fixsss setter")
+                        context.report(
+                            TextViewSetterIssue.ISSUE,
+                            context.getLocation(node),
+                            "Found text view, fixsss setter"
+                        )
                     }
                 }
                 METHOD_APP_OPEN -> {
@@ -84,7 +119,6 @@ class NStackIssuesDetector :
 
                 METHOD_INIT -> {
                     nstackInitLocation = context.getLocation(node)
-
                 }
             }
         }
@@ -94,8 +128,11 @@ class NStackIssuesDetector :
         return listOf(REFERENCE_VERSION_CONTROL)
     }
 
-
-    override fun visitReference(context: JavaContext, reference: UReferenceExpression, referenced: PsiElement) {
+    override fun visitReference(
+        context: JavaContext,
+        reference: UReferenceExpression,
+        referenced: PsiElement
+    ) {
         when (reference.resolvedName) {
             REFERENCE_VERSION_CONTROL -> {
                 versionControlUsed = true
@@ -117,8 +154,10 @@ class NStackIssuesDetector :
                 val string = expression.getValueIfStringLiteral() ?: return
 
                 if (string.contains("lint") && string!!.matches(".*\\blint\\b.*".toRegex())) {
-                    context.report(NStackTestIssue.ISSUE, expression, context.getLocation(expression),
-                            "This code mentions `lint`: **Congratulations**")
+                    context.report(
+                        NStackTestIssue.ISSUE, expression, context.getLocation(expression),
+                        "This code mentions `lint`: **Congratulations**"
+                    )
                 }
             }
         }
@@ -126,11 +165,11 @@ class NStackIssuesDetector :
 
     companion object {
         val ISSUES = listOf(
-                NStackTestIssue.ISSUE,
-                TextViewSetterIssue.ISSUE,
-                AppOpenMissingIssue.ISSUE,
-                VersionControlIssue.ISSUE,
-                NStackHardcodedIssue.ISSUE
+            NStackTestIssue.ISSUE,
+            TextViewSetterIssue.ISSUE,
+            AppOpenMissingIssue.ISSUE,
+            VersionControlIssue.ISSUE,
+            NStackHardcodedIssue.ISSUE
         )
         // Methods
         private const val METHOD_SET_TEXT = "setText"
@@ -140,16 +179,12 @@ class NStackIssuesDetector :
         // REFERENCES
         private const val REFERENCE_VERSION_CONTROL = "onAppUpdateListener"
 
-        //TAGS
+        // TAGS
         private const val TAG_META_DATA = "meta-data"
-
 
         private const val NSTACK_APP_ID = "dk.nodes.nstack.appId"
         private const val NSTACK_API_KEY = "dk.nodes.nstack.apiKey"
         private const val NSTACK_ENV = "dk.nodes.nstack.env"
         private const val ANDROID_URI = "http://schemas.android.com/apk/res/android"
-
-
     }
-
 }

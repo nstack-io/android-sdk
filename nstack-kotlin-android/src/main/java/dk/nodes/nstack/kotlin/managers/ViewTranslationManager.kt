@@ -9,9 +9,9 @@ import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
-import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
+import org.json.JSONObject
 
 internal class ViewTranslationManager(private val translationHolder: TranslationHolder) :
     NStackViewPlugin {

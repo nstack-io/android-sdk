@@ -2,14 +2,27 @@ package dk.nodes.nstack.kotlin.managers
 
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
-import dk.nodes.nstack.kotlin.models.*
+import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppUpdateData
+import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.Feedback
+import dk.nodes.nstack.kotlin.models.Proposal
+import dk.nodes.nstack.kotlin.models.RateReminder2
+import dk.nodes.nstack.kotlin.models.TermDetailsResponse
+import dk.nodes.nstack.kotlin.models.TermsDetails
 import dk.nodes.nstack.kotlin.provider.GsonProvider
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
-import okhttp3.*
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.*
-
+import java.util.Date
+import java.util.Locale
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 
 class NetworkManager(
     private val client: OkHttpClient,
@@ -253,8 +266,8 @@ class NetworkManager(
                     val responseString = response.body()?.string()
                     val listType = object : TypeToken<List<Proposal>>() {}.type
                     val proposals = gson.fromJson<List<Proposal>>(
-                            responseString?.asJsonObject?.get("data")!!,
-                            listType
+                        responseString?.asJsonObject?.get("data")!!,
+                        listType
                     )
                     onSuccess(proposals)
                 } catch (e: Exception) {
@@ -265,17 +278,17 @@ class NetworkManager(
     }
 
     fun getLatestTerms(
-            termsID: Long,
-            acceptLanguage: String,
-            settings: AppOpenSettings,
-            onSuccess: (TermsDetails) -> Unit,
-            onError: (Exception) -> Unit
+        termsID: Long,
+        acceptLanguage: String,
+        settings: AppOpenSettings,
+        onSuccess: (TermsDetails) -> Unit,
+        onError: (Exception) -> Unit
     ) {
         val request = Request.Builder()
-                .url("$baseUrl/api/v2/content/terms/$termsID/versions/newest?guid=${settings.guid}")
-                .header("Accept-Language", acceptLanguage)
-                .get()
-                .build()
+            .url("$baseUrl/api/v2/content/terms/$termsID/versions/newest?guid=${settings.guid}")
+            .header("Accept-Language", acceptLanguage)
+            .get()
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -295,17 +308,17 @@ class NetworkManager(
     }
 
     fun getTerms(
-            versionID : Long,
-            settings: AppOpenSettings,
-            acceptLanguage: String,
-            onSuccess: (TermsDetails) -> Unit,
-            onError: (Exception) -> Unit
+        versionID: Long,
+        settings: AppOpenSettings,
+        acceptLanguage: String,
+        onSuccess: (TermsDetails) -> Unit,
+        onError: (Exception) -> Unit
     ) {
         val request = Request.Builder()
-                .url("$baseUrl/api/v2/content/terms/versions/$versionID?guid=${settings.guid}")
-                .header("Accept-Language", acceptLanguage)
-                .get()
-                .build()
+            .url("$baseUrl/api/v2/content/terms/versions/$versionID?guid=${settings.guid}")
+            .header("Accept-Language", acceptLanguage)
+            .get()
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -324,38 +337,40 @@ class NetworkManager(
         })
     }
 
-    fun setTermsViewed(versionID: Long,
-                       userID: String,
-                       locale: String,
-                       settings: AppOpenSettings,
-                       onSuccess: () -> Unit,
-                       onError: (Exception) -> Unit) {
+    fun setTermsViewed(
+        versionID: Long,
+        userID: String,
+        locale: String,
+        settings: AppOpenSettings,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
 
         val requestBody = FormBody.Builder()
-                .add("guid", settings.guid)
-                .add("term_version_id", versionID.toString())
-                .add("identifier", userID)
-                .add("locale", locale)
-                .build()
+            .add("guid", settings.guid)
+            .add("term_version_id", versionID.toString())
+            .add("identifier", userID)
+            .add("locale", locale)
+            .build()
 
         val request = Request.Builder()
-                .url("$baseUrl/api/v2/content/terms/versions/views")
-                .post(requestBody)
-                .build()
+            .url("$baseUrl/api/v2/content/terms/versions/views")
+            .post(requestBody)
+            .build()
 
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    onError(e)
-                }
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                onError(e)
+            }
 
-                override fun onResponse(call: Call, response: Response) {
-                    if (response.isSuccessful) {
-                        onSuccess()
-                    } else {
-                        onError(IllegalStateException(response.message()))
-                    }
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onError(IllegalStateException(response.message()))
                 }
-            })
+            }
+        })
     }
 
     val String.asJsonObject: JsonObject?
@@ -395,7 +410,7 @@ class NetworkManager(
         FormBody.Builder().also {
             it["guid"] = settings.guid
             it["answer"] = answer
-        }.post("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminderId}/answers")
+        }.post("$baseUrl/api/v2/notify/rate_reminder_v2/$rateReminderId/answers")
     }
 
     suspend fun postFeedback(feedback: Feedback) {

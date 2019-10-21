@@ -78,7 +78,7 @@ internal class ProposalsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(
          * @value the translated text
          * @local the translation locale
          */
-        data class Row(val id: Long, val value: String, val locale : String) : Item()
+        data class Row(val id: Long, val value: String, val locale: String) : Item()
     }
 
     companion object {

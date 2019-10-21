@@ -2,11 +2,11 @@ package dk.nodes.nstack.kotlin.util.extensions
 
 import android.view.View
 import android.view.ViewGroup
-import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import org.json.JSONObject
 
 // Extension
 

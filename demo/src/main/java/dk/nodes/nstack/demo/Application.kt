@@ -23,7 +23,7 @@ class Application : Application() {
 
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
-                when (val result : AppOpenResult = NStack.appOpen()) {
+                when (val result: AppOpenResult = NStack.appOpen()) {
                     is AppOpenResult.Success -> {
                         Log.d("AppOpenResult", result.toString())
                     }

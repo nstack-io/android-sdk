@@ -11,7 +11,7 @@ class TermsViewModel : ViewModel() {
 
     private val viewStateInternal: MutableLiveData<TermsViewState> = MutableLiveData()
 
-    val viewState : LiveData<TermsViewState> = viewStateInternal
+    val viewState: LiveData<TermsViewState> = viewStateInternal
 
     init {
         viewStateInternal.value = TermsViewState(

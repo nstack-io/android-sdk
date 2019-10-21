@@ -5,11 +5,9 @@ import com.android.tools.lint.detector.api.Implementation
 import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
-
 import dk.nodes.nstack.lint.NStackIssuesDetector
 
 object TextViewSetterIssue {
-
 
     private const val ID = "TextViewSetter"
     private const val DESCRIPTION = "Setting a TextView's text"
@@ -29,5 +27,4 @@ object TextViewSetterIssue {
             Implementation(
                     NStackIssuesDetector::class.java,
                     Scope.JAVA_FILE_SCOPE))
-
 }
