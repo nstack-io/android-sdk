@@ -47,8 +47,8 @@ captures/
 .idea/inspectionProfiles/*
 
 # Exclude following files from the previous two directories from being ignored
-!.idea/codeStyles/Project.xml
 !.idea/codeStyles/codeStyleConfig.xml
+!.idea/inspectionProfiles/profiles_settings.xml
 !.idea/inspectionProfiles/ktlint.xml
 
 # Keystore files
