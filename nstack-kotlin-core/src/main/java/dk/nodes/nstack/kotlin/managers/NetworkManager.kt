@@ -6,12 +6,15 @@ import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.Empty
+import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.Proposal
 import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.models.TermDetailsResponse
 import dk.nodes.nstack.kotlin.models.TermsDetails
 import dk.nodes.nstack.kotlin.provider.GsonProvider
+import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import java.io.IOException
 import java.text.SimpleDateFormat
