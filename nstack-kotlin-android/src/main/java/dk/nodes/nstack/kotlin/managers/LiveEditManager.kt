@@ -14,6 +14,7 @@ import android.widget.ToggleButton
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.textfield.TextInputLayout
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.NStackException
@@ -175,6 +176,13 @@ internal class LiveEditManager(
                                 when (keyAndTranslation.styleable) {
                                     StyleableEnum.Title -> view.title = editedTranslation
                                     StyleableEnum.Subtitle -> view.subtitle = editedTranslation
+                                    else -> {
+                                    }
+                                }
+                            }
+                            is TextInputLayout -> {
+                                when (keyAndTranslation.styleable) {
+                                    StyleableEnum.Hint -> view.hint = editedTranslation
                                     else -> {
                                     }
                                 }
