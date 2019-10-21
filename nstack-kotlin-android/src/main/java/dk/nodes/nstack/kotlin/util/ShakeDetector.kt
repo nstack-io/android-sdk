@@ -5,7 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import java.util.*
+import java.util.ArrayList
 
 /**
  * Detects phone shaking. If more than 75% of the samples taken in the past 0.5s are
@@ -47,13 +47,16 @@ internal class ShakeDetector(private val listener: Listener) : SensorEventListen
         }
 
         accelerometer = sensorManager.getDefaultSensor(
-                Sensor.TYPE_ACCELEROMETER)
+            Sensor.TYPE_ACCELEROMETER
+        )
 
         // If this phone has an accelerometer, listen to it.
         if (accelerometer != null) {
             this.sensorManager = sensorManager
-            sensorManager.registerListener(this, accelerometer,
-                    SensorManager.SENSOR_DELAY_FASTEST)
+            sensorManager.registerListener(
+                this, accelerometer,
+                SensorManager.SENSOR_DELAY_FASTEST
+            )
         }
         return accelerometer != null
     }
@@ -115,9 +118,9 @@ internal class ShakeDetector(private val listener: Listener) : SensorEventListen
          */
         val isShaking: Boolean
             get() = (newest != null &&
-                    oldest != null &&
-                    newest!!.timestamp - oldest!!.timestamp >= MIN_WINDOW_SIZE &&
-                    acceleratingCount >= (sampleCount shr 1) + (sampleCount shr 2))
+                oldest != null &&
+                newest!!.timestamp - oldest!!.timestamp >= MIN_WINDOW_SIZE &&
+                acceleratingCount >= (sampleCount shr 1) + (sampleCount shr 2))
 
         /**
          * Adds a sample.
@@ -164,7 +167,8 @@ internal class ShakeDetector(private val listener: Listener) : SensorEventListen
         /** Purges samples with timestamps older than cutoff.  */
         fun purge(cutoff: Long) {
             while (sampleCount >= MIN_QUEUE_SIZE &&
-                    oldest != null && cutoff - oldest!!.timestamp > 0) {
+                oldest != null && cutoff - oldest!!.timestamp > 0
+            ) {
                 // Remove sample.
                 val removed = oldest
                 if (removed!!.accelerating) {

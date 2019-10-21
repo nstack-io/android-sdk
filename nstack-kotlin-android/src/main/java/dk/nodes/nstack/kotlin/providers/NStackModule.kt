@@ -14,9 +14,9 @@ import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.NStackMeta
 import dk.nodes.nstack.kotlin.provider.HttpClientProvider
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.PreferencesImpl
+import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import kotlin.reflect.KClass
 
 /**

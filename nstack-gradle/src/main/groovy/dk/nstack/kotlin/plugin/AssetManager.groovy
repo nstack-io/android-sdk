@@ -8,8 +8,8 @@ class AssetManager {
     public static final String DIRECTORY_PATH_ASSETS = "${File.separator}src${File.separator}main${File.separator}assets"
 
     /**
-     * Creates our assets folder to be used for downloading and storing our translation files
-     */
+    * Creates our assets folder to be used for downloading and storing our translation files
+    */
 
     private static void checkIfAssetsFolderExists() {
         Log.info("Creating Assets Folder")

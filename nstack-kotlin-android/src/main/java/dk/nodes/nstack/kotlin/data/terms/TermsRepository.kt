@@ -7,8 +7,8 @@ import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.Preferences
 
 internal class TermsRepository(
-        private val preferences: Preferences,
-        private val gson: Gson
+    private val preferences: Preferences,
+    private val gson: Gson
 ) {
 
     private val gsonLatestTermsType = object : TypeToken<List<Terms>>() {}.type
