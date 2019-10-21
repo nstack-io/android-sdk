@@ -22,7 +22,7 @@ internal class ViewTranslationManager(private val translationHolder: Translation
      *
      * We shouldn't need a lock when using the ConcurrentHashMap
      */
-    private var viewMap: ConcurrentHashMap<WeakReference<View>, TranslationData> =
+    private val viewMap: ConcurrentHashMap<WeakReference<View>, TranslationData> =
         ConcurrentHashMap()
 
     /**
