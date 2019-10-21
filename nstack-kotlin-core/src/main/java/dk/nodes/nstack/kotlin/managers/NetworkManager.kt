@@ -6,12 +6,15 @@ import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.Empty
+import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.Proposal
 import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.models.TermDetailsResponse
 import dk.nodes.nstack.kotlin.models.TermsDetails
 import dk.nodes.nstack.kotlin.provider.GsonProvider
+import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -277,100 +280,56 @@ class NetworkManager(
         })
     }
 
-    fun getLatestTerms(
-        termsID: Long,
-        acceptLanguage: String,
-        settings: AppOpenSettings,
-        onSuccess: (TermsDetails) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
+    suspend fun getLatestTerms(
+            termsID: Long,
+            acceptLanguage: String,
+            settings: AppOpenSettings
+    ): Result<TermsDetails> = try {
         val request = Request.Builder()
-            .url("$baseUrl/api/v2/content/terms/$termsID/versions/newest?guid=${settings.guid}")
-            .header("Accept-Language", acceptLanguage)
-            .get()
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                onError(e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                try {
-                    val responseString = response.body()?.string()
-                    val result = gson.fromJson(responseString, TermDetailsResponse::class.java)
-                    onSuccess(result.data)
-                } catch (e: Exception) {
-                    onError(e)
-                }
-            }
-        })
+                .url("$baseUrl/api/v2/content/terms/$termsID/versions/newest?guid=${settings.guid}")
+                .header("Accept-Language", acceptLanguage)
+                .get()
+                .build()
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            val responseString = response.body()?.string()
+            val result = gson.fromJson(responseString, TermDetailsResponse::class.java)
+            Result.Success(value = result.data)
+        } else {
+            Result.Error(Error.ApiError(errorCode = response.code()))
+        }
+    } catch (e: IOException) {
+        Result.Error(Error.NetworkError)
+    } catch (e: Exception) {
+        Result.Error(Error.UnknownError)
     }
 
-    fun getTerms(
-        versionID: Long,
-        settings: AppOpenSettings,
-        acceptLanguage: String,
-        onSuccess: (TermsDetails) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        val request = Request.Builder()
-            .url("$baseUrl/api/v2/content/terms/versions/$versionID?guid=${settings.guid}")
-            .header("Accept-Language", acceptLanguage)
-            .get()
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                onError(e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                try {
-                    val responseString = response.body()?.string()
-                    val result = gson.fromJson(responseString, TermDetailsResponse::class.java)
-                    onSuccess(result.data)
-                } catch (e: Exception) {
-                    onError(e)
-                }
-            }
-        })
-    }
-
-    fun setTermsViewed(
-        versionID: Long,
-        userID: String,
-        locale: String,
-        settings: AppOpenSettings,
-        onSuccess: () -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-
+    suspend fun setTermsViewed(
+            versionID: Long,
+            userID: String,
+            locale: String,
+            settings: AppOpenSettings
+    ): Result<Empty> = try {
         val requestBody = FormBody.Builder()
-            .add("guid", settings.guid)
-            .add("term_version_id", versionID.toString())
-            .add("identifier", userID)
-            .add("locale", locale)
-            .build()
-
+                .add("guid", settings.guid)
+                .add("term_version_id", versionID.toString())
+                .add("identifier", userID)
+                .add("locale", locale)
+                .build()
         val request = Request.Builder()
-            .url("$baseUrl/api/v2/content/terms/versions/views")
-            .post(requestBody)
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                onError(e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    onSuccess()
-                } else {
-                    onError(IllegalStateException(response.message()))
-                }
-            }
-        })
+                .url("$baseUrl/api/v2/content/terms/versions/views")
+                .post(requestBody)
+                .build()
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            Result.Success(value = Empty)
+        } else {
+            Result.Error(Error.ApiError(errorCode = response.code()))
+        }
+    } catch (e: IOException) {
+        Result.Error(Error.NetworkError)
+    } catch (e: Exception) {
+        Result.Error(Error.UnknownError)
     }
 
     val String.asJsonObject: JsonObject?
