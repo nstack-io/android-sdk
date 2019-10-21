@@ -28,56 +28,60 @@ class TermsViewModel : ViewModel() {
         )
     }
 
-    fun loadTerms(termsID: Long) = viewModelScope.launch {
-        viewStateInternal.value = viewStateInternal.value?.copy(
+    fun loadTerms(termsID: Long) {
+        viewModelScope.launch {
+            viewStateInternal.value = viewStateInternal.value?.copy(
                 isLoading = true
-        )
-        when (val result = withContext(Dispatchers.IO) {
-            NStack.Terms.getTermsDetails(
-                    termsID = termsID
             )
-        }) {
-            is Result.Success -> {
-                termVersionID = result.value.versionID
-                viewStateInternal.value = viewStateInternal.value?.copy(
+            when (val result = withContext(Dispatchers.IO) {
+                NStack.Terms.getTermsDetails(
+                    termsID = termsID
+                )
+            }) {
+                is Result.Success -> {
+                    termVersionID = result.value.versionID
+                    viewStateInternal.value = viewStateInternal.value?.copy(
                         isLoading = false,
                         errorMessage = null,
                         termsName = result.value.versionName,
                         termsContent = result.value.content.data,
                         isAccepted = result.value.hasViewed
-                )
-            }
-            is Result.Error -> {
-                viewStateInternal.value = viewStateInternal.value?.copy(
+                    )
+                }
+                is Result.Error -> {
+                    viewStateInternal.value = viewStateInternal.value?.copy(
                         isLoading = false,
                         errorMessage = result.error.toString()
-                )
+                    )
+                }
             }
         }
     }
 
-    fun acceptTerms() = viewModelScope.launch {
-        viewStateInternal.value = viewStateInternal.value?.copy(
+    fun acceptTerms() {
+        viewModelScope.launch {
+            viewStateInternal.value = viewStateInternal.value?.copy(
                 isLoading = true
-        )
-        when (val result = withContext(Dispatchers.IO) {
-            NStack.Terms.setTermsViewed(
+            )
+            when (val result = withContext(Dispatchers.IO) {
+                NStack.Terms.setTermsViewed(
                     versionID = termVersionID,
                     userID = "unknown"
-            )
-        }) {
-            is Result.Success -> {
-                viewStateInternal.value = viewStateInternal.value?.copy(
+                )
+            }) {
+                is Result.Success -> {
+                    viewStateInternal.value = viewStateInternal.value?.copy(
                         isLoading = false,
                         errorMessage = null,
                         isAccepted = true
-                )
-            }
-            is Result.Error -> {
-                viewStateInternal.value = viewStateInternal.value?.copy(
+                    )
+                }
+                is Result.Error -> {
+                    viewStateInternal.value = viewStateInternal.value?.copy(
                         isLoading = false,
                         errorMessage = result.error.toString()
-                )
+                    )
+                }
             }
         }
     }
