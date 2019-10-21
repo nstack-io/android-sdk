@@ -8,8 +8,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 230
-        versionName "2.3.0"
-        manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder"]
+        versionName VERSION_NAME
+        manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder", env: "production"]
         buildConfigField "String", "SDK_VERSION", "\"$VERSION_NAME\""
     }
 }

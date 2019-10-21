@@ -1,7 +1,9 @@
 package dk.nodes.nstack.kotlin
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.preference.PreferenceManager
 import android.util.Log
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
@@ -30,8 +32,6 @@ import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
-import java.util.Date
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
@@ -40,6 +40,8 @@ import org.json.JSONObject
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import java.util.Date
+import java.util.Locale
 
 internal class NStackTest {
 
@@ -64,52 +66,6 @@ internal class NStackTest {
 
         verify { classTranslationManagerMock.parseTranslations(translations3) }
         assert(currentLanguage == locale3)
-    }
-
-    @Test
-    fun `Test app open without internet connection`() {
-        every { connectionManagerMock.isConnected } returns false
-
-        var updated = false
-        NStack.onAppUpdateListener = { updated = true }
-
-        NStack.appOpen { }
-
-        assert(updated)
-
-        NStack.onAppUpdateListener = null
-    }
-
-    @Test
-    fun `Test app open with internet connection`() {
-        var updated = false
-        val translations1 = "translations1"
-        val translations2 = "translations2"
-
-        val successCallbackSlot = slot<(AppUpdateData) -> Unit>()
-
-        every { connectionManagerMock.isConnected } returns true
-        coEvery { networkManagerMock.loadTranslation(languageIndex1.url) } returns translations1
-        coEvery { networkManagerMock.loadTranslation(languageIndex2.url) } returns translations2
-
-        NStack.onAppUpdateListener = { updated = true }
-        NStack.appOpen { }
-
-        verify {
-            networkManagerMock.postAppOpen(
-                appOpenSettings,
-                any(),
-                capture(successCallbackSlot),
-                any()
-            )
-        }
-
-        successCallbackSlot.captured(appUpdateDate)
-        verify { appOpenSettingsManagerMock.setUpdateDate() }
-
-        verifyLanguageIndicesAreHandled()
-
-        assert(updated)
     }
 
     @Test
@@ -161,31 +117,6 @@ internal class NStackTest {
         uiActionSlot.captured()
 
         assert(NStack.defaultLanguage == language2.locale)
-
-        NStack.onAppUpdateListener = null
-    }
-
-    @Test
-    fun `Test app open error`() {
-        var updated = false
-        val errorCallbackSlot = slot<(Exception) -> Unit>()
-
-        every { connectionManagerMock.isConnected } returns true
-
-        NStack.onAppUpdateListener = { updated = true }
-        NStack.appOpen { }
-
-        verify {
-            networkManagerMock.postAppOpen(
-                appOpenSettings,
-                any(),
-                any(),
-                capture(errorCallbackSlot)
-            )
-        }
-        errorCallbackSlot.captured(RuntimeException())
-
-        assert(updated)
 
         NStack.onAppUpdateListener = null
     }
@@ -345,6 +276,9 @@ internal class NStackTest {
 
             every { appOpenSettingsManagerMock.getAppOpenSettings() } returns appOpenSettings
             mockkStatic(Log::class)
+            mockkStatic(PreferenceManager::class)
+            every { PreferenceManager.getDefaultSharedPreferences(any()) } returns mockk(relaxed = true)
+            every { contextMock.applicationContext } returns mockk<Application>(relaxed = true)
             every { Log.e(any(), any()) } returns 0
             every { Log.e(any(), any(), any()) } returns 0
 
