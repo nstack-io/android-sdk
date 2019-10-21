@@ -10,12 +10,6 @@ allprojects { ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile
 allprojects { ext."signing.password" = System.getenv('password') }
 
 // Artifact settings
-def _group = 'dk.nodes.nstack'
-def _version = '3.1.0'
-def _archivesBaseName = 'translation'
-
-def _name = 'NStack Gradle Plugin'
-def _description = 'Gradle extensions for NStack.io translations'
 
 nexusStaging {
     packageGroup = "dk.nodes"
@@ -28,7 +22,7 @@ signing {
 
 jar {
     manifest {
-        attributes 'Implementation-Title': _name, 'Implementation-Version': _version
+        attributes 'Implementation-Title': POM_NAME, 'Implementation-Version': VERSION_NAME
     }
 }
 
@@ -56,9 +50,9 @@ uploadArchives {
 
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            pom.groupId = _group
-            pom.artifactId = _archivesBaseName
-            pom.version = _version
+            pom.groupId = GROUP
+            pom.artifactId = POM_ARTIFACT_ID
+            pom.version = VERSION_NAME
 
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 authentication(userName: _ossrhUsername, password: _ossrhPassword)
@@ -69,10 +63,10 @@ uploadArchives {
             }
 
             pom.project {
-                name _name
-                packaging 'jar'
-                artifactId _archivesBaseName
-                description _description
+                name POM_NAME
+                packaging POM_PACKAGING
+                artifactId POM_ARTIFACT_ID
+                description POM_DESCRIPTION
                 url 'https://github.com/nodes-android/nstack-gradle'
                 inceptionYear '2015'
 

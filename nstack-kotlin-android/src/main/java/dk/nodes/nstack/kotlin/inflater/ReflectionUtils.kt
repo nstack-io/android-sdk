@@ -35,7 +35,7 @@ object ReflectionUtils {
     fun invokeMethod(obj: Any, method: Method?, vararg args: Any) {
         try {
             method?.invoke(obj, args)
-        } catch(e: Exception) {
+        } catch (e: Exception) {
         }
     }
 }

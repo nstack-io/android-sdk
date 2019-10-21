@@ -11,9 +11,9 @@ import java.util.Date
 import java.util.UUID
 
 internal class AppOpenSettingsManager(
-        private val clientAppInfo: ClientAppInfo,
-        private val preferences: Preferences,
-        var versionUpdateTestMode: Boolean = false
+    private val clientAppInfo: ClientAppInfo,
+    private val preferences: Preferences,
+    var versionUpdateTestMode: Boolean = false
 ) {
 
     fun getAppOpenSettings(): AppOpenSettings {

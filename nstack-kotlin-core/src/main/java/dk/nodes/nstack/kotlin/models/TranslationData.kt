@@ -24,5 +24,4 @@ data class TranslationData(
                 title == null &&
                 subtitle == null
             )
-
 }

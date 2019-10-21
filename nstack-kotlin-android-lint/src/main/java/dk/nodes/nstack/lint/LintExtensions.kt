@@ -1,15 +1,10 @@
 package dk.nodes.nstack.lint
 
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiClassType
-import com.intellij.psi.PsiType
-import org.jetbrains.uast.UExpression
-import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.client.api.JavaEvaluator
+import com.android.tools.lint.detector.api.JavaContext
+import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiMethod
-
-
-
+import org.jetbrains.uast.UExpression
 
 internal fun UExpression.isSubclassOf(context: JavaContext, cls: Class<*>): Boolean {
     val expressionType = getExpressionType()

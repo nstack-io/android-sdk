@@ -119,32 +119,6 @@ or take advantage of `Kotlin Coroutines` using `suspend` function:
 }
 ```
 
-## Version Control
-Version control will send the result from `appOpen` to the listener for the application to handle.
-Now it's up to the app to decide how you want to handle the app update status, meaning you must provide your own way to inform the user about the update (i.e. your custom dialog and e.t.c)
-
-> **Warning: You should set this before `appOpen`**
-
-```kotlin
-NStack.onAppUpdateListener = { appUpdate ->
-    when (appUpdate.state) {
-        AppUpdateState.NONE      -> {
-            // Do nothing because there is no update
-        }
-        AppUpdateState.UPDATE    -> {
-            // Show a user a dialog that is dismissible
-        }
-        AppUpdateState.FORCE     -> {
-            // Show the user an undismissable dialog
-        }
-        AppUpdateState.CHANGELOG -> {
-            // Show change log (Not yet implemented because its never used)
-        }
-    }
-}
-```
-
-
 
 ## Collections
 The purpose of the Collections feature in NStack is to enable you, as a client, to be able to control different data sets that are shown in the app. You can learn more about collections [here](https://nstack-io.github.io/documentation/docs/features/collections.html)

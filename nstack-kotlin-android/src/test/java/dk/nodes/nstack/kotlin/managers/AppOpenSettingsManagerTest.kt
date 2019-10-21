@@ -8,8 +8,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import org.junit.Test
 import java.util.Date
+import org.junit.Test
 
 internal class AppOpenSettingsManagerTest {
 

@@ -5,11 +5,9 @@ import com.android.tools.lint.detector.api.Implementation
 import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
-
 import dk.nodes.nstack.lint.NStackIssuesDetector
 
 object NStackTestIssue {
-
 
     private const val ID = "TestIssue"
     private const val DESCRIPTION = "Lint Mentions"
@@ -32,5 +30,4 @@ object NStackTestIssue {
             Implementation(
                     NStackIssuesDetector::class.java,
                     Scope.JAVA_FILE_SCOPE))
-
 }
