@@ -27,7 +27,6 @@ import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.AppUpdateData
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
@@ -168,11 +167,6 @@ object NStack {
                 networkLanguages ?: cacheLanguages
             }
         }
-
-    /**
-     * Listener specifically for listening for any app update events
-     */
-    var onAppUpdateListener: ((AppUpdateData) -> Unit)? = null
 
     // States
     /**

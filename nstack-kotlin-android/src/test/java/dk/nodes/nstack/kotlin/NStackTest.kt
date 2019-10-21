@@ -117,8 +117,6 @@ internal class NStackTest {
         uiActionSlot.captured()
 
         assert(NStack.defaultLanguage == language2.locale)
-
-        NStack.onAppUpdateListener = null
     }
 
     @Test

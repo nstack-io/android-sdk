@@ -14,7 +14,6 @@ import dk.nodes.nstack.lint.issues.AppOpenMissingIssue
 import dk.nodes.nstack.lint.issues.NStackHardcodedIssue
 import dk.nodes.nstack.lint.issues.NStackTestIssue
 import dk.nodes.nstack.lint.issues.TextViewSetterIssue
-import dk.nodes.nstack.lint.issues.VersionControlIssue
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.ULiteralExpression
@@ -29,11 +28,9 @@ class NStackIssuesDetector :
 
     private var appOpenCalled: Boolean = false
     private var nstackInitLocation: Location? = null
-    private var versionControlUsed: Boolean = false
 
     override fun beforeCheckRootProject(context: Context) {
         appOpenCalled = false
-        versionControlUsed = false
         nstackInitLocation = null
     }
 
@@ -46,13 +43,6 @@ class NStackIssuesDetector :
                     initLocation,
                     "AppOpen is not called"
                 )
-                !versionControlUsed -> {
-                    context.report(
-                        VersionControlIssue.ISSUE,
-                        initLocation,
-                        "onAppUpdateListener is not called"
-                    )
-                }
             }
         }
     }
@@ -125,7 +115,7 @@ class NStackIssuesDetector :
     }
 
     override fun getApplicableReferenceNames(): List<String>? {
-        return listOf(REFERENCE_VERSION_CONTROL)
+        return listOf()
     }
 
     override fun visitReference(
@@ -133,11 +123,7 @@ class NStackIssuesDetector :
         reference: UReferenceExpression,
         referenced: PsiElement
     ) {
-        when (reference.resolvedName) {
-            REFERENCE_VERSION_CONTROL -> {
-                versionControlUsed = true
-            }
-        }
+
     }
 
     override fun createUastHandler(context: JavaContext): UElementHandler? {
@@ -168,16 +154,12 @@ class NStackIssuesDetector :
             NStackTestIssue.ISSUE,
             TextViewSetterIssue.ISSUE,
             AppOpenMissingIssue.ISSUE,
-            VersionControlIssue.ISSUE,
             NStackHardcodedIssue.ISSUE
         )
         // Methods
         private const val METHOD_SET_TEXT = "setText"
         private const val METHOD_APP_OPEN = "appOpen"
         private const val METHOD_INIT = "init"
-
-        // REFERENCES
-        private const val REFERENCE_VERSION_CONTROL = "onAppUpdateListener"
 
         // TAGS
         private const val TAG_META_DATA = "meta-data"
