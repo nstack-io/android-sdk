@@ -174,7 +174,7 @@ internal class NStackLayoutInflater internal constructor(
      * Take our view strip whatever values were put into the XML and then add that to our NStack Translation Library Cache
      */
     private fun processView(name: String, context: Context, view: View, attrs: AttributeSet) {
-        if (name.contains("Layout")) return
+        if (name.contains("Layout") && !name.endsWith("TextInputLayout")) return
 
         operator fun TypedArray.get(i: Int): String? = getString(i)
 
