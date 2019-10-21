@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.ToggleButton
+import com.google.android.material.textfield.TextInputLayout
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import org.json.JSONObject
@@ -121,6 +122,11 @@ class ViewTranslationManager {
                 }
                 translatedDescription?.let {
                     view.contentDescription = it
+                }
+            }
+            is TextInputLayout -> {
+                translatedHint?.let {
+                    view.hint = it
                 }
             }
             else -> {
