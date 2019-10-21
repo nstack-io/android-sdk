@@ -170,7 +170,7 @@ internal class NStackLayoutInflater internal constructor(
             return
         }
 
-        if (name.contains("Layout")) return
+        if (name.contains("Layout") && !name.endsWith("TextInputLayout")) return
 
         // try to pull our value from it
 
