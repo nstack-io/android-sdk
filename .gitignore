@@ -36,12 +36,6 @@ captures/
 *.iml
 .idea/
 
-# Ktlint files
-!.idea/codeStyles/codeStyleConfig.xml
-!.idea/inspectionProfiles/profiles_settings.xml
-!.idea/inspectionProfiles/ktlint.xml
-
-
 # Keystore files
 # Uncomment the following line if you do not want to check your keystore files in.
 #*.jks
@@ -58,3 +52,8 @@ freeline/
 freeline_project_description.json
 
 sample/
+
+# Ktlint files
+!/.idea/codeStyles/Project.xml
+!/.idea/codeStyles/codeStyleConfig.xml
+!/.idea/inspectionProfiles/ktlint.xml
