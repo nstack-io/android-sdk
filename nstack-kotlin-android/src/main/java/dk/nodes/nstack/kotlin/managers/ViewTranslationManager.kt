@@ -4,6 +4,7 @@ import android.os.Handler
 import android.view.View
 import android.widget.TextView
 import android.widget.ToggleButton
+import com.google.android.material.textfield.TextInputLayout
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
@@ -127,6 +128,9 @@ internal class ViewTranslationManager(private val translationHolder: Translation
                 (translatedKey ?: translatedText)?.let(view::setText)
                 translatedHint?.let(view::setHint)
                 translatedDescription?.let(view::setContentDescription)
+            }
+            is TextInputLayout -> {
+                translatedHint?.let(view::setHint)
             }
         }
     }
