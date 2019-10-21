@@ -20,11 +20,11 @@ class TermsViewModel : ViewModel() {
 
     init {
         viewStateInternal.value = TermsViewState(
-                isLoading = false,
-                errorMessage = null,
-                termsName = null,
-                termsContent = null,
-                isAccepted = null
+            isLoading = false,
+            errorMessage = null,
+            termsName = null,
+            termsContent = null,
+            isAccepted = null
         )
     }
 
