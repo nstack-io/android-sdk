@@ -8,8 +8,10 @@ import dk.nodes.nstack.demo.BuildConfig
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.exceptions.FeedbackSendFailedException
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.Feedback
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeViewModel : ViewModel() {
 
@@ -26,6 +28,9 @@ class HomeViewModel : ViewModel() {
     }
 
     fun sendFeedbackWithScreenshot() {
+        viewStateInternal.value = viewStateInternal.value?.copy(
+            isLoading = true
+        )
         viewModelScope.launch {
             val screenshot = NStack.takeScreenshot()
 
@@ -41,7 +46,9 @@ class HomeViewModel : ViewModel() {
             )
 
             try {
-                NStack.sendFeedback(feedback)
+                withContext(Dispatchers.IO) {
+                    NStack.sendFeedback(feedback)
+                }
 
                 viewStateInternal.value = viewStateInternal.value?.copy(
                     isLoading = false,

@@ -34,6 +34,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun showViewState(state: HomeViewState) {
+        feedbackWithScreenshotButton.isEnabled = !state.isLoading
+
         if (state.isFeedbackSent == true) {
             showToast("Feedback sent, please check nstack.io")
         }
