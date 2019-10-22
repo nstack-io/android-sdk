@@ -7,5 +7,5 @@ data class Feedback(
     val name: String,
     val email: String,
     val message: String,
-    val image: ImageData?
+    val image: ImageData? // TODO: Maybe should be a flag like withScreenshot : Boolean
 )

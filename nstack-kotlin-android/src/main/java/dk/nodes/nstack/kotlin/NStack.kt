@@ -850,6 +850,8 @@ object NStack {
      * recreate the [ImageData] with the byte data you previously stored.
      */
     @Suppress("unused")
+    // TODO: Not sure if this functionality should be public
+    // Taking Screenshot and showing Feedback UI needs to be coordinated
     fun takeScreenshot(): ImageData? {
         return activeActivityHolder
             .foregroundActivity
