@@ -25,10 +25,10 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.Empty
+import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
@@ -56,14 +56,14 @@ import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
 
 /**
  * NStack
@@ -340,10 +340,11 @@ object NStack {
     }
 
     /**
-     * Coroutine version of AppOpen: Callback method for when the app is first opened
+     * Callback method for when the app is first opened.
      *
+     * @see [AppOpen]
      */
-    suspend fun appOpen(): AppOpenResult {
+    suspend fun appOpen() = guardConnectivity {
         check(isInitialized) { "init() has not been called" }
 
         val localeString = language.toString()
@@ -351,40 +352,28 @@ object NStack {
 
         NLog.d(this, "onAppOpened -> $localeString $appOpenSettings")
 
-        // If we aren't connected we should just send the app open call back as none
-        if (!connectionManager.isConnected) {
-            NLog.e(this, "No internet skipping appOpen")
-            return AppOpenResult.NoInternet
-        }
+        when (val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
+            is Result.Success -> {
+                NLog.d(this, "NStack appOpen")
 
-        try {
-            return when (val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
-                is AppOpenResult.Success -> {
-                    NLog.d(this, "NStack appOpen")
+                termsRepository.setLatestTerms(result.value.data.terms)
+                result.value.data.localize.forEach { handleLocalizeIndex(it) }
 
-                    termsRepository.setLatestTerms(result.appUpdateResponse.data.terms)
-                    result.appUpdateResponse.data.localize.forEach { handleLocalizeIndex(it) }
-
-                    val shouldUpdateTranslationClass =
-                        result.appUpdateResponse.data.localize.any { it.shouldUpdate }
-                    if (shouldUpdateTranslationClass) {
-                        NLog.e(this, "ShouldUpdate is set, updating Translations class...")
-                        withContext(Dispatchers.Main) {
-                            onLanguagesChanged()
-                            onLanguageChanged()
-                        }
+                val shouldUpdateTranslationClass =
+                    result.value.data.localize.any { it.shouldUpdate }
+                if (shouldUpdateTranslationClass) {
+                    NLog.e(this, "ShouldUpdate is set, updating Translations class...")
+                    withContext(Dispatchers.Main) {
+                        onLanguagesChanged()
+                        onLanguageChanged()
                     }
-
-                    result
                 }
-                else -> {
-                    NLog.e(this, "Error: onAppOpened")
-                    result
-                }
+                result
             }
-        } catch (e: Exception) {
-            NLog.e(this, "Error: onAppOpened - network request probably failed")
-            return AppOpenResult.Failure
+            else -> {
+                NLog.e(this, "Error: onAppOpened")
+                result
+            }
         }
     }
 
@@ -726,6 +715,19 @@ object NStack {
     }
 
     /**
+     * Wrapper for [Result] returning functions that require network connectivity.
+     *
+     * Returns Result.Error(Error.NetworkError) when no network is available.
+     */
+    private suspend fun <T> guardConnectivity(block: suspend () -> Result<T>): Result<T> {
+        return if (connectionManager.isConnected) {
+            block()
+        } else {
+            Result.Error(Error.NetworkError)
+        }
+    }
+
+    /**
      * Enables the live editing feature for text in the UI
      *
      * Please note that the recent versions of NStack support additional features triggered with the
@@ -865,23 +867,23 @@ object NStack {
         /**
          * Provides latest [TermsDetails] for given [termsID]
          */
-        suspend fun getTermsDetails(termsID: Long) : Result<TermsDetails> {
-            return networkManager.getLatestTerms(
-                    termsID = termsID,
-                    acceptLanguage = language.toString(),
-                    settings = appOpenSettingsManager.getAppOpenSettings()
+        suspend fun getTermsDetails(termsID: Long) = guardConnectivity {
+            networkManager.getLatestTerms(
+                termsID = termsID,
+                acceptLanguage = language.toString(),
+                settings = appOpenSettingsManager.getAppOpenSettings()
             )
         }
 
         /**
          * Set a version of terms to viewed by this app instance (GUID)
          */
-        suspend fun setTermsViewed(versionID : Long, userID : String) : Result<Empty> {
-            return networkManager.setTermsViewed(
-                    versionID = versionID,
-                    userID = userID,
-                    locale = language.toString().replace("_", "-"),
-                    settings = appOpenSettingsManager.getAppOpenSettings()
+        suspend fun setTermsViewed(versionID: Long, userID: String) = guardConnectivity {
+            networkManager.setTermsViewed(
+                versionID = versionID,
+                userID = userID,
+                locale = language.toString().replace("_", "-"),
+                settings = appOpenSettingsManager.getAppOpenSettings()
             )
         }
     }
