@@ -23,55 +23,27 @@ import dk.nodes.nstack.kotlin.features.feedback.domain.model.Feedback
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.ScreenshotTaker
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
-import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
-import dk.nodes.nstack.kotlin.managers.AssetCacheManager
-import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
-import dk.nodes.nstack.kotlin.managers.ConnectionManager
-import dk.nodes.nstack.kotlin.managers.LiveEditManager
-import dk.nodes.nstack.kotlin.managers.NetworkManager
-import dk.nodes.nstack.kotlin.managers.PrefManager
-import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenResult
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.AppUpdateData
-import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.LocalizeIndex
-import dk.nodes.nstack.kotlin.models.Message
-import dk.nodes.nstack.kotlin.models.RateReminderAnswer
-import dk.nodes.nstack.kotlin.models.TermsDetails
-import dk.nodes.nstack.kotlin.models.TranslationData
+import dk.nodes.nstack.kotlin.managers.*
+import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.models.local.Environment
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.providers.RepositoryModule
-import dk.nodes.nstack.kotlin.util.AppOpenCallbackCount
-import dk.nodes.nstack.kotlin.util.LanguageFetchCallback
-import dk.nodes.nstack.kotlin.util.LanguageListener
-import dk.nodes.nstack.kotlin.util.LanguagesListener
-import dk.nodes.nstack.kotlin.util.NLog
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguageChangedListener
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
-import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
-import dk.nodes.nstack.kotlin.util.ShakeDetector
-import dk.nodes.nstack.kotlin.util.extensions.AppOpenCallback
-import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
-import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
-import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
-import dk.nodes.nstack.kotlin.util.extensions.languageCode
-import dk.nodes.nstack.kotlin.util.extensions.locale
-import dk.nodes.nstack.kotlin.util.extensions.removeFirst
+import dk.nodes.nstack.kotlin.util.*
+import dk.nodes.nstack.kotlin.util.extensions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.IOException
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 /**
  * NStack
@@ -177,11 +149,6 @@ object NStack {
                 networkLanguages ?: cacheLanguages
             }
         }
-
-    /**
-     * Listener specifically for listening for any app update events
-     */
-    var onAppUpdateListener: ((AppUpdateData) -> Unit)? = null
 
     // States
     /**
@@ -896,36 +863,23 @@ object NStack {
         /**
          * Provides latest [TermsDetails] for given [termsID]
          */
-        fun getTermsDetails(
-            termsID: Long,
-            onSuccess: (TermsDetails) -> Unit,
-            onError: (Exception) -> Unit
-        ) {
-            networkManager.getLatestTerms(
-                termsID = termsID,
-                acceptLanguage = language.toString(),
-                settings = appOpenSettingsManager.getAppOpenSettings(),
-                onSuccess = { runUiAction { onSuccess(it) } },
-                onError = { runUiAction { onError(it) } }
+        suspend fun getTermsDetails(termsID: Long) : Result<TermsDetails> {
+            return networkManager.getLatestTerms(
+                    termsID = termsID,
+                    acceptLanguage = language.toString(),
+                    settings = appOpenSettingsManager.getAppOpenSettings()
             )
         }
 
         /**
          * Set a version of terms to viewed by this app instance (GUID)
          */
-        fun setTermsViewed(
-            versionID: Long,
-            userID: String,
-            onSuccess: () -> Unit,
-            onError: (Exception) -> Unit
-        ) {
-            networkManager.setTermsViewed(
-                versionID = versionID,
-                userID = userID,
-                locale = language.toString().replace("_", "-"),
-                settings = appOpenSettingsManager.getAppOpenSettings(),
-                onSuccess = { runUiAction { onSuccess() } },
-                onError = { runUiAction { onError(it) } }
+        suspend fun setTermsViewed(versionID : Long, userID : String) : Result<Empty> {
+            return networkManager.setTermsViewed(
+                    versionID = versionID,
+                    userID = userID,
+                    locale = language.toString().replace("_", "-"),
+                    settings = appOpenSettingsManager.getAppOpenSettings()
             )
         }
     }

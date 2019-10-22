@@ -13,10 +13,10 @@ import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
-import org.xmlpull.v1.XmlPullParser
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
-import java.util.*
+import java.util.HashMap
+import org.xmlpull.v1.XmlPullParser
 
 internal class NStackLayoutInflater internal constructor(
     original: LayoutInflater,
@@ -80,10 +80,15 @@ internal class NStackLayoutInflater internal constructor(
             return
         }
 
-        val setPrivateFactoryMethod = ReflectionUtils.getMethod(LayoutInflater::class.java, "setPrivateFactory")
+        val setPrivateFactoryMethod =
+            ReflectionUtils.getMethod(LayoutInflater::class.java, "setPrivateFactory")
 
         if (setPrivateFactoryMethod != null) {
-            ReflectionUtils.invokeMethod(this, setPrivateFactoryMethod, PrivateWrapperFactory2(context as Factory2, this))
+            ReflectionUtils.invokeMethod(
+                this,
+                setPrivateFactoryMethod,
+                PrivateWrapperFactory2(context as Factory2, this)
+            )
         }
 
         isPrivateFactorySet = true
@@ -100,15 +105,22 @@ internal class NStackLayoutInflater internal constructor(
         }.firstOrNull() ?: super.onCreateView(name, attrs)
     }
 
-    private fun createCustomViewInternal(view: View?, name: String, viewContext: Context, attrs: AttributeSet): View? {
+    private fun createCustomViewInternal(
+        view: View?,
+        name: String,
+        viewContext: Context,
+        attrs: AttributeSet
+    ): View? {
         var v = view
         if (v == null && name.indexOf('.') > -1) {
 
             if (mConstructorArgs == null) {
-                mConstructorArgs = ReflectionUtils.getField(LayoutInflater::class.java, "mConstructorArgs")
+                mConstructorArgs =
+                    ReflectionUtils.getField(LayoutInflater::class.java, "mConstructorArgs")
             }
 
-            val mConstructorArgsArr = ReflectionUtils.getValue(mConstructorArgs!!, this) as Array<Any>
+            val mConstructorArgsArr =
+                ReflectionUtils.getValue(mConstructorArgs!!, this) as Array<Any>
             val lastContext = mConstructorArgsArr[0]
 
             mConstructorArgsArr[0] = viewContext
@@ -130,7 +142,12 @@ internal class NStackLayoutInflater internal constructor(
     /**
      * If all else fails then we just try to brute force the layout provided (I'm looking at you AppCompat....)
      */
-    private fun doDirtyInflation(view: View?, name: String, context: Context, attrs: AttributeSet): View? {
+    private fun doDirtyInflation(
+        view: View?,
+        name: String,
+        context: Context,
+        attrs: AttributeSet
+    ): View? {
         return view ?: inflateFromName(name, context, attrs)
     }
 
@@ -141,7 +158,8 @@ internal class NStackLayoutInflater internal constructor(
             if (classLookup.containsKey(name)) {
                 clazz = classLookup[name]
             } else {
-                clazz = context.classLoader.loadClass(name).asSubclass(View::class.java) as Class<out View>
+                clazz =
+                    context.classLoader.loadClass(name).asSubclass(View::class.java) as Class<out View>
                 classLookup[name] = clazz
             }
             constructor = clazz!!.getConstructor(*constructorSignature)
@@ -156,7 +174,7 @@ internal class NStackLayoutInflater internal constructor(
      * Take our view strip whatever values were put into the XML and then add that to our NStack Translation Library Cache
      */
     private fun processView(name: String, context: Context, view: View, attrs: AttributeSet) {
-        if (name.contains("Layout")) return
+        if (name.contains("Layout") && !name.endsWith("TextInputLayout")) return
 
         operator fun TypedArray.get(i: Int): String? = getString(i)
 
@@ -215,7 +233,12 @@ internal class NStackLayoutInflater internal constructor(
             return view
         }
 
-        override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
+        override fun onCreateView(
+            parent: View?,
+            name: String,
+            context: Context,
+            attrs: AttributeSet
+        ): View? {
             // Try to generate our view from our factory
             var view: View? = factory2.onCreateView(parent, name, context, attrs)
             // If this fails then we should just try to brute force
@@ -231,8 +254,20 @@ internal class NStackLayoutInflater internal constructor(
         inflater: NStackLayoutInflater
     ) : WrapperFactory2(factory2, inflater) {
 
-        override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
-            return layoutInflater.createCustomViewInternal(factory2.onCreateView(parent, name, context, attrs), name, context, attrs)
+        override fun onCreateView(
+            parent: View?,
+            name: String,
+            context: Context,
+            attrs: AttributeSet
+        ): View? {
+            return layoutInflater.createCustomViewInternal(
+                factory2.onCreateView(
+                    parent,
+                    name,
+                    context,
+                    attrs
+                ), name, context, attrs
+            )
         }
     }
 

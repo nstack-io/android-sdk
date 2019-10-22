@@ -4,14 +4,15 @@ import android.os.Handler
 import android.view.View
 import android.widget.TextView
 import android.widget.ToggleButton
+import com.google.android.material.textfield.TextInputLayout
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
-import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
+import org.json.JSONObject
 
 internal class ViewTranslationManager(private val translationHolder: TranslationHolder) :
     NStackViewPlugin {
@@ -21,7 +22,7 @@ internal class ViewTranslationManager(private val translationHolder: Translation
      *
      * We shouldn't need a lock when using the ConcurrentHashMap
      */
-    private var viewMap: ConcurrentHashMap<WeakReference<View>, TranslationData> =
+    private val viewMap: ConcurrentHashMap<WeakReference<View>, TranslationData> =
         ConcurrentHashMap()
 
     /**
@@ -127,6 +128,9 @@ internal class ViewTranslationManager(private val translationHolder: Translation
                 (translatedKey ?: translatedText)?.let(view::setText)
                 translatedHint?.let(view::setHint)
                 translatedDescription?.let(view::setContentDescription)
+            }
+            is TextInputLayout -> {
+                translatedHint?.let(view::setHint)
             }
         }
     }

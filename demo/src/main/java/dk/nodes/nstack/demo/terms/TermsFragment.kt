@@ -74,14 +74,6 @@ class TermsFragment : Fragment(R.layout.fragment_terms) {
         }
     }
 
-    private fun View.setVisibleOrGone(isVisible: Boolean) {
-        visibility = if (isVisible) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
-    }
-
     private var View.isVisible: Boolean
         get() = visibility == View.VISIBLE
         set(value) {

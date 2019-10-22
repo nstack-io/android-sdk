@@ -5,9 +5,9 @@ import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.formatted
 import dk.nodes.nstack.kotlin.util.extensions.iso8601Date
-import org.json.JSONObject
 import java.util.Date
 import java.util.Locale
+import org.json.JSONObject
 
 internal class PrefManager(private val preferences: Preferences) {
 

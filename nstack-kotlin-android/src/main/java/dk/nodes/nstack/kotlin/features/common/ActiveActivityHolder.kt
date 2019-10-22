@@ -5,7 +5,6 @@ import android.app.Application
 import android.os.Bundle
 import java.lang.ref.WeakReference
 
-
 /**
  * Used to access active activities, needs to be bound to the application context
  */

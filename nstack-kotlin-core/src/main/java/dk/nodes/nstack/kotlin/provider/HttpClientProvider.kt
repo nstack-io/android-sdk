@@ -1,9 +1,9 @@
 package dk.nodes.nstack.kotlin.provider
 
+import kotlin.reflect.KClass
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import kotlin.reflect.KClass
 
 object HttpClientProvider {
 

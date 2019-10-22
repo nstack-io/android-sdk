@@ -70,6 +70,7 @@ dependencies {
     implementation "androidx.core:core:1.1.0"
     implementation "androidx.fragment:fragment-ktx:1.1.0"
     implementation "androidx.lifecycle:lifecycle-extensions:2.1.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-beta01"
     implementation "androidx.navigation:navigation-fragment-ktx:2.1.0"
     implementation "androidx.navigation:navigation-ui-ktx:2.1.0"
     implementation "androidx.constraintlayout:constraintlayout:1.1.3"

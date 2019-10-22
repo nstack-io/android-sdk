@@ -4,7 +4,7 @@ import dk.nodes.nstack.kotlin.data.terms.TermsRepository
 import dk.nodes.nstack.kotlin.provider.GsonProvider
 
 internal class RepositoryModule(
-        private val nStackModule: NStackModule
+    private val nStackModule: NStackModule
 ) {
 
     fun provideTermsRepository(): TermsRepository = TermsRepository(
