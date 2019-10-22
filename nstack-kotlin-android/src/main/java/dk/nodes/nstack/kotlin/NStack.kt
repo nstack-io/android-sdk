@@ -866,6 +866,7 @@ object NStack {
      * @throws FeedbackSendFailedException in case the feedback sending failed (possibly due to network issues)
      */
     @Suppress("MemberVisibilityCanBePrivate")
+    // TODO: Return Result<Empty>
     suspend fun sendFeedback(feedback: Feedback) {
         val sendFeedbackInteractor: SendFeedbackInteractor
 
