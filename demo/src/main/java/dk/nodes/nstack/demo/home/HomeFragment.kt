@@ -1,7 +1,23 @@
 package dk.nodes.nstack.demo.home
 
+import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import dk.nodes.nstack.demo.BuildConfig
 import dk.nodes.nstack.demo.R
+import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.exceptions.FeedbackSendFailedException
+import dk.nodes.nstack.kotlin.features.feedback.domain.model.Feedback
+import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class HomeFragment : Fragment(R.layout.fragment_home), CoroutineScope {
 

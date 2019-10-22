@@ -11,21 +11,21 @@ import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.Proposal
 import dk.nodes.nstack.kotlin.models.RateReminder2
+import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.models.TermDetailsResponse
 import dk.nodes.nstack.kotlin.models.TermsDetails
 import dk.nodes.nstack.kotlin.provider.GsonProvider
-import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class NetworkManager(
     private val client: OkHttpClient,
