@@ -2,7 +2,7 @@ package dk.nodes.nstack.kotlin.models
 
 import java.util.Date
 
-data class AppUpdateData(
+data class AppOpenData(
     val count: Int = 0,
     val update: AppUpdate = AppUpdate(),
     val localize: List<LocalizeIndex> = listOf(),

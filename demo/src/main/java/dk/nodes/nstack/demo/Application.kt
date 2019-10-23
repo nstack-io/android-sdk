@@ -3,7 +3,7 @@ package dk.nodes.nstack.demo
 import android.app.Application
 import android.util.Log
 import dk.nodes.nstack.kotlin.NStack
-import dk.nodes.nstack.kotlin.models.AppOpenResult
+import dk.nodes.nstack.kotlin.models.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -23,16 +23,9 @@ class Application : Application() {
 
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
-                when (val result: AppOpenResult = NStack.appOpen()) {
-                    is AppOpenResult.Success -> {
-                        Log.d("AppOpenResult", result.toString())
-                    }
-                    is AppOpenResult.Failure -> {
-                        Log.d("AppOpenResult", "Failure")
-                    }
-                    is AppOpenResult.NoInternet -> {
-                        Log.d("AppOpenResult", "NoInternet")
-                    }
+                when (val result = NStack.appOpen()) {
+                    is Result.Success ->  Log.d("AppOpenResult: Success", result.toString())
+                    is Result.Error -> Log.d("AppOpenResult: Error", result.toString())
                 }
             }
         }
