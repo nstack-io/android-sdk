@@ -1,5 +1,6 @@
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
+apply plugin: 'digital.wup.android-maven-publish'
 
 // Username & password for Sonatype, stored in gradle.properties
 def _ossrhUsername = System.getenv('NEXUS_USERNAME')
@@ -19,27 +20,26 @@ nexusStaging {
 }
 
 afterEvaluate {
-
-
-
     publishing {
         publications {
-            nstackKotlin(MavenPublication) {
+            nstackKotlinAar(MavenPublication) {
+
+                // Tell maven to prepare the generated "*.aar" file for publishing
+                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar") {
+                    builtBy assembleRelease
+                }
+
                 pom {
+                    artifactId = POM_ARTIFACT_ID
                     name = POM_NAME
                     packaging = POM_PACKAGING
-                    artifactId = POM_ARTIFACT_ID
                     groupId = GROUP
                     description = POM_DESCRIPTION
                     version = VERSION_NAME
                     url = POM_URL
                     inceptionYear = '2015'
 
-                    /*artifact project.sourcesJar {
-                        classifier "sources"
-                    }*/
-
-
+                    from components.android
 
                     licenses {
                         license {
@@ -71,7 +71,6 @@ afterEvaluate {
 
         repositories {
             maven {
-
                 credentials {
                     username _ossrhUsername
                     password _ossrhPassword
@@ -83,54 +82,29 @@ afterEvaluate {
                 url = _isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
             }
         }
-    }
 
-
-    def plugins = project.getPlugins()
-    if (plugins.hasPlugin('com.android.application') || plugins.hasPlugin('com.android.library')) {
-        task androidSourcesJar(type: Jar) {
-            classifier = 'sources'
-            from android.sourceSets.main.java.sourceFiles
-        }
-
-        artifacts {
-            archives androidSourcesJar
-        }
-    }
-    else {
-        task('sourcesJar', type: Jar, dependsOn: classes) {
-            classifier = 'sources'
-            from sourceSets.main.allSource
-        }
-        task javadocsJar(type: Jar, dependsOn: javadoc) {
-            classifier = 'javadoc'
-            from javadoc.destinationDir
-        }
-
-        artifacts {
-            archives sourcesJar
-            archives javadocsJar
-        }
-    }
-
-    if (JavaVersion.current().isJava8Compatible()) {
-        allprojects {
-            tasks.withType(Javadoc) {
-                options.addStringOption('Xdoclint:none', '-quiet')
+        if (JavaVersion.current().isJava8Compatible()) {
+            allprojects {
+                tasks.withType(Javadoc) {
+                    options.addStringOption('Xdoclint:none', '-quiet')
+                }
             }
         }
     }
 
+    task javadoc(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
 
+    task javadocJar(type: Jar) {
+        archiveClassifier.set("javadoc")
 
+        from javadoc.destinationDir
+    }
 
+    signing {
+        required { gradle.taskGraph.hasTask("publishNstackKotlinPublicationToMavenRepository") }
+        sign configurations.archives
+    }
 }
-
-
-
-signing {
-    required { gradle.taskGraph.hasTask("publishNstackKotlinPublicationToMavenRepository") }
-    sign configurations.archives
-}
-
-
