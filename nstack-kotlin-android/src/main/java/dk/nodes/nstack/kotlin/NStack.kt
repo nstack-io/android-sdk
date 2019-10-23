@@ -14,7 +14,7 @@ import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import dk.nodes.nstack.kotlin.data.terms.TermsRepository
+import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
@@ -670,7 +670,6 @@ object NStack {
     /**
      * Exposed Adders(?)
      */
-
     private fun getTranslationByKey(key: String?): String? {
         return currentLanguage?.optString(key?.cleanKeyName ?: return null, null)
     }
@@ -707,7 +706,6 @@ object NStack {
     /**
      * Goes through each sub section and adds the value under the new key
      */
-
     private fun parseSubsection(sectionName: String, jsonSection: JSONObject) {
         jsonSection.keys().forEach {
             currentLanguage?.put("${sectionName}_$it", jsonSection.getString(it))
@@ -860,7 +858,7 @@ object NStack {
         /**
          * A list of terms which are not yet accepted by this app instance (GUID)
          *
-         * This is a local copy of terms provided via [AppOpenResult]
+         * This is a local copy of terms provided via [AppOpen]
          */
         val latestTerms = termsRepository.getLatestTerms().filter { it.version != null }
 
