@@ -90,7 +90,7 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
 
     private fun launchGalleryIntent() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "feedbackImage/*"
+        intent.type = "image/*"
         startActivityForResult(intent, RC_GALLERY)
     }
 
