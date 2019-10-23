@@ -1,12 +1,13 @@
 <resources>
   <string name='nstack_default_yes' formatted='false'>{default_yes}</string>
   <string name='nstack_default_no' formatted='false'>{default_no}</string>
-  <string name='nstack_test_title' formatted='false'>{test_title}</string>
-  <string name='nstack_test_subTitle' formatted='false'>{test_subTitle}</string>
-  <string name='nstack_test_message' formatted='false'>{test_message}</string>
-  <string name='nstack_test_on' formatted='false'>{test_on}</string>
-  <string name='nstack_test_off' formatted='false'>{test_off}</string>
   <string name='nstack_terms_termsNotFound' formatted='false'>{terms_termsNotFound}</string>
   <string name='nstack_terms_acceptLabel' formatted='false'>{terms_acceptLabel}</string>
   <string name='nstack_terms_acceptedLabel' formatted='false'>{terms_acceptedLabel}</string>
+  <string name='nstack_home_title' formatted='false'>{home_title}</string>
+  <string name='nstack_home_subTitle' formatted='false'>{home_subTitle}</string>
+  <string name='nstack_home_message' formatted='false'>{home_message}</string>
+  <string name='nstack_home_on' formatted='false'>{home_on}</string>
+  <string name='nstack_home_off' formatted='false'>{home_off}</string>
+  <string name='nstack_home_sendFeedbackButton' formatted='false'>{home_sendFeedbackButton}</string>
 </resources>
