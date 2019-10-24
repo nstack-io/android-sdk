@@ -1,4 +1,6 @@
 <resources>
+  <string name='nstack_rateReminder_firstAction' formatted='false'>{rateReminder_firstAction}</string>
+  <string name='nstack_rateReminder_secondAction' formatted='false'>{rateReminder_secondAction}</string>
   <string name='nstack_default_yes' formatted='false'>{default_yes}</string>
   <string name='nstack_default_no' formatted='false'>{default_no}</string>
   <string name='nstack_terms_termsNotFound' formatted='false'>{terms_termsNotFound}</string>

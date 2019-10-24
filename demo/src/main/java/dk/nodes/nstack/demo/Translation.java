@@ -6,6 +6,10 @@ package dk.nodes.nstack.demo;
  */
 
 public class Translation {
+	public final static class rateReminder {
+		public static String firstAction = "First Action";
+		public static String secondAction = "Second Action";
+	}
 	public final static class defaultSection {
 		public static String yes = "Yes";
 		public static String no = "No";

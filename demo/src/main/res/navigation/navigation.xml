@@ -3,7 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation"
-    app:startDestination="@id/mainFragment">
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="dk.nodes.nstack.demo.splash.SplashFragment"
+        android:label="Splash"
+        tools:layout="@layout/fragment_splash" />
 
     <fragment
         android:id="@+id/mainFragment"
@@ -16,5 +22,11 @@
         android:name="dk.nodes.nstack.demo.terms.TermsFragment"
         android:label="Info"
         tools:layout="@layout/fragment_terms" />
+
+    <fragment
+        android:id="@+id/rateReminderFragment"
+        android:name="dk.nodes.nstack.demo.ratereminder.RateReminderFragment"
+        android:label="Rate"
+        tools:layout="@layout/fragment_ratereminder" />
 
 </navigation>

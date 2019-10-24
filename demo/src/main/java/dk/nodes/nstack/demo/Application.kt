@@ -20,14 +20,5 @@ class Application : Application() {
         if (BuildConfig.DEBUG) {
             NStack.enableMenuOnShake(this)
         }
-
-        GlobalScope.launch {
-            withContext(Dispatchers.IO) {
-                when (val result = NStack.appOpen()) {
-                    is Result.Success ->  Log.d("AppOpenResult: Success", result.toString())
-                    is Result.Error -> Log.d("AppOpenResult: Error", result.toString())
-                }
-            }
-        }
     }
 }
