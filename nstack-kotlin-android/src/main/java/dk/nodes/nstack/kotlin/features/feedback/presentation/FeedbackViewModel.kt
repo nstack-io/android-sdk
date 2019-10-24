@@ -18,6 +18,8 @@ internal class FeedbackViewModel : ViewModel() {
 
     val viewState: LiveData<FeedbackViewState> = viewStateInternal
 
+    var feedbackImage: Bitmap? = null
+
     init {
         viewStateInternal.value = FeedbackViewState(
             isLoading = false,
