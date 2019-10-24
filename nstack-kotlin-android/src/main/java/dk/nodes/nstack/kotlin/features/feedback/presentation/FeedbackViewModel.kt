@@ -54,10 +54,6 @@ internal class FeedbackViewModel : ViewModel() {
                     )
                 }
             }
-
-            viewStateInternal.value = viewStateInternal.value?.copy(
-                isFeedbackSent = true
-            )
         }
     }
 }
