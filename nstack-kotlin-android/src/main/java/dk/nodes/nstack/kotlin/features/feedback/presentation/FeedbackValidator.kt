@@ -2,7 +2,7 @@ package dk.nodes.nstack.kotlin.features.feedback.presentation
 
 import android.util.Patterns
 
-class FeedbackValidator(private val callback: Callback) {
+internal class FeedbackValidator(private val callback: Callback) {
 
     interface Callback {
         fun onValidationUpdate(isValid: Boolean)

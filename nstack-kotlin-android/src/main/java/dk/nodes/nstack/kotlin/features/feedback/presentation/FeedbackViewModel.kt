@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class FeedbackViewModel : ViewModel() {
+internal class FeedbackViewModel : ViewModel() {
 
     private val viewStateInternal: MutableLiveData<FeedbackViewState> = MutableLiveData()
 
