@@ -6,7 +6,7 @@ apply plugin: 'signing'
 def _ossrhUsername = System.getenv('NEXUS_USERNAME')
 def _ossrhPassword = System.getenv('NEXUS_PASSWORD')
 
-final def _isReleaseVersion = !VERSION_NAME.endsWith("SNAPSHOT")
+final def _isReleaseVersion = !TRANSLATION_VERSION_NAME.endsWith("SNAPSHOT")
 
 nexusStaging {
     packageGroup = "dk.nodes"
@@ -16,7 +16,7 @@ nexusStaging {
 
 jar {
     manifest {
-        attributes 'Implementation-Title': POM_NAME, 'Implementation-Version': VERSION_NAME
+        attributes 'Implementation-Title': TRANSLATION_NAME, 'Implementation-Version': TRANSLATION_VERSION_NAME
     }
 }
 
@@ -41,14 +41,14 @@ afterEvaluate {
                 from components.java
 
                 pom {
-                    name = POM_NAME
-                    packaging = POM_PACKAGING
-                    artifactId = POM_ARTIFACT_ID
-                    description = POM_DESCRIPTION
+                    name = TRANSLATION_NAME
+                    packaging = TRANSLATION_PACKAGING
+                    artifactId = TRANSLATION_ARTIFACT_ID
+                    description = TRANSLATION_DESCRIPTION
 
                     groupId = GROUP
-                    version = VERSION_NAME
-                    url = POM_URL
+                    version = TRANSLATION_VERSION_NAME
+                    url = TRANSLATION_URL
 
                     inceptionYear = '2015'
 
