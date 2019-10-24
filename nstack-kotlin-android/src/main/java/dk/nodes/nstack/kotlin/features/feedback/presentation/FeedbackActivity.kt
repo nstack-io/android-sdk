@@ -34,7 +34,7 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
 
         viewModel = ViewModelProviders.of(this)[FeedbackViewModel::class.java]
         viewModel.viewState.observe(this, Observer(this::showViewState))
-        viewModel.feedbackType = getFeedbackType()
+        viewModel.feedbackType = getExtraType()
 
         nameInputView.addTextChangedListener {
             feedbackValidator.name = it.toString()
@@ -116,8 +116,5 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
         screenshotClearButton.visibility = if (image == null) View.GONE else View.VISIBLE
     }
 
-    private fun getFeedbackType(): FeedbackType {
-        val typeSlug = intent?.extras?.getString(EXTRA_TYPE)
-        return FeedbackType.values().find { it.slug == typeSlug } ?: FeedbackType.FEEDBACK
-    }
+    private fun getExtraType() = FeedbackType.fromSlug(intent?.extras?.getString(EXTRA_TYPE))
 }
