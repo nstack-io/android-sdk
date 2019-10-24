@@ -2,12 +2,11 @@ package dk.nodes.nstack.kotlin.managers
 
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.AppOpenData
 import dk.nodes.nstack.kotlin.models.AppOpen
+import dk.nodes.nstack.kotlin.models.AppOpenData
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.Empty
 import dk.nodes.nstack.kotlin.models.Error
-import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.Proposal
 import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.models.Result
@@ -18,8 +17,11 @@ import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
+import okhttp3.MediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.Response
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -284,15 +286,15 @@ class NetworkManager(
     }
 
     suspend fun getLatestTerms(
-            termsID: Long,
-            acceptLanguage: String,
-            settings: AppOpenSettings
+        termsID: Long,
+        acceptLanguage: String,
+        settings: AppOpenSettings
     ): Result<TermsDetails> = try {
         val request = Request.Builder()
-                .url("$baseUrl/api/v2/content/terms/$termsID/versions/newest?guid=${settings.guid}")
-                .header("Accept-Language", acceptLanguage)
-                .get()
-                .build()
+            .url("$baseUrl/api/v2/content/terms/$termsID/versions/newest?guid=${settings.guid}")
+            .header("Accept-Language", acceptLanguage)
+            .get()
+            .build()
         val response = client.newCall(request).execute()
         if (response.isSuccessful) {
             val responseString = response.body()?.string()
@@ -308,21 +310,21 @@ class NetworkManager(
     }
 
     suspend fun setTermsViewed(
-            versionID: Long,
-            userID: String,
-            locale: String,
-            settings: AppOpenSettings
+        versionID: Long,
+        userID: String,
+        locale: String,
+        settings: AppOpenSettings
     ): Result<Empty> = try {
         val requestBody = FormBody.Builder()
-                .add("guid", settings.guid)
-                .add("term_version_id", versionID.toString())
-                .add("identifier", userID)
-                .add("locale", locale)
-                .build()
+            .add("guid", settings.guid)
+            .add("term_version_id", versionID.toString())
+            .add("identifier", userID)
+            .add("locale", locale)
+            .build()
         val request = Request.Builder()
-                .url("$baseUrl/api/v2/content/terms/versions/views")
-                .post(requestBody)
-                .build()
+            .url("$baseUrl/api/v2/content/terms/versions/views")
+            .post(requestBody)
+            .build()
         val response = client.newCall(request).execute()
         if (response.isSuccessful) {
             Result.Success(value = Empty)
@@ -375,19 +377,47 @@ class NetworkManager(
         }.post("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminderId}/answers")
     }
 
-    suspend fun postFeedback(feedback: Feedback) {
-        FormBody.Builder().also {
-            it["app_version"] = feedback.appVersion
-            it["device"] = feedback.deviceName
-            it["name"] = feedback.name
-            it["email"] = feedback.email
-            it["message"] = feedback.message
+    suspend fun postFeedback(
+        settings: AppOpenSettings,
+        name: String,
+        email: String,
+        message: String,
+        image: ByteArray?
+    ): Result<Empty> = try {
+        val mediaType = MediaType.parse("image/jpg")
 
-            feedback.image?.let { image ->
-                it["image"] = image
-            }
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("os", settings.platform)
+            .addFormDataPart("device", settings.device)
+            .addFormDataPart("app_version", settings.version)
+            .addFormDataPart("name", name)
+            .addFormDataPart("email", email)
+            .addFormDataPart("message", message)
 
-        }.post("$baseUrl/api/v2/ugc/feedbacks")
+        image?.let {
+            requestBody.addFormDataPart(
+                "image",
+                "feedback.jpg",
+                RequestBody.create(mediaType, image)
+            )
+        }
+
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/ugc/feedbacks")
+            .post(requestBody.build())
+            .build()
+
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            Result.Success(value = Empty)
+        } else {
+            Result.Error(Error.ApiError(errorCode = response.code()))
+        }
+    } catch (e: IOException) {
+        Result.Error(Error.NetworkError)
+    } catch (e: Exception) {
+        Result.Error(Error.UnknownError)
     }
 
     private operator fun FormBody.Builder.set(field: String, value: String) {

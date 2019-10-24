@@ -2,7 +2,6 @@ package dk.nodes.nstack.kotlin.features.feedback.domain.model
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Base64
 import java.io.ByteArrayOutputStream
 
 /**
@@ -32,15 +31,8 @@ data class ImageData internal constructor(
      */
     fun asJpegBytes(): ByteArray {
         return ByteArrayOutputStream()
-            .also { stream -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream) }
+            .also { stream -> bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream) }
             .toByteArray()
-    }
-
-    /**
-     * Creates a new Base64 string out of the contained data
-     */
-    fun asJpegBase64String(): String {
-        return Base64.encodeToString(asJpegBytes(), Base64.NO_WRAP)
     }
 }
 
