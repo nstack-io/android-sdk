@@ -2,4 +2,5 @@
 <resources>
     <string name="nstack">NStack</string>
     <string name="edit_translations">Edit translations</string>
+    <string name="send_feedback">Send feedback</string>
 </resources>
