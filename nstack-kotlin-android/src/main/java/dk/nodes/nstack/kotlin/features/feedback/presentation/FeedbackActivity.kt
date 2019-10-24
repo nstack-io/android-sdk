@@ -24,8 +24,6 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
 
     private val feedbackValidator = FeedbackValidator(this)
 
-    private var feedbackImage: Bitmap? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -53,13 +51,15 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
                 name = feedbackValidator.name,
                 email = feedbackValidator.email,
                 message = feedbackValidator.message,
-                image = feedbackImage
+                image = viewModel.feedbackImage
             )
         }
 
         screenshotClearButton.setOnClickListener {
             updateFeedbackImage(null)
         }
+
+        updateFeedbackImage(viewModel.feedbackImage)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -102,8 +102,8 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
     )
 
     private fun updateFeedbackImage(image: Bitmap?) {
-        feedbackImage = image
-        screenshotImageView.setImageBitmap(feedbackImage)
+        viewModel.feedbackImage = image
+        screenshotImageView.setImageBitmap(image)
         screenshotClearButton.visibility = if (image == null) View.GONE else View.VISIBLE
     }
 }

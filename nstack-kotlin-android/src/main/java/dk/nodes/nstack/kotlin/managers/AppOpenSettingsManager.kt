@@ -17,6 +17,7 @@ internal class AppOpenSettingsManager(
 ) {
 
     fun getAppOpenSettings(): AppOpenSettings {
+        val device = clientAppInfo.deviceName
         val uuid = appUUID
         val version = clientAppInfo.versionName
         val oldVersion = appOldVersion ?: version
@@ -25,6 +26,7 @@ internal class AppOpenSettingsManager(
 
         return AppOpenSettings(
                 "android",
+                device,
                 uuid,
                 version,
                 oldVersion,
