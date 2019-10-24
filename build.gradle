@@ -35,6 +35,10 @@ plugins {
 }
 
 allprojects {
+    ext."signing.keyId" = System.getenv('keyId')
+    ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile')
+    ext."signing.password" = System.getenv('password')
+
     repositories {
         google()
         jcenter()
