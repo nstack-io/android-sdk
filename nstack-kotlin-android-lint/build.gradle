@@ -21,9 +21,3 @@ jar {
         attributes("Lint-Registry-v2": "dk.nodes.nstack.lint.NStackIssueRegistry")
     }
 }
-
-task lintJar(type: Jar) {
-    archiveClassifier.set("sources")
-
-    from sourceSets.main.allSource
-}
