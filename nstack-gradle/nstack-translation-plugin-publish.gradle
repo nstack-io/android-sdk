@@ -87,8 +87,8 @@ afterEvaluate {
                     password _ossrhPassword
                 }
 
-                final def releasesRepoUrl = 'https://oss.sonatype.org/content/repositories/releases'
-                final def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+                final def releasesRepoUrl = RELEASE_REPO_URL
+                final def snapshotsRepoUrl = SNAPSHOT_REPO_URL
 
                 url = _isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
             }
