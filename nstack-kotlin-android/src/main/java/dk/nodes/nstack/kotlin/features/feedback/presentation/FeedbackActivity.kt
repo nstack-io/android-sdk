@@ -22,7 +22,7 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
     FeedbackValidator.Callback {
 
     companion object {
-        const val EXTRA_TYPE = "type"
+        const val EXTRA_FEEDBACK_TYPE = "feedback_type"
     }
 
     private lateinit var viewModel: FeedbackViewModel
@@ -116,5 +116,5 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
         screenshotClearButton.visibility = if (image == null) View.GONE else View.VISIBLE
     }
 
-    private fun getExtraType() = FeedbackType.fromSlug(intent?.extras?.getString(EXTRA_TYPE))
+    private fun getExtraType() = FeedbackType.fromSlug(intent?.extras?.getString(EXTRA_FEEDBACK_TYPE))
 }

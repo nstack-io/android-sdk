@@ -839,7 +839,7 @@ object NStack {
 
         fun show(context: Context, type : FeedbackType = FeedbackType.FEEDBACK) {
             startActivity(context, Intent(context, FeedbackActivity::class.java).apply {
-                putExtra(FeedbackActivity.EXTRA_TYPE, type.slug)
+                putExtra(FeedbackActivity.EXTRA_FEEDBACK_TYPE, type.slug)
             }, null)
         }
 
