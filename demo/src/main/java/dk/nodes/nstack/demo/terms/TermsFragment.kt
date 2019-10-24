@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -73,14 +74,4 @@ class TermsFragment : Fragment(R.layout.fragment_terms) {
             isEnabled = true
         }
     }
-
-    private var View.isVisible: Boolean
-        get() = visibility == View.VISIBLE
-        set(value) {
-            visibility = if (value) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-        }
 }
