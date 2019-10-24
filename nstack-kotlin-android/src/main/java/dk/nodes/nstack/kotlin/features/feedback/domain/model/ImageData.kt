@@ -10,8 +10,7 @@ import java.io.ByteArrayOutputStream
  */
 @Suppress("MemberVisibilityCanBePrivate")
 data class ImageData internal constructor(
-    // A bitmap is only used internally for practicality (e.g. the ScreenshotTaker class returns a
-    // bitmap), but this shouldn't be exposed towards the outside
+    // A bitmap is only used internally for practicality
     private val bitmap: Bitmap
 ) {
 
