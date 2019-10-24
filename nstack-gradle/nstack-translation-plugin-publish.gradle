@@ -73,8 +73,8 @@ afterEvaluate {
                     }
 
                     issueManagement {
-                        system = 'GitHub issues'
-                        url = 'https://github.com/nodes-android/nstack-gradle/issues'
+                        system = POM_ISSUE_MANAGEMENT_SYSTEM
+                        url = POM_ISSUE_MANAGEMENT_URL
                     }
                 }
             }
