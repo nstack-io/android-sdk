@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:padding="8dp"
-        android:text="@string/nstack_test_message"
+        android:text="@string/nstack_home_message"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <androidx.appcompat.widget.Toolbar
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="@string/nstack_test_title"
-        app:subtitle="@string/nstack_test_subTitle"/>
+        app:title="@string/nstack_home_title"
+        app:subtitle="@string/nstack_home_subTitle"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,5 +13,7 @@
         <meta-data
             android:name="dk.nodes.nstack.env"
             android:value="${env}"/>
+
+        <activity android:name=".kotlin.features.feedback.presentation.FeedbackActivity" />
     </application>
 </manifest>

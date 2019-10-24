@@ -14,8 +14,10 @@ import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat.startActivity
 import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
+import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
@@ -850,6 +852,10 @@ object NStack {
                 message
             )
             networkManager.postFeedback(feedback)
+        }
+
+        fun show(context : Context) {
+            startActivity(context, Intent(context, FeedbackActivity::class.java), null)
         }
     }
 
