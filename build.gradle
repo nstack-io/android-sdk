@@ -35,6 +35,13 @@ plugins {
 }
 
 allprojects {
+
+    if (JavaVersion.current().isJava8Compatible()) {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+
     ext."signing.keyId" = System.getenv('keyId')
     ext."signing.secretKeyRingFile" = System.getenv('secretKeyRingFile')
     ext."signing.password" = System.getenv('password')

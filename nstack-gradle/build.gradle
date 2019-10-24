@@ -1,4 +1,5 @@
 apply plugin: 'groovy'
+apply from: 'nstack-translation-plugin-publish.gradle'
 
 targetCompatibility = JavaVersion.VERSION_1_8
 sourceCompatibility = JavaVersion.VERSION_1_8
