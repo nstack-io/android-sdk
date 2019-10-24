@@ -30,7 +30,7 @@ data class ImageData internal constructor(
      */
     fun asJpegBytes(): ByteArray {
         return ByteArrayOutputStream()
-            .also { stream -> bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream) }
+            .also { stream -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream) }
             .toByteArray()
     }
 }

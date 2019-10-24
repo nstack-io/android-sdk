@@ -4,16 +4,19 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import dk.nodes.nstack.R
+import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.managers.LiveEditManager
+import dk.nodes.nstack.kotlin.models.FeedbackType
 import dk.nodes.nstack.kotlin.util.extensions.setNavigationBarColor
+import kotlinx.android.synthetic.main.bottomsheet_main_menu.view.*
 
 private enum class DisplayedFeature {
     NONE,
     MAIN_MENU,
-    LIVE_EDIT
+    LIVE_EDIT,
+    FEEDBACK
 }
 
 /**
@@ -24,12 +27,6 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
 
     private var currentlyDisplayedFeature: DisplayedFeature = DisplayedFeature.NONE
     private var mainMenuDialog: BottomSheetDialog? = null
-
-    private val mainMenuClickListener = View.OnClickListener { view ->
-        when (view.id) {
-            R.id.editTranslationsButton -> startLiveEdit()
-        }
-    }
 
     /**
      * Presents the main menu by default, but can also cancel subsequent actions caused by the
@@ -46,6 +43,7 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
             DisplayedFeature.NONE -> showMainMenu(activity)
             DisplayedFeature.MAIN_MENU -> Unit // Do nothing, keep the menu open
             DisplayedFeature.LIVE_EDIT -> stopLiveEdit()
+            DisplayedFeature.FEEDBACK -> Unit // Do nothing, keep the menu open
         }
     }
 
@@ -53,7 +51,6 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
     private fun showMainMenu(activity: Activity) {
         val inflater = activity.layoutInflater
         val view = inflater.inflate(R.layout.bottomsheet_main_menu, null, false)
-        val editTranslationsButton: View = view.findViewById(R.id.editTranslationsButton)
 
         this.mainMenuDialog = BottomSheetDialog(activity, R.style.NstackBottomSheetTheme)
             .apply {
@@ -67,9 +64,14 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
                 }
             }
             .also { dialog ->
-                editTranslationsButton.setOnClickListener { view ->
-                    mainMenuClickListener.onClick(view)
+                view.editTranslationsButton.setOnClickListener {
+                    startLiveEdit()
                     dialog.dismiss()
+                }
+
+                view.sendFeedbackButton.setOnClickListener {
+                    NStack.Feedback.show(activity, FeedbackType.BUG)
+                    currentlyDisplayedFeature = DisplayedFeature.FEEDBACK
                 }
 
                 dialog.show()
