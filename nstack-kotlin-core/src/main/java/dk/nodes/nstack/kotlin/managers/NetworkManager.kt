@@ -7,6 +7,7 @@ import dk.nodes.nstack.kotlin.models.AppOpenData
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.Empty
 import dk.nodes.nstack.kotlin.models.Error
+import dk.nodes.nstack.kotlin.models.FeedbackType
 import dk.nodes.nstack.kotlin.models.Proposal
 import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.models.Result
@@ -382,15 +383,18 @@ class NetworkManager(
         name: String,
         email: String,
         message: String,
-        image: ByteArray?
+        image: ByteArray?,
+        type : FeedbackType
     ): Result<Empty> = try {
         val mediaType = MediaType.parse("image/jpg")
 
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("os", settings.platform)
+            .addFormDataPart("os", settings.osVersion)
+            .addFormDataPart("platform", settings.platform)
             .addFormDataPart("device", settings.device)
             .addFormDataPart("app_version", settings.version)
+            .addFormDataPart("type", type.slug)
             .addFormDataPart("name", name)
             .addFormDataPart("email", email)
             .addFormDataPart("message", message)

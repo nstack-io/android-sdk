@@ -60,7 +60,7 @@
         android:paddingEnd="16dp"
         android:textColor="@color/white"
         android:fontFamily="sans-serif-medium"
-        android:text="@string/send_feedback"
+        android:text="@string/feedback_send_bug"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

@@ -32,6 +32,7 @@ import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Error
+import dk.nodes.nstack.kotlin.models.FeedbackType
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
@@ -61,7 +62,6 @@ import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.File
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
@@ -837,22 +837,26 @@ object NStack {
 
     object Feedback {
 
-        fun show(context: Context) {
-            startActivity(context, Intent(context, FeedbackActivity::class.java), null)
+        fun show(context: Context, type : FeedbackType = FeedbackType.FEEDBACK) {
+            startActivity(context, Intent(context, FeedbackActivity::class.java).apply {
+                putExtra(FeedbackActivity.EXTRA_TYPE, type.slug)
+            }, null)
         }
 
         suspend fun postFeedback(
             name: String,
             email: String,
             message: String,
-            image: ImageData?
+            image: ImageData?,
+            type: FeedbackType
         ) = guardConnectivity {
             networkManager.postFeedback(
                 settings = appOpenSettingsManager.getAppOpenSettings(),
                 name = name,
                 email = email,
                 message = message,
-                image = image?.asJpegBytes()
+                image = image?.asJpegBytes(),
+                type = type
             )
         }
     }

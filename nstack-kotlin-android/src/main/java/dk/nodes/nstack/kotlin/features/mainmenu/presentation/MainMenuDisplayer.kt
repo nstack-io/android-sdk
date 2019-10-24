@@ -8,6 +8,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.managers.LiveEditManager
+import dk.nodes.nstack.kotlin.models.FeedbackType
 import dk.nodes.nstack.kotlin.util.extensions.setNavigationBarColor
 import kotlinx.android.synthetic.main.bottomsheet_main_menu.view.*
 
@@ -69,7 +70,7 @@ internal class MainMenuDisplayer(private val liveEditManager: LiveEditManager) {
                 }
 
                 view.sendFeedbackButton.setOnClickListener {
-                    NStack.Feedback.show(activity)
+                    NStack.Feedback.show(activity, FeedbackType.BUG)
                     currentlyDisplayedFeature = DisplayedFeature.FEEDBACK
                 }
 
