@@ -2,10 +2,9 @@ package dk.nodes.nstack.kotlin.managers
 
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
-import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.AppUpdateData
-import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.AppOpenData
+import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.Empty
 import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.Feedback
@@ -70,7 +69,7 @@ class NetworkManager(
     fun postAppOpen(
         settings: AppOpenSettings,
         acceptLanguage: String,
-        onSuccess: (AppUpdateData) -> Unit,
+        onSuccess: (AppOpenData) -> Unit,
         onError: (Exception) -> Unit
     ) {
         FormBody.Builder().also {
@@ -92,7 +91,7 @@ class NetworkManager(
             override fun onResponse(call: Call?, response: Response?) {
                 try {
                     val responseString = response?.body()?.string()!!
-                    val appUpdate = gson.fromJson(responseString, AppUpdateResponse::class.java)
+                    val appUpdate = gson.fromJson(responseString, AppOpen::class.java)
                     onSuccess.invoke(appUpdate.data)
                 } catch (e: Exception) {
                     onError(e)
@@ -101,25 +100,29 @@ class NetworkManager(
         })
     }
 
-    suspend fun postAppOpen(settings: AppOpenSettings, acceptLanguage: String): AppOpenResult =
-        try {
-            FormBody.Builder().also {
-                it["guid"] = settings.guid
-                it["version"] = settings.version
-                it["old_version"] = settings.oldVersion
-                it["platform"] = settings.platform
-                it["last_updated"] = settings.lastUpdated.formatted
-                it["dev"] = debugMode.toString()
-                it["test"] = settings.versionUpdateTestMode.toString()
-            }.buildRequest(
-                "$baseUrl/api/v2/open",
-                "Accept-Language" to acceptLanguage
-            ).execute().body()?.string()?.let {
-                AppOpenResult.Success(gson.fromJson(it, AppUpdateResponse::class.java))
-            } ?: AppOpenResult.Failure
-        } catch (e: Exception) {
-            AppOpenResult.Failure
-        }
+    suspend fun postAppOpen(
+        settings: AppOpenSettings,
+        acceptLanguage: String
+    ): Result<AppOpen> = try {
+        FormBody.Builder().also {
+            it["guid"] = settings.guid
+            it["version"] = settings.version
+            it["old_version"] = settings.oldVersion
+            it["platform"] = settings.platform
+            it["last_updated"] = settings.lastUpdated.formatted
+            it["dev"] = debugMode.toString()
+            it["test"] = settings.versionUpdateTestMode.toString()
+        }.buildRequest(
+            "$baseUrl/api/v2/open",
+            "Accept-Language" to acceptLanguage
+        ).execute().body()?.string()?.let {
+            Result.Success(gson.fromJson(it, AppOpen::class.java))
+        } ?: Result.Error(Error.UnknownError)
+    } catch (e: IOException) {
+        Result.Error(Error.NetworkError)
+    } catch (e: Exception) {
+        Result.Error(Error.UnknownError)
+    }
 
     /**
      * Notifies the backend that the message has been seen

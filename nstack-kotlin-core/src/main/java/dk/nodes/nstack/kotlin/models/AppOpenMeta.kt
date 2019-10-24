@@ -1,5 +1,5 @@
 package dk.nodes.nstack.kotlin.models
 
-data class AppUpdateMeta(
+data class AppOpenMeta(
     val acceptLanguage: String?
 )

@@ -12,16 +12,17 @@ import dk.nodes.nstack.kotlin.managers.ConnectionManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.AppUpdateData
-import dk.nodes.nstack.kotlin.models.AppUpdateMeta
-import dk.nodes.nstack.kotlin.models.AppUpdateResponse
+import dk.nodes.nstack.kotlin.models.AppOpenData
+import dk.nodes.nstack.kotlin.models.AppOpenMeta
+import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
+import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.Language
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.NStackMeta
+import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.providers.ManagersModule
 import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
@@ -71,11 +72,13 @@ internal class NStackTest {
     @Test
     fun `Test ClassTranslationManager parse ran correct translation`() {
         val translationCacheMock = mapOf(Locale.getDefault() to translations3)
-        val successResult = AppOpenResult.Success(appUpdateResponse)
+        val successResult = Result.Success(appUpdateResponse)
 
         every { connectionManagerMock.isConnected } returns true
         every { assetCacheManagerMock.loadTranslations() } returns translationCacheMock
         coEvery { networkManagerMock.postAppOpen(any(), any()) } returns successResult
+        coEvery { networkManagerMock.loadTranslation(languageIndex1.url) } returns "translations1"
+        coEvery { networkManagerMock.loadTranslation(languageIndex2.url) } returns "translations2"
 
         runBlocking { NStack.appOpen() }
 
@@ -125,7 +128,7 @@ internal class NStackTest {
 
         val result = runBlocking { NStack.appOpen() }
 
-        assert(result is AppOpenResult.NoInternet)
+        assert(result == Result.Error(Error.NetworkError))
     }
 
     @Test
@@ -133,7 +136,7 @@ internal class NStackTest {
         val translations1 = "translations1"
         val translations2 = "translations2"
 
-        val successfulResult = AppOpenResult.Success(appUpdateResponse)
+        val successfulResult = Result.Success(appUpdateResponse)
 
         every { connectionManagerMock.isConnected } returns true
         coEvery { networkManagerMock.postAppOpen(appOpenSettings, any()) } returns successfulResult
@@ -141,7 +144,7 @@ internal class NStackTest {
         coEvery { networkManagerMock.loadTranslation(languageIndex2.url) } returns translations2
 
         val result = runBlocking { NStack.appOpen() }
-        assert(result is AppOpenResult.Success)
+        assert(result is Result.Success)
         verify { prefManagerMock.setTranslations(language1.locale, translations1) }
         verify { prefManagerMock.setTranslations(language2.locale, translations2) }
         verify(exactly = 0) { prefManagerMock.setTranslations(language3.locale, any()) }
@@ -150,14 +153,14 @@ internal class NStackTest {
 
     @Test
     fun `Test coroutine app open error`() {
-        val errorResult = AppOpenResult.Failure
+        val errorResult = Result.Error(Error.UnknownError)
 
         every { connectionManagerMock.isConnected } returns true
         coEvery { networkManagerMock.postAppOpen(any(), any()) } returns errorResult
 
         val result = runBlocking(Dispatchers.Main) { NStack.appOpen() }
 
-        assert(result is AppOpenResult.Failure)
+        assert(result is Result.Error)
     }
 
     @Test
@@ -224,9 +227,9 @@ internal class NStackTest {
         private val languageIndex3 =
             LocalizeIndex(0, "url3", Date(), shouldUpdate = false, language = language3)
         private val appUpdateDate =
-            AppUpdateData(localize = listOf(languageIndex1, languageIndex2, languageIndex3))
+            AppOpenData(localize = listOf(languageIndex1, languageIndex2, languageIndex3))
         private val appUpdateResponse =
-            AppUpdateResponse(appUpdateDate, AppUpdateMeta(language1.locale.toString()))
+            AppOpen(appUpdateDate, AppOpenMeta(language1.locale.toString()))
 
         private val locale1 = Locale("it-IT")
         private val translations1 = mockk<JSONObject>()

@@ -6,6 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/yesButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/nstack_default_yes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/messageTextView" />
+
+    <Button
+        android:id="@+id/noButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/nstack_default_no"
+        app:layout_constraintEnd_toStartOf="@id/yesButton"
+        app:layout_constraintTop_toTopOf="@id/yesButton" />
+
     <TextView
         android:id="@+id/messageTextView"
         android:layout_width="match_parent"
@@ -20,19 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:subtitle="@string/nstack_home_subTitle"
-        app:title="@string/nstack_home_title" />
-
-    <Button
-        android:id="@+id/feedbackWithScreenshotButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/nstack_home_sendFeedbackButton"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:title="@string/nstack_home_title"
+        app:subtitle="@string/nstack_home_subTitle"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,14 +14,10 @@ import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import dk.nodes.nstack.kotlin.data.terms.TermsRepository
-import dk.nodes.nstack.kotlin.exceptions.FeedbackSendFailedException
+import androidx.core.content.ContextCompat.startActivity
+import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
-import dk.nodes.nstack.kotlin.features.feedback.domain.RemoteSendFeedbackInteractor
-import dk.nodes.nstack.kotlin.features.feedback.domain.SendFeedbackInteractor
-import dk.nodes.nstack.kotlin.features.feedback.domain.model.Feedback
-import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
-import dk.nodes.nstack.kotlin.features.feedback.presentation.ScreenshotTaker
+import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
@@ -31,10 +27,11 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenResult
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.Empty
+import dk.nodes.nstack.kotlin.models.Error
+import dk.nodes.nstack.kotlin.models.Feedback
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
@@ -64,7 +61,6 @@ import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.IOException
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
@@ -103,7 +99,7 @@ object NStack {
 
     private var currentLanguage: JSONObject? = null
 
-    private lateinit var activeActivityHolder: ActiveActivityHolder
+    private var activeActivityHolder: ActiveActivityHolder? = null
 
     // Internally used classes
     private lateinit var classTranslationManager: ClassTranslationManager
@@ -346,10 +342,11 @@ object NStack {
     }
 
     /**
-     * Coroutine version of AppOpen: Callback method for when the app is first opened
+     * Callback method for when the app is first opened.
      *
+     * @see [AppOpen]
      */
-    suspend fun appOpen(): AppOpenResult {
+    suspend fun appOpen() = guardConnectivity {
         check(isInitialized) { "init() has not been called" }
 
         val localeString = language.toString()
@@ -357,40 +354,28 @@ object NStack {
 
         NLog.d(this, "onAppOpened -> $localeString $appOpenSettings")
 
-        // If we aren't connected we should just send the app open call back as none
-        if (!connectionManager.isConnected) {
-            NLog.e(this, "No internet skipping appOpen")
-            return AppOpenResult.NoInternet
-        }
+        when (val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
+            is Result.Success -> {
+                NLog.d(this, "NStack appOpen")
 
-        try {
-            return when (val result = networkManager.postAppOpen(appOpenSettings, localeString)) {
-                is AppOpenResult.Success -> {
-                    NLog.d(this, "NStack appOpen")
+                termsRepository.setLatestTerms(result.value.data.terms)
+                result.value.data.localize.forEach { handleLocalizeIndex(it) }
 
-                    termsRepository.setLatestTerms(result.appUpdateResponse.data.terms)
-                    result.appUpdateResponse.data.localize.forEach { handleLocalizeIndex(it) }
-
-                    val shouldUpdateTranslationClass =
-                        result.appUpdateResponse.data.localize.any { it.shouldUpdate }
-                    if (shouldUpdateTranslationClass) {
-                        NLog.e(this, "ShouldUpdate is set, updating Translations class...")
-                        withContext(Dispatchers.Main) {
-                            onLanguagesChanged()
-                            onLanguageChanged()
-                        }
+                val shouldUpdateTranslationClass =
+                    result.value.data.localize.any { it.shouldUpdate }
+                if (shouldUpdateTranslationClass) {
+                    NLog.e(this, "ShouldUpdate is set, updating Translations class...")
+                    withContext(Dispatchers.Main) {
+                        onLanguagesChanged()
+                        onLanguageChanged()
                     }
-
-                    result
                 }
-                else -> {
-                    NLog.e(this, "Error: onAppOpened")
-                    result
-                }
+                result
             }
-        } catch (e: Exception) {
-            NLog.e(this, "Error: onAppOpened - network request probably failed")
-            return AppOpenResult.Failure
+            else -> {
+                NLog.e(this, "Error: onAppOpened")
+                result
+            }
         }
     }
 
@@ -687,7 +672,6 @@ object NStack {
     /**
      * Exposed Adders(?)
      */
-
     private fun getTranslationByKey(key: String?): String? {
         return currentLanguage?.optString(key?.cleanKeyName ?: return null, null)
     }
@@ -724,10 +708,22 @@ object NStack {
     /**
      * Goes through each sub section and adds the value under the new key
      */
-
     private fun parseSubsection(sectionName: String, jsonSection: JSONObject) {
         jsonSection.keys().forEach {
             currentLanguage?.put("${sectionName}_$it", jsonSection.getString(it))
+        }
+    }
+
+    /**
+     * Wrapper for [Result] returning functions that require network connectivity.
+     *
+     * Returns Result.Error(Error.NetworkError) when no network is available.
+     */
+    private suspend fun <T> guardConnectivity(block: suspend () -> Result<T>): Result<T> {
+        return if (connectionManager.isConnected) {
+            block()
+        } else {
+            Result.Error(Error.NetworkError)
         }
     }
 
@@ -753,7 +749,7 @@ object NStack {
 
         val shakeDetector = ShakeDetector(object : ShakeDetector.Listener {
             override fun hearShake() {
-                val activity = activeActivityHolder.foregroundActivity ?: return
+                val activity = activeActivityHolder?.foregroundActivity ?: return
                 mainMenuDisplayer.trigger(activity)
             }
         })
@@ -838,45 +834,28 @@ object NStack {
         }
     }
 
-    /**
-     * Tries taking a screenshot of the current screen contents and returns an [ImageData] instance
-     * containing the screenshot. Returns null in case a screenshot is not possible at the time.
-     *
-     * The [ImageData] is intended to be used in NStack functions (such as [sendFeedback]) and in
-     * many cases you can just pass it on as is.
-     *
-     * In case you need a the actual data contents (e.g. to store the screenshot as a file when
-     * switching activities), there are several methods offered as part of the object. You can then
-     * recreate the [ImageData] with the byte data you previously stored.
-     */
-    @Suppress("unused")
-    // TODO: Not sure if this functionality should be public
-    // Taking Screenshot and showing Feedback UI needs to be coordinated
-    fun takeScreenshot(): ImageData? {
-        return activeActivityHolder
-            .foregroundActivity
-            ?.let { activity -> if (activity.isFinishing) null else activity }
-            ?.let { activity -> ScreenshotTaker.take(activity) }
-            ?.let { screenshot -> ImageData(screenshot) }
-    }
+    object Feedback {
 
-    /**
-     * Sends the feedback to the NStack backend
-     *
-     * @throws FeedbackSendFailedException in case the feedback sending failed (possibly due to network issues)
-     */
-    @Suppress("MemberVisibilityCanBePrivate")
-    // TODO: Return Result<Empty>
-    suspend fun sendFeedback(feedback: Feedback) {
-        val sendFeedbackInteractor: SendFeedbackInteractor
+        var appVersion: String = ""
+        var deviceName: String = ""
+        var name: String = ""
+        var email: String = ""
 
-        sendFeedbackInteractor = RemoteSendFeedbackInteractor(networkManager)
-        sendFeedbackInteractor.input = SendFeedbackInteractor.Input(feedback)
+        suspend fun send(
+            message: String = ""
+        ) {
+            val feedback = Feedback(
+                appVersion,
+                deviceName,
+                name,
+                email,
+                message
+            )
+            networkManager.postFeedback(feedback)
+        }
 
-        try {
-            sendFeedbackInteractor.run()
-        } catch (exception: IOException) {
-            throw FeedbackSendFailedException()
+        fun show(context : Context) {
+            startActivity(context, Intent(context, FeedbackActivity::class.java), null)
         }
     }
 
@@ -885,30 +864,30 @@ object NStack {
         /**
          * A list of terms which are not yet accepted by this app instance (GUID)
          *
-         * This is a local copy of terms provided via [AppOpenResult]
+         * This is a local copy of terms provided via [AppOpen]
          */
         val latestTerms = termsRepository.getLatestTerms().filter { it.version != null }
 
         /**
          * Provides latest [TermsDetails] for given [termsID]
          */
-        suspend fun getTermsDetails(termsID: Long) : Result<TermsDetails> {
-            return networkManager.getLatestTerms(
-                    termsID = termsID,
-                    acceptLanguage = language.toString(),
-                    settings = appOpenSettingsManager.getAppOpenSettings()
+        suspend fun getTermsDetails(termsID: Long) = guardConnectivity {
+            networkManager.getLatestTerms(
+                termsID = termsID,
+                acceptLanguage = language.toString(),
+                settings = appOpenSettingsManager.getAppOpenSettings()
             )
         }
 
         /**
          * Set a version of terms to viewed by this app instance (GUID)
          */
-        suspend fun setTermsViewed(versionID : Long, userID : String) : Result<Empty> {
-            return networkManager.setTermsViewed(
-                    versionID = versionID,
-                    userID = userID,
-                    locale = language.toString().replace("_", "-"),
-                    settings = appOpenSettingsManager.getAppOpenSettings()
+        suspend fun setTermsViewed(versionID: Long, userID: String) = guardConnectivity {
+            networkManager.setTermsViewed(
+                versionID = versionID,
+                userID = userID,
+                locale = language.toString().replace("_", "-"),
+                settings = appOpenSettingsManager.getAppOpenSettings()
             )
         }
     }

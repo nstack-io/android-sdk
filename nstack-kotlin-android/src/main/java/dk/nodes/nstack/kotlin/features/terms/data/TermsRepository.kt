@@ -1,4 +1,4 @@
-package dk.nodes.nstack.kotlin.data.terms
+package dk.nodes.nstack.kotlin.features.terms.data
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
