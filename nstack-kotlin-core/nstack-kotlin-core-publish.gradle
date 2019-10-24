@@ -1,0 +1,104 @@
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
+
+// Username & password for Sonatype, stored in gradle.properties
+def _ossrhUsername = System.getenv('NEXUS_USERNAME')
+def _ossrhPassword = System.getenv('NEXUS_PASSWORD')
+
+final def _isReleaseVersion = !VERSION_NAME.endsWith("SNAPSHOT")
+
+nexusStaging {
+    packageGroup = "dk.nodes"
+    delayBetweenRetriesInMillis = 4000
+    stagingProfileId = "5a414403b5bf75"
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': CORE_NAME, 'Implementation-Version': VERSION_NAME
+    }
+}
+
+afterEvaluate {
+
+    task sourcesJar(type: Jar) {
+        archiveClassifier.set('sources')
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar) {
+        archiveClassifier.set('javadoc')
+        from javadoc
+    }
+
+    publishing {
+        publications {
+            nstackTranslationPluginJar(MavenPublication) {
+
+                artifact sourcesJar
+                artifact javadocJar
+                from components.java
+
+                pom {
+                    artifactId = CORE_ARTIFACT_ID
+                    name = CORE_NAME
+                    packaging = CORE_PACKAGING
+                    description = POM_DESCRIPTION
+
+                    groupId = GROUP
+                    version = VERSION_NAME
+                    url = POM_URL
+
+                    inceptionYear = '2015'
+
+                    licenses {
+                        license {
+                            name = POM_LICENCE_NAME
+                            url = POM_LICENCE_URL
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = POM_DEVELOPER_ID
+                            name = POM_DEVELOPER_NAME
+                            email = POM_DEVELOPER_EMAIL
+                        }
+                    }
+
+                    scm {
+                        url = POM_SCM_URL
+                        connection = POM_SCM_CONNECTION
+                    }
+
+                    issueManagement {
+                        system = 'GitHub issues'
+                        url = 'https://github.com/nodes-android/nstack-kotlin/issues'
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                credentials {
+                    username _ossrhUsername
+                    password _ossrhPassword
+                }
+
+                final def releasesRepoUrl = 'https://oss.sonatype.org/content/repositories/releases'
+                final def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+
+                url = _isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
+            }
+        }
+
+        signing {
+            required {
+                return _isReleaseVersion
+            }
+
+            sign publishing.publications.nstackTranslationPluginJar
+        }
+    }
+}
