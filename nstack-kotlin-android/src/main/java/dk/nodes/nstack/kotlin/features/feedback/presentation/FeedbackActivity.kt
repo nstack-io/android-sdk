@@ -13,6 +13,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import dk.nodes.nstack.R
+import dk.nodes.nstack.kotlin.models.FeedbackType
 import kotlinx.android.synthetic.main.activity_feedback.*
 
 private const val RC_GALLERY = 111
@@ -20,17 +21,20 @@ private const val RC_GALLERY = 111
 internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
     FeedbackValidator.Callback {
 
+    companion object {
+        const val EXTRA_FEEDBACK_TYPE = "feedback_type"
+    }
+
     private lateinit var viewModel: FeedbackViewModel
 
     private val feedbackValidator = FeedbackValidator(this)
-
-    private var feedbackImage: Bitmap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         viewModel = ViewModelProviders.of(this)[FeedbackViewModel::class.java]
         viewModel.viewState.observe(this, Observer(this::showViewState))
+        viewModel.feedbackType = getExtraType()
 
         nameInputView.addTextChangedListener {
             feedbackValidator.name = it.toString()
@@ -53,13 +57,16 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
                 name = feedbackValidator.name,
                 email = feedbackValidator.email,
                 message = feedbackValidator.message,
-                image = feedbackImage
+                image = viewModel.feedbackImage,
+                type = viewModel.feedbackType
             )
         }
 
         screenshotClearButton.setOnClickListener {
             updateFeedbackImage(null)
         }
+
+        updateFeedbackImage(viewModel.feedbackImage)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -86,6 +93,8 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
         state.errorMessage?.let {
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
         }
+
+        toolbar.setTitle(state.title)
     }
 
     private fun launchGalleryIntent() {
@@ -102,8 +111,10 @@ internal class FeedbackActivity : AppCompatActivity(R.layout.activity_feedback),
     )
 
     private fun updateFeedbackImage(image: Bitmap?) {
-        feedbackImage = image
-        screenshotImageView.setImageBitmap(feedbackImage)
+        viewModel.feedbackImage = image
+        screenshotImageView.setImageBitmap(image)
         screenshotClearButton.visibility = if (image == null) View.GONE else View.VISIBLE
     }
+
+    private fun getExtraType() = FeedbackType.fromSlug(intent?.extras?.getString(EXTRA_FEEDBACK_TYPE))
 }

@@ -13,8 +13,7 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            app:title="Feedback" />
+            android:layout_height="56dp" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -131,7 +130,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="16dp"
                 android:enabled="false"
-                android:text="Send feedback"
+                android:text="@string/feedback_send"
                 android:textAllCaps="false" />
 
         </LinearLayout>

@@ -17,19 +17,15 @@ internal class AppOpenSettingsManager(
 ) {
 
     fun getAppOpenSettings(): AppOpenSettings {
-        val uuid = appUUID
-        val version = clientAppInfo.versionName
-        val oldVersion = appOldVersion ?: version
-        val updateDate = appUpdateDate
-        val versionUpdateTestMode = versionUpdateTestMode
-
         return AppOpenSettings(
-                "android",
-                uuid,
-                version,
-                oldVersion,
-                updateDate,
-                versionUpdateTestMode
+                platform = "android",
+                device = clientAppInfo.deviceName,
+                guid = appUUID,
+                version = clientAppInfo.versionName,
+                oldVersion = appOldVersion ?: clientAppInfo.versionName,
+                lastUpdated = appUpdateDate,
+                versionUpdateTestMode = versionUpdateTestMode,
+                osVersion = clientAppInfo.osVersion
         )
     }
 

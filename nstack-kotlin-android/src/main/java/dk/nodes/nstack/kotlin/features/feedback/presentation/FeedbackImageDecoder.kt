@@ -10,10 +10,10 @@ internal class FeedbackImageDecoder(private val contentResolver: ContentResolver
 
     fun decode(
         uri: Uri,
-        minSize: Int = 800
+        requiredSize: Int = 1200
     ): Bitmap? = try {
         val bitmapSize = obtainBitmapSize(uri)
-        val sampleSize = bitmapSize.maximum / minSize
+        val sampleSize = bitmapSize.maximum / requiredSize
 
         val options = BitmapFactory.Options().apply {
             inJustDecodeBounds = false

@@ -15,10 +15,11 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
-import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
+import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
+import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
@@ -27,11 +28,11 @@ import dk.nodes.nstack.kotlin.managers.LiveEditManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.AppOpen
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Error
-import dk.nodes.nstack.kotlin.models.Feedback
+import dk.nodes.nstack.kotlin.models.FeedbackType
 import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
@@ -836,26 +837,27 @@ object NStack {
 
     object Feedback {
 
-        var appVersion: String = ""
-        var deviceName: String = ""
-        var name: String = ""
-        var email: String = ""
-
-        suspend fun send(
-            message: String = ""
-        ) {
-            val feedback = Feedback(
-                appVersion,
-                deviceName,
-                name,
-                email,
-                message
-            )
-            networkManager.postFeedback(feedback)
+        fun show(context: Context, type : FeedbackType = FeedbackType.FEEDBACK) {
+            startActivity(context, Intent(context, FeedbackActivity::class.java).apply {
+                putExtra(FeedbackActivity.EXTRA_FEEDBACK_TYPE, type.slug)
+            }, null)
         }
 
-        fun show(context : Context) {
-            startActivity(context, Intent(context, FeedbackActivity::class.java), null)
+        suspend fun postFeedback(
+            name: String,
+            email: String,
+            message: String,
+            image: ImageData?,
+            type: FeedbackType
+        ) = guardConnectivity {
+            networkManager.postFeedback(
+                settings = appOpenSettingsManager.getAppOpenSettings(),
+                name = name,
+                email = email,
+                message = message,
+                image = image?.asJpegBytes(),
+                type = type
+            )
         }
     }
 
