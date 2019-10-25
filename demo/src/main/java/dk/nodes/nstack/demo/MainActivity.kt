@@ -2,8 +2,8 @@ package dk.nodes.nstack.demo
 
 import android.content.Context
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import dk.nodes.nstack.kotlin.inflater.NStackBaseContext
@@ -26,11 +26,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun hideBottomNav() {
-        bottomNavigationView.visibility = View.GONE
+        bottomNavigationView.isVisible = false
     }
 
     private fun showBottomNav() {
-        bottomNavigationView.visibility = View.VISIBLE
+        bottomNavigationView.isVisible = true
     }
 
     override fun attachBaseContext(newBase: Context) {
