@@ -10,6 +10,6 @@
         android:title="Terms" />
     <item
         android:id="@+id/rateReminderFragment"
-        android:icon="@drawable/ic_subject_black_24dp"
+        android:icon="@drawable/ic_star_black_24dp"
         android:title="Rate Reminder" />
 </menu>
