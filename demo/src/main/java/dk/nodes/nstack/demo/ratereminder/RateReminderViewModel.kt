@@ -1,8 +1,10 @@
 package dk.nodes.nstack.demo.ratereminder
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dk.nodes.nstack.demo.RateReminderActions
-import dk.nodes.nstack.demo.terms.TermsViewState
 import dk.nodes.nstack.kotlin.NStack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,12 +16,17 @@ class RateReminderViewModel : ViewModel() {
     val viewState: LiveData<RateReminderViewState> = viewStateInternal
 
     init {
-        viewStateInternal.value = RateReminderViewState(isLoading = false, shouldShowReminder = false )
+        viewStateInternal.value = RateReminderViewState(
+            isLoading = false,
+            shouldShowReminder = false
+        )
     }
 
     fun checkRateReminder() {
         viewModelScope.launch {
-            val shouldShow = withContext(Dispatchers.IO) { NStack.RateReminder.shouldShow() }
+            val shouldShow = withContext(Dispatchers.IO) {
+                NStack.RateReminder.shouldShow()
+            }
             viewStateInternal.value = viewStateInternal.value?.copy(
                     shouldShowReminder = shouldShow
             )
@@ -37,5 +44,4 @@ class RateReminderViewModel : ViewModel() {
             //RateReminderActions.rideCompleted()
         }
     }
-
 }
