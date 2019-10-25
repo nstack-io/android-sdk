@@ -66,7 +66,6 @@ object HttpClientProvider {
                     )
                 )
                 .addInterceptor(provideHttpLoggingInterceptor(debugMode))
-                .addInterceptor(NodesErrorInterceptor(GsonProvider.provideGson()))
                 .build()
         }
     }
