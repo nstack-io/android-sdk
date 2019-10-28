@@ -32,12 +32,12 @@ class RateReminderFragment : Fragment(R.layout.fragment_ratereminder) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        someActionButton.setOnClickListener {
-            viewModel.someRateMethod()
+        firstActionButton.setOnClickListener {
+            viewModel.runFirstAction()
         }
 
-        someOtherActionButton.setOnClickListener {
-            viewModel.someOtherRateMethod()
+        secondActionButton.setOnClickListener {
+            viewModel.runSecondAction()
         }
     }
 

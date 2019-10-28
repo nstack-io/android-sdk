@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/someActionButton"
+        android:id="@+id/firstActionButton"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:text="@string/nstack_rateReminder_firstAction"
         android:layout_width="wrap_content"
@@ -19,7 +19,7 @@
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/someOtherActionButton"
+        android:id="@+id/secondActionButton"
         android:text="@string/nstack_rateReminder_secondAction"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"

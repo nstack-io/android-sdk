@@ -33,15 +33,15 @@ class RateReminderViewModel : ViewModel() {
         }
     }
 
-    fun someRateMethod() {
+    fun runFirstAction() {
         viewModelScope.launch(Dispatchers.IO) {
-            RateReminderActions.rideCompleted()
+            RateReminderActions.firstaction()
         }
     }
 
-    fun someOtherRateMethod() {
+    fun runSecondAction() {
         viewModelScope.launch(Dispatchers.IO) {
-            //RateReminderActions.rideCompleted()
+            RateReminderActions.secondaction()
         }
     }
 }
