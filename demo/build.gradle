@@ -1,4 +1,4 @@
-import dk.nstack.translation.plugin.TranslationPlugin
+import dk.nstack.kotlin.plugin.TranslationPlugin
 
 apply plugin: 'com.android.application'
 
@@ -40,10 +40,12 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+
         manifestPlaceholders = [
                 appId : translation.appId,
                 apiKey: translation.apiKey,
         ]
+
     }
     buildTypes {
         debug {

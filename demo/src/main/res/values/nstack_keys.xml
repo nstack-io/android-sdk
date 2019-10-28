@@ -1,6 +1,11 @@
 <resources>
+  <string name='nstack_rateReminder_firstAction' formatted='false'>{rateReminder_firstAction}</string>
+  <string name='nstack_rateReminder_secondAction' formatted='false'>{rateReminder_secondAction}</string>
+  <string name='nstack_rateReminder_rateReminderTitle' formatted='false'>{rateReminder_rateReminderTitle}</string>
+  <string name='nstack_rateReminder_rateReminderMessage' formatted='false'>{rateReminder_rateReminderMessage}</string>
   <string name='nstack_default_yes' formatted='false'>{default_yes}</string>
   <string name='nstack_default_no' formatted='false'>{default_no}</string>
+  <string name='nstack_default_later' formatted='false'>{default_later}</string>
   <string name='nstack_terms_termsNotFound' formatted='false'>{terms_termsNotFound}</string>
   <string name='nstack_terms_acceptLabel' formatted='false'>{terms_acceptLabel}</string>
   <string name='nstack_terms_acceptedLabel' formatted='false'>{terms_acceptedLabel}</string>

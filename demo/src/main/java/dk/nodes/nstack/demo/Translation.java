@@ -6,9 +6,16 @@ package dk.nodes.nstack.demo;
  */
 
 public class Translation {
+	public final static class rateReminder {
+		public static String firstAction = "First Action";
+		public static String secondAction = "Second Action";
+		public static String rateReminderTitle = "Rate this app";
+		public static String rateReminderMessage = "It seems like you like this app, do you want to give it a rating?";
+	}
 	public final static class defaultSection {
 		public static String yes = "Yes";
-		public static String no = "No";
+		public static String no = "No thanks";
+		public static String later = "Later";
 	}
 	public final static class terms {
 		public static String termsNotFound = "Terms not found.";
