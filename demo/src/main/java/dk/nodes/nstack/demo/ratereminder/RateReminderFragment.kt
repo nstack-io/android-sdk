@@ -6,21 +6,17 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.lifecycleScope
 import dk.nodes.nstack.demo.R
 import dk.nodes.nstack.demo.Translation
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import kotlinx.android.synthetic.main.fragment_ratereminder.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class RateReminderFragment : Fragment(R.layout.fragment_ratereminder) {
 
     private lateinit var viewModel: RateReminderViewModel
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +46,7 @@ class RateReminderFragment : Fragment(R.layout.fragment_ratereminder) {
     private fun showViewState(rateReminderViewState: RateReminderViewState) {
         when {
             rateReminderViewState.shouldShowReminder -> {
-                scope.launch {
+                lifecycleScope.launch {
                     NStack.RateReminder.apply {
                         title = Translation.rateReminder.rateReminderTitle
                         message = Translation.rateReminder.rateReminderMessage
