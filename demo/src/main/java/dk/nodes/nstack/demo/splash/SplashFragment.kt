@@ -14,7 +14,7 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
     private lateinit var viewModel: SplashViewModel
 
     private val splashTimer = SplashTimer(DURATION) {
-        findNavController().navigate(R.id.mainFragment)
+        findNavController().navigate(SplashFragmentDirections.actionSplashFragmentToMainFragment())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
