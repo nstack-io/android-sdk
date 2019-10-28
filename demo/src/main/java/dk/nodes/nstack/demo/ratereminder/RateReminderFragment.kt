@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import dk.nodes.nstack.demo.R
 import dk.nodes.nstack.demo.Translation
@@ -21,7 +21,7 @@ class RateReminderFragment : Fragment(R.layout.fragment_ratereminder) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProviders.of(this)[RateReminderViewModel::class.java]
+        viewModel = ViewModelProvider(this).get(RateReminderViewModel::class.java)
         viewModel.viewState.observe(this, Observer(this::showViewState))
     }
 
