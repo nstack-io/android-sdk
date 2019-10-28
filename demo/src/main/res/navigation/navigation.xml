@@ -39,4 +39,10 @@
         android:label="Rate"
         tools:layout="@layout/fragment_ratereminder" />
 
+    <fragment
+        android:id="@+id/moreFragment"
+        android:name="dk.nodes.nstack.demo.more.MoreFragment"
+        android:label="More"
+        tools:layout="@layout/fragment_more" />
+
 </navigation>

@@ -14,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:title="@string/nstack_rateReminder_title" />
+            app:title="@string/nstack_more_title" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -26,30 +26,18 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingTop="16dp">
+            android:orientation="vertical">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/firstActionButton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/feedbackButton"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/nstack_rateReminder_firstAction"
-                android:visibility="visible"
-                tools:text="Accept"
-                tools:visibility="visible" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/secondActionButton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/nstack_rateReminder_secondAction"
-                android:visibility="visible"
-                tools:text="Accept"
-                tools:visibility="visible" />
+                android:layout_margin="16dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/nstack_home_sendFeedbackButton"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </LinearLayout>
 

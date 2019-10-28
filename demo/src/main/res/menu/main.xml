@@ -11,5 +11,10 @@
     <item
         android:id="@+id/rateReminderFragment"
         android:icon="@drawable/ic_star_black_24dp"
-        android:title="Rate Reminder" />
+        android:title="Rate" />
+
+    <item
+        android:id="@+id/moreFragment"
+        android:icon="@drawable/ic_more_horiz_black_24dp"
+        android:title="More" />
 </menu>
