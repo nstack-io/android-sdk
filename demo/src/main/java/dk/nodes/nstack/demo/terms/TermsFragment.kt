@@ -10,7 +10,7 @@ import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import dk.nodes.nstack.demo.R
 import dk.nodes.nstack.demo.Translation
 import kotlinx.android.synthetic.main.fragment_terms.*
@@ -24,7 +24,7 @@ class TermsFragment : Fragment(R.layout.fragment_terms) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProviders.of(this)[TermsViewModel::class.java]
+        viewModel = ViewModelProvider(this).get(TermsViewModel::class.java)
         viewModel.viewState.observe(this, Observer(this::showViewState))
         viewModel.loadTerms(TERMS_ID)
     }

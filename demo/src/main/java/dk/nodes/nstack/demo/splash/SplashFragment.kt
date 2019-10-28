@@ -3,7 +3,7 @@ package dk.nodes.nstack.demo.splash
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import dk.nodes.nstack.demo.R
 
@@ -14,7 +14,7 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
     private lateinit var viewModel: SplashViewModel
 
     private val splashTimer = SplashTimer(DURATION) {
-        findNavController().navigate(R.id.mainFragment)
+        findNavController().navigate(SplashFragmentDirections.actionSplashFragmentToMainFragment())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +22,7 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
 
         lifecycle.addObserver(splashTimer)
 
-        viewModel = ViewModelProviders.of(this)[SplashViewModel::class.java]
+        viewModel = ViewModelProvider(this).get(SplashViewModel::class.java)
         viewModel.viewState.observe(this, Observer(this::showViewState))
     }
 
