@@ -2,11 +2,14 @@ package dk.nodes.nstack.demo.ratereminder
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import dk.nodes.nstack.demo.R
+import dk.nodes.nstack.demo.Translation
 import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import kotlinx.android.synthetic.main.fragment_ratereminder.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,9 +51,30 @@ class RateReminderFragment : Fragment(R.layout.fragment_ratereminder) {
         when {
             rateReminderViewState.shouldShowReminder -> {
                 scope.launch {
-                    val result = NStack.RateReminder.show(requireContext())
+                    NStack.RateReminder.apply {
+                        title = Translation.rateReminder.rateReminderTitle
+                        message = Translation.rateReminder.rateReminderMessage
+                        yesButton = Translation.defaultSection.yes
+                        noButton = Translation.defaultSection.no
+                        skipButton = Translation.defaultSection.later
+                    }
+                    when (NStack.RateReminder.show(requireContext())) {
+                        RateReminderAnswer.POSITIVE -> {
+                            showToast("TODO: Go to PlayStore")
+                        }
+                        RateReminderAnswer.NEGATIVE -> {
+                            showToast("TODO: Go to feedback screen")
+                        }
+                        RateReminderAnswer.SKIP -> {
+                            showToast("TODO: Skipped")
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
