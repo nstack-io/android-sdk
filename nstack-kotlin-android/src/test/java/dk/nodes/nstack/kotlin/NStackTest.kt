@@ -206,12 +206,16 @@ internal class NStackTest {
         private const val guid = "guid"
         private const val version = "version"
         private const val oldVersion = "oldVersion"
+        private const val device = "device"
+        private const val osVersion = "osVersion"
         private val lastUpdated = Date()
         private val appOpenSettings = AppOpenSettings(
             guid = guid,
             version = version,
             oldVersion = oldVersion,
-            lastUpdated = lastUpdated
+            lastUpdated = lastUpdated,
+            device = device,
+            osVersion = osVersion
         )
 
         private val language1 =
