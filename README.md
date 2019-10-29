@@ -99,13 +99,7 @@ Minimal setup of this feature will only require to add this line:
 NStack.appOpen()
 ```
 
-Additionaly, if you care about the outcome or want to run code afterwards, you can specify this callback
-```kotlin
-NStack.appOpen { success: AppOpenCallback ->
-  // Your handling
- }
-```
-or take advantage of `Kotlin Coroutines` using `suspend` function:
+Take advantage of `Kotlin Coroutines` using `suspend` function:
 ```kotlin
   GlobalScope.launch {
       withContext(Dispatchers.IO) {
