@@ -71,22 +71,22 @@ uploadArchives {
                 inceptionYear '2015'
 
                 scm {
-                    url 'https://github.com/nodes-android/nstack-gradle'
-                    connection 'scm:https://github.com/nodes-android/nstack-gradle'
+                    url POM_SCM_URL
+                    connection POM_SCM_CONNECTION
                 }
 
                 licenses {
                     license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name POM_LICENCE_NAME
+                        url POM_LICENCE_URL
                     }
                 }
 
                 developers {
                     developer {
-                        id 'johsoe'
-                        name 'Johnny Sørensen'
-                        email 'joso@nodes.dk'
+                        id POM_DEVELOPER_ID
+                        name POM_DEVELOPER_NAME
+                        email POM_DEVELOPER_EMAIL
                     }
                 }
 
