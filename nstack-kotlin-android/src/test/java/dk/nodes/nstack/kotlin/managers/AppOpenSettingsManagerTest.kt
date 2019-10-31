@@ -4,7 +4,9 @@ import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.util.Constants
 import dk.nodes.nstack.kotlin.util.Preferences
 import dk.nodes.nstack.kotlin.util.extensions.formatted
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -53,6 +55,8 @@ internal class AppOpenSettingsManagerTest {
         every { preferencesMock.loadString(Constants.spk_nstack_guid) } returns uuid
         every { preferencesMock.loadString(Constants.spk_nstack_old_version) } returns oldVersion
         every { preferencesMock.loadString(Constants.spk_nstack_last_updated) } returns updateDate.formatted
+        every { clientAppInfoMock.deviceName }  returns "deviceName"
+        every { clientAppInfoMock.osVersion }  returns "osVersion"
 
         val settings = appOpenSettingsManager.getAppOpenSettings()
 
@@ -66,6 +70,8 @@ internal class AppOpenSettingsManagerTest {
     @Test
     fun `Test old version is current when there is no old version saved`() {
         every { preferencesMock.loadString(Constants.spk_nstack_old_version) } returns ""
+        every { clientAppInfoMock.deviceName }  returns "deviceName"
+        every { clientAppInfoMock.osVersion }  returns "osVersion"
 
         val settings = appOpenSettingsManager.getAppOpenSettings()
 
@@ -82,7 +88,10 @@ internal class AppOpenSettingsManagerTest {
                 Constants.spk_nstack_guid,
                 capture(uuidSlot)
             )
-        } answers { }
+        } just Runs
+
+        every { clientAppInfoMock.deviceName }  returns "deviceName"
+        every { clientAppInfoMock.osVersion }  returns "osVersion"
 
         val settings = appOpenSettingsManager.getAppOpenSettings()
 
