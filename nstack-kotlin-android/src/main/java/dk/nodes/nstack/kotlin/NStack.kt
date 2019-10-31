@@ -19,6 +19,7 @@ import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
+import dk.nodes.nstack.kotlin.features.messages.presentation.MessageDialog
 import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
@@ -891,6 +892,13 @@ object NStack {
                 locale = language.toString().replace("_", "-"),
                 settings = appOpenSettingsManager.getAppOpenSettings()
             )
+        }
+    }
+
+    object Messages {
+
+        fun show(context: Context, message: Message) {
+            MessageDialog(context).show(message)
         }
     }
 }
