@@ -767,6 +767,9 @@ object NStack {
         shakeDetector.start(sensorManager)
     }
 
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/rate-reminder.html">NStack - Rate Reminders Documentation</a>
+     */
     object RateReminder {
 
         var title: String = "_rate reminder"
@@ -844,6 +847,9 @@ object NStack {
         }
     }
 
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/feedback.html">NStack - Feedback Documentation</a>
+     */
     object Feedback {
 
         /**
@@ -879,6 +885,9 @@ object NStack {
         }
     }
 
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/terms.html">NStack - Terms Documentation</a>
+     */
     object Terms {
 
         /**
@@ -912,6 +921,9 @@ object NStack {
         }
     }
 
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/messages.html">NStack - Messages Documentation</a>
+     */
     object Messages {
 
         /**
