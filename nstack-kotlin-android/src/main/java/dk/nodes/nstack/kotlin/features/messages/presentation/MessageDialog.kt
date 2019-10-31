@@ -10,6 +10,8 @@ import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.models.Message
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.reflect.KFunction2
 
 internal class MessageDialog(private val context: Context) {
@@ -43,7 +45,9 @@ internal class MessageDialog(private val context: Context) {
     }
 
     private fun onOkButtonClicked(view: View) {
-        NStack.messageSeen(message)
+        GlobalScope.launch {
+            NStack.Messages.setMessageViewed(message)
+        }
         dialog.dismiss()
     }
 
