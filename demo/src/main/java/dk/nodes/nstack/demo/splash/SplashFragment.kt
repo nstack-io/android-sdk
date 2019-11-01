@@ -6,6 +6,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import dk.nodes.nstack.demo.R
+import dk.nodes.nstack.kotlin.NStack
 
 private const val DURATION = 1500L
 
@@ -27,6 +28,10 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
     }
 
     private fun showViewState(state: SplashViewState) {
+        state.message?.let {
+            NStack.Messages.show(requireContext(), it)
+        }
+
         if (state.isFinished) {
             splashTimer.finish()
         }

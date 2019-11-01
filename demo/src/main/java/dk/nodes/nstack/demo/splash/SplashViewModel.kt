@@ -19,7 +19,8 @@ class SplashViewModel : ViewModel() {
     init {
         viewStateInternal.value = SplashViewState(
             isLoading = true,
-            isFinished = false
+            isFinished = false,
+            message = null
         )
         viewModelScope.launch {
             when (val result = withContext(Dispatchers.IO) {
@@ -29,7 +30,8 @@ class SplashViewModel : ViewModel() {
                     Log.d("AppOpenResult: Success", result.toString())
                     viewStateInternal.value = viewStateInternal.value?.copy(
                         isLoading = false,
-                        isFinished = true
+                        isFinished = true,
+                        message = result.value.data.message
                     )
                 }
                 is Result.Error -> {

@@ -12,10 +12,10 @@ import dk.nodes.nstack.kotlin.managers.ConnectionManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.AppOpenData
 import dk.nodes.nstack.kotlin.models.AppOpenMeta
-import dk.nodes.nstack.kotlin.models.AppOpen
+import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.Language
@@ -165,12 +165,20 @@ internal class NStackTest {
 
     @Test
     fun `Test message seen`() {
-        val messageId = 101
-        val message = Message(messageId, "", "")
+        val message = Message(
+            id = 101,
+            showSetting = Message.ShowSetting.ONCE,
+            message = "",
+            url = null,
+            localization = Message.Localization(
+                okBtn = "",
+                urlBtn = ""
+            )
+        )
 
         NStack.messageSeen(message)
 
-        verify { networkManagerMock.postMessageSeen(guid, messageId) }
+        verify { networkManagerMock.postMessageSeen(guid, message.id) }
     }
 
     @Test

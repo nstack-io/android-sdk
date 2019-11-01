@@ -15,10 +15,12 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
+import dk.nodes.nstack.kotlin.features.messages.presentation.MessageDialog
 import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
@@ -406,6 +408,13 @@ object NStack {
     /**
      * Call it to notify that the message was seen and doesn't need to appear anymore
      */
+    @Deprecated(
+        message = "Messages features are now accessible via NStack.Messages object",
+        replaceWith = ReplaceWith(
+            expression = "NStack.Messages.setMessageViewed(message)",
+            imports = ["dk.nodes.nstack.kotlin.NStack"]
+        )
+    )
     fun messageSeen(message: Message) {
         val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
         networkManager.postMessageSeen(appOpenSettings.guid, message.id)
@@ -758,6 +767,9 @@ object NStack {
         shakeDetector.start(sensorManager)
     }
 
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/rate-reminder.html">NStack - Rate Reminders Documentation</a>
+     */
     object RateReminder {
 
         var title: String = "_rate reminder"
@@ -835,14 +847,26 @@ object NStack {
         }
     }
 
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/feedback.html">NStack - Feedback Documentation</a>
+     */
     object Feedback {
 
+        /**
+         * Shows an activity where users can compose their feedback.
+         */
         fun show(context: Context, type : FeedbackType = FeedbackType.FEEDBACK) {
             startActivity(context, Intent(context, FeedbackActivity::class.java).apply {
                 putExtra(FeedbackActivity.EXTRA_FEEDBACK_TYPE, type.slug)
             }, null)
         }
 
+        /**
+         * Sends user feedback to NStack.
+         *
+         * This will automatically be called when you use [show]. You should only need to manually
+         * use this function when writing custom views.
+         */
         suspend fun postFeedback(
             name: String,
             email: String,
@@ -861,6 +885,9 @@ object NStack {
         }
     }
 
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/terms.html">NStack - Terms Documentation</a>
+     */
     object Terms {
 
         /**
@@ -882,7 +909,7 @@ object NStack {
         }
 
         /**
-         * Set a version of terms to viewed by this app instance (GUID)
+         * Sets a version of terms to viewed by this app instance (GUID)
          */
         suspend fun setTermsViewed(versionID: Long, userID: String) = guardConnectivity {
             networkManager.setTermsViewed(
@@ -891,6 +918,30 @@ object NStack {
                 locale = language.toString().replace("_", "-"),
                 settings = appOpenSettingsManager.getAppOpenSettings()
             )
+        }
+    }
+
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/messages.html">NStack - Messages Documentation</a>
+     */
+    object Messages {
+
+        /**
+         * Shows an alert dialog presenting [message].
+         */
+        fun show(context: Context, message: Message) {
+            MessageDialog(context).show(message)
+        }
+
+        /**
+         * Sets a message to viewed by this app instance (GUID).
+         *
+         * This will automatically be called when you use [show]. You should only need to manually
+         * use this function when writing custom views.
+         */
+        suspend fun setMessageViewed(message: Message) = guardConnectivity {
+            val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
+            networkManager.postMessageSeen(appOpenSettings, message.id)
         }
     }
 }

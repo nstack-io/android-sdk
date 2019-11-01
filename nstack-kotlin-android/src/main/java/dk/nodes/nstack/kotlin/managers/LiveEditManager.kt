@@ -6,7 +6,6 @@ import android.os.Handler
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -120,9 +119,7 @@ internal class LiveEditManager(
         bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_edit)
         bottomSheetDialog.setOnShowListener {
-            val bottomSheetInternal =
-                bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
-            BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
         val contentView = bottomSheetDialog.findViewById<View>(R.id.contentView)
         val editText = bottomSheetDialog.findViewById<EditText>(R.id.zzz_nstack_translation_et)
@@ -233,9 +230,7 @@ internal class LiveEditManager(
                 showLiveEditDialog(view, it)
                 bottomSheetDialog.dismiss()
             }
-        val bottomSheetInternal =
-            bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
-        BottomSheetBehavior.from(bottomSheetInternal).apply {
+        bottomSheetDialog.behavior.apply {
             peekHeight = 168.dp
             isFitToContents = true
         }
@@ -255,13 +250,11 @@ internal class LiveEditManager(
         bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_proposals)
 
-        val bottomSheetInternal =
-            bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
         val recyclerView = bottomSheetDialog.findViewById<RecyclerView>(R.id.recyclerView)
         val loadingView = bottomSheetDialog.findViewById<ProgressBar>(R.id.loadingView)
         val errorTextView = bottomSheetDialog.findViewById<TextView>(R.id.errorTextView)
 
-        BottomSheetBehavior.from(bottomSheetInternal).apply {
+        bottomSheetDialog.behavior.apply {
             peekHeight = 300.dp
         }
 
@@ -332,9 +325,7 @@ internal class LiveEditManager(
         bottomSheetDialog.setNavigationBarColor()
         bottomSheetDialog.setContentView(R.layout.bottomsheet_translation_options)
         bottomSheetDialog.setOnShowListener {
-            val bottomSheetInternal =
-                bottomSheetDialog.findViewById<FrameLayout>(R.id.design_bottom_sheet)
-            BottomSheetBehavior.from(bottomSheetInternal).state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
         val optionViewProposalTextView =

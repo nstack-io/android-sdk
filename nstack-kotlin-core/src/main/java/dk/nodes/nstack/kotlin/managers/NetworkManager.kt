@@ -130,6 +130,7 @@ class NetworkManager(
     /**
      * Notifies the backend that the message has been seen
      */
+    @Deprecated("Use suspend fun postMessageSeen()")
     fun postMessageSeen(guid: String, messageId: Int) {
         FormBody.Builder().also {
             it["guid"] = guid
@@ -144,6 +145,33 @@ class NetworkManager(
                 override fun onResponse(call: Call, response: Response) {
                 }
             })
+    }
+
+    /**
+     * Notifies the backend that the message has been seen
+     */
+    suspend fun postMessageSeen(
+        settings: AppOpenSettings,
+        messageID: Int
+    ): Result<Empty> = try {
+        val requestBody = FormBody.Builder()
+            .add("guid", settings.guid)
+            .add("message_id", messageID.toString())
+            .build()
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/notify/messages/views")
+            .post(requestBody)
+            .build()
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            Result.Success(value = Empty)
+        } else {
+            Result.Error(Error.ApiError(errorCode = response.code()))
+        }
+    } catch (e: IOException) {
+        Result.Error(Error.NetworkError)
+    } catch (e: Exception) {
+        Result.Error(Error.UnknownError)
     }
 
     /**
