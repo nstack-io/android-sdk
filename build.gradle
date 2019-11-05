@@ -1,6 +1,24 @@
 buildscript {
 
+    // Username & password for Sonatype, stored in gradle.properties
+    final def _OSSRH_USERNAME = System.getenv('NEXUS_USERNAME')
+    final def _OSSRH_PASSWORD = System.getenv('NEXUS_PASSWORD')
+
+    // Artifact settings
+    final def _IS_RELEASE_VERSION = !VERSION_NAME.endsWith("SNAPSHOT")
+
     ext {
+        ossrhUsername = _OSSRH_USERNAME
+        ossrhPassword = _OSSRH_PASSWORD
+
+        getPublishRepositoryUrl = {
+            return _IS_RELEASE_VERSION ? RELEASE_REPO_URL : SNAPSHOT_REPO_URL
+        }
+
+        isSigningRequired = {
+            return _IS_RELEASE_VERSION
+        }
+
         //If the Gradle plugin version is X.Y.Z, then the Lint library version is X+23.Y.Z.
         lintVersion = '26.4.0'
         gradlePluginVersion = '3.4.0'

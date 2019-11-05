@@ -3,19 +3,6 @@ apply plugin: 'maven-publish'
 apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'signing'
 
-// Username & password for Sonatype, stored in gradle.properties
-def _ossrhUsername = System.getenv('NEXUS_USERNAME')
-def _ossrhPassword = System.getenv('NEXUS_PASSWORD')
-
-// Artifact settings
-final def _isReleaseVersion = !VERSION_NAME.endsWith("SNAPSHOT")
-
-nexusStaging {
-    packageGroup = "dk.nodes"
-    delayBetweenRetriesInMillis = 4000
-    stagingProfileId = "5a414403b5bf75"
-}
-
 afterEvaluate {
 
     task androidJavadoc(type: Javadoc) {
@@ -83,14 +70,11 @@ afterEvaluate {
         repositories {
             maven {
                 credentials {
-                    username _ossrhUsername
-                    password _ossrhPassword
+                    username ossrhUsername
+                    password ossrhPassword
                 }
 
-                final def releasesRepoUrl = RELEASE_REPO_URL
-                final def snapshotsRepoUrl = SNAPSHOT_REPO_URL
-
-                url = _isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
+                url = getPublishRepositoryUrl()
             }
         }
 
@@ -104,7 +88,7 @@ afterEvaluate {
 
         signing {
             required {
-                return _isReleaseVersion
+                return isSigningRequired()
             }
 
             sign publishing.publications.nstackKotlinAar
