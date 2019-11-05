@@ -50,7 +50,7 @@ afterEvaluate {
                     version = VERSION_NAME
                     url = TRANSLATION_URL
 
-                    inceptionYear = '2015'
+                    inceptionYear = POM_INCEPTION_YEAR
 
                     licenses {
                         license {
