@@ -7,5 +7,5 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation 'com.android.tools.build:gradle:3.5.1'
+    implementation 'com.android.tools.build:gradle:3.5.2'
 }
