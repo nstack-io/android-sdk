@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
-apply from: 'nstack-kotlin-core-publish.gradle'
+apply from: 'publish-nstack-kotlin-core.gradle'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
