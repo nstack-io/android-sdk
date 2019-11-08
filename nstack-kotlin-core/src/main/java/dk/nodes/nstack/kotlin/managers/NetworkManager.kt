@@ -209,7 +209,7 @@ class NetworkManager(
         slug: String
     ): Result<String> = try {
         val request = Request.Builder()
-            .url("$baseUrl/api/v1/content/responses/$slug")
+            .url("$baseUrl/api/v2/content/responses/$slug")
             .get()
             .build()
         val response = client.newCall(request).execute()
