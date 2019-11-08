@@ -944,4 +944,24 @@ object NStack {
             networkManager.postMessageSeen(appOpenSettings, message.id)
         }
     }
+
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/features/collections.html">NStack - Collections Documentation</a>
+     */
+    object Collections {
+
+        /**
+         * Returns the collection for given [collectionID] as JSON String.
+         */
+        suspend fun getCollection(collectionID: Long) = guardConnectivity {
+            networkManager.getCollection(collectionID)
+        }
+
+        /**
+         * Returns the collection item for given [collectionID] and [itemID] as JSON String.
+         */
+        suspend fun getCollectionItem(collectionID: Long, itemID: Long) = guardConnectivity {
+            networkManager.getCollectionItem(collectionID, itemID)
+        }
+    }
 }
