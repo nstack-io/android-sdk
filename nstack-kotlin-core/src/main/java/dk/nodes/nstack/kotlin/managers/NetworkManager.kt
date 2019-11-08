@@ -203,49 +203,26 @@ class NetworkManager(
     }
 
     /**
-     * Get a Collection Response (as String) from NStack collections
+     * Get a Response (as String) from NStack Responses
      */
-    fun getResponse(
-        slug: String,
-        onSuccess: (String) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
+    suspend fun getResponse(
+        slug: String
+    ): Result<String> = try {
         val request = Request.Builder()
             .url("$baseUrl/api/v1/content/responses/$slug")
             .get()
             .build()
-
-        client
-            .newCall(request)
-            .enqueue(object : Callback {
-
-                override fun onFailure(call: Call, e: IOException) {
-                    onError.invoke(e)
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    val responseBody = response.body()
-                    when {
-                        response.isSuccessful && responseBody != null -> onSuccess.invoke(
-                            responseBody.string()
-                        )
-                        else -> onError.invoke(RuntimeException("$slug returned: ${response.code()}"))
-                    }
-                }
-            })
-    }
-
-    /**
-     * Get a Collection Response (as String) synchronously in a coroutine from NStack collections
-     */
-    suspend fun getResponseSync(slug: String): String? {
-        val response = Request.Builder()["$baseUrl/api/v1/content/responses/$slug"]
-        val responseBody = response.body()
-
-        return when {
-            response.isSuccessful && responseBody != null -> responseBody.string()
-            else -> null
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            val responseString = response.body().toString()
+            Result.Success(value = responseString)
+        } else {
+            Result.Error(Error.ApiError(errorCode = response.code()))
         }
+    } catch (e: IOException) {
+        Result.Error(Error.NetworkError)
+    } catch (e: Exception) {
+        Result.Error(Error.UnknownError)
     }
 
     fun postProposal(
@@ -412,7 +389,7 @@ class NetworkManager(
         email: String,
         message: String,
         image: ByteArray?,
-        type : FeedbackType
+        type: FeedbackType
     ): Result<Empty> = try {
         val mediaType = MediaType.parse("image/jpg")
 
