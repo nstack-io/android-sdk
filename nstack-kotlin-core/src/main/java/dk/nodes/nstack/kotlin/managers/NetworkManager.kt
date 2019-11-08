@@ -255,7 +255,7 @@ class NetworkManager(
         collectionID: Long
     ): Result<String> = try {
         val request = Request.Builder()
-            .url("$baseUrl/api/v2/content/collections/$collectionID") // TODO
+            .url("$baseUrl/api/v2/content/collections/$collectionID")
             .get()
             .build()
         val response = client.newCall(request).execute()
