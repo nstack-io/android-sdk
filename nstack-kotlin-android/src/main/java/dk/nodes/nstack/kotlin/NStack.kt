@@ -930,7 +930,7 @@ object NStack {
     object Responses {
 
         /**
-         * Returns the response for given [slug]
+         * Returns the response for given [slug] as JSON String.
          */
         suspend fun getResponse(slug: String) = guardConnectivity {
             networkManager.getResponse(slug)
