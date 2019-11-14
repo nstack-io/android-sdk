@@ -114,23 +114,14 @@ Take advantage of `Kotlin Coroutines` using `suspend` function:
 ```
 
 
-## Collections
-The purpose of the Collections feature in NStack is to enable you, as a client, to be able to control different data sets that are shown in the app. You can learn more about collections [here](https://nstack-io.github.io/documentation/docs/features/collections.html)
+## Responses
+The purpose of the Responses feature in NStack is to enable you, as a client, to be able to control different data sets that are shown in the app. You can learn more about Responses [here](https://nstack-io.github.io/documentation/docs/features/responses.html)
 
-In your application, you can obtain your collections either by using method with callback, or use power of Kotlin Coroutines with the `suspend` method.
-
-Example using callback method:
-```kotlin
-  NStack.getCollectionResponse("slug",
-      onSuccess = { response: String -> doSomething(response) },
-      onError = {error: Exception -> handleError(error) }
-  )
-```
-Example with `Coroutines`:
+Example:
 ```kotlin
 GlobalScope.launch {
     withContext(Dispatchers.IO) {
-      val response: String? = NStack.getCollectionResponse("slug")
+      val response: Result<String> = NStack.Responses.getResponse("slug")
       doSomething(response)
   }
 }

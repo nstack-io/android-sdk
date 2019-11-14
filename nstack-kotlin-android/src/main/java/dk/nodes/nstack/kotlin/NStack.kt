@@ -431,27 +431,6 @@ object NStack {
     }
 
     /**
-     * Call it to get a Response created in Collection in the given NStack application
-     * @param slug - copy paste the text slug from the list of responses
-     */
-    fun getCollectionResponse(
-        slug: String,
-        onSuccess: (String) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        networkManager.getResponse(slug, onSuccess, onError)
-    }
-
-    /**
-     * Call it to get a Response created in Collection in the given NStack application
-     * This is the coroutine version for Kotlin
-     * @param slug - copy paste the text slug from the list of responses
-     */
-    suspend fun getCollectionResponse(slug: String): String? {
-        return networkManager.getResponseSync(slug)
-    }
-
-    /**
      * Triggers translation and add view to cached views
      */
     fun setTranslation(
@@ -942,6 +921,19 @@ object NStack {
         suspend fun setMessageViewed(message: Message) = guardConnectivity {
             val appOpenSettings = appOpenSettingsManager.getAppOpenSettings()
             networkManager.postMessageSeen(appOpenSettings, message.id)
+        }
+    }
+
+    /**
+     * @see <a href="https://nstack-io.github.io/documentation/docs/guides/Android/android-responses.html">NStack - Responses Documentation</a>
+     */
+    object Responses {
+
+        /**
+         * Returns the response for given [slug] as JSON String.
+         */
+        suspend fun getResponse(slug: String) = guardConnectivity {
+            networkManager.getResponse(slug)
         }
     }
 
