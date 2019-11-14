@@ -225,6 +225,53 @@ class NetworkManager(
         Result.Error(Error.UnknownError)
     }
 
+    /**
+     * Get a Collection (as String) from NStack Collections
+     */
+    suspend fun getCollection(
+        collectionID: Long
+    ): Result<String> = try {
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/content/collections/$collectionID")
+            .get()
+            .build()
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            val responseString = response.body().toString()
+            Result.Success(value = responseString)
+        } else {
+            Result.Error(Error.ApiError(errorCode = response.code()))
+        }
+    } catch (e: IOException) {
+        Result.Error(Error.NetworkError)
+    } catch (e: Exception) {
+        Result.Error(Error.UnknownError)
+    }
+
+    /**
+     * Get a Collection Item (as String) from NStack Collections
+     */
+    suspend fun getCollectionItem(
+        collectionID: Long,
+        itemID : Long
+    ): Result<String> = try {
+        val request = Request.Builder()
+            .url("$baseUrl/api/v2/content/collections/$collectionID/items/$itemID")
+            .get()
+            .build()
+        val response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            val responseString = response.body().toString()
+            Result.Success(value = responseString)
+        } else {
+            Result.Error(Error.ApiError(errorCode = response.code()))
+        }
+    } catch (e: IOException) {
+        Result.Error(Error.NetworkError)
+    } catch (e: Exception) {
+        Result.Error(Error.UnknownError)
+    }
+
     fun postProposal(
         settings: AppOpenSettings,
         locale: String,
