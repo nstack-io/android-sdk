@@ -39,10 +39,31 @@ class LocaleDeserializerTest {
         combinations
             .map(::JsonPrimitive)
             .forEach {
-            val locale = LocaleDeserializer().deserialize(it, null, null)
-            assertNotNull(locale); locale!!
-            assert(locale.toLanguageTag() != undefined)
-        }
+                val locale = LocaleDeserializer().deserialize(it, null, null)
+                assertNotNull(locale); locale!!
+                assert(locale.toLanguageTag() != undefined)
+            }
+    }
+
+    @Test
+    fun `Test underscore variations`() {
+        validLocations
+            .map { it.replace("-", "_") }
+            .map(::JsonPrimitive)
+            .forEach {
+                val locale = LocaleDeserializer().deserialize(it, null, null)
+                assertNotNull(locale); locale!!
+                assert(locale.toLanguageTag() != undefined)
+            }
+        val combinations = listOf("en-BR", "en-DK", "pt-CZ", "da-UK")
+        combinations
+            .map { it.replace("-", "_") }
+            .map(::JsonPrimitive)
+            .forEach {
+                val locale = LocaleDeserializer().deserialize(it, null, null)
+                assertNotNull(locale); locale!!
+                assert(locale.toLanguageTag() != undefined)
+            }
     }
 
     @Test

@@ -12,6 +12,26 @@ class LocaleDeserializer : JsonDeserializer<Locale> {
         typeOfT: Type?,
         context: JsonDeserializationContext?
     ): Locale? {
-        return json?.asString?.let(Locale::forLanguageTag)
+
+        return json?.asString?.let {
+            val locale = Locale.forLanguageTag(it)
+            if (locale.toLanguageTag() != "und") {
+                locale
+            } else {
+                val split = it.split("_", "-")
+                if (split.size == 3) {
+                    Locale(
+                        split[0],
+                        split[1],
+                        split[2]
+                    )
+                } else
+                    Locale(
+                        split.firstOrNull() ?: "",
+                        split.getOrNull(1) ?: ""
+                    )
+            }
+
+        }
     }
 }
