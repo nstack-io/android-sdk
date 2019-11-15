@@ -11,7 +11,7 @@ class LocaleDeserializer : JsonDeserializer<Locale> {
         json: JsonElement?,
         typeOfT: Type?,
         context: JsonDeserializationContext?
-    ): Locale {
-        return Locale.forLanguageTag(json?.asString)
+    ): Locale? {
+        return json?.asString?.let(Locale::forLanguageTag)
     }
 }

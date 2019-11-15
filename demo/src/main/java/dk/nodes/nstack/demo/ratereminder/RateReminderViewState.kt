@@ -4,4 +4,3 @@ data class RateReminderViewState(
     val isLoading: Boolean,
     val shouldShowReminder: Boolean
 )
-

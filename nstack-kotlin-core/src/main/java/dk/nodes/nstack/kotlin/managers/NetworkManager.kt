@@ -380,7 +380,7 @@ class NetworkManager(
         FormBody.Builder().also {
             it["guid"] = settings.guid
             it["answer"] = answer
-        }.post("$baseUrl/api/v2/notify/rate_reminder_v2/${rateReminderId}/answers")
+        }.post("$baseUrl/api/v2/notify/rate_reminder_v2/$rateReminderId/answers")
     }
 
     suspend fun postFeedback(

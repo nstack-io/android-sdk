@@ -385,11 +385,11 @@ object NStack {
     private suspend fun handleLocalizeIndex(index: LocalizeIndex) {
         if (index.shouldUpdate) {
             val translation = networkManager.loadTranslation(index.url) ?: return
-            prefManager.setTranslations(index.language.locale, translation)
+            prefManager.setTranslations(index.language.locale ?: defaultLanguage, translation)
 
             try {
                 networkLanguages = networkLanguages?.toMutableMap()?.apply {
-                    put(index.language.locale, translation.asJsonObject ?: return@apply)
+                    put(index.language.locale ?: defaultLanguage, translation.asJsonObject ?: return@apply)
                 }
             } catch (e: Exception) {
                 NLog.e(this, e.toString())
@@ -398,10 +398,10 @@ object NStack {
             appOpenSettingsManager.setUpdateDate()
         }
         if (index.language.isDefault) {
-            defaultLanguage = index.language.locale
+            defaultLanguage = index.language.locale ?: defaultLanguage
         }
         if (index.language.isBestFit) {
-            language = index.language.locale
+            language = index.language.locale ?: defaultLanguage
         }
     }
 
@@ -834,7 +834,7 @@ object NStack {
         /**
          * Shows an activity where users can compose their feedback.
          */
-        fun show(context: Context, type : FeedbackType = FeedbackType.FEEDBACK) {
+        fun show(context: Context, type: FeedbackType = FeedbackType.FEEDBACK) {
             startActivity(context, Intent(context, FeedbackActivity::class.java).apply {
                 putExtra(FeedbackActivity.EXTRA_FEEDBACK_TYPE, type.slug)
             }, null)
