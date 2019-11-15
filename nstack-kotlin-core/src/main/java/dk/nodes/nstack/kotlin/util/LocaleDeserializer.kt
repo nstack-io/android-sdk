@@ -31,7 +31,6 @@ class LocaleDeserializer : JsonDeserializer<Locale> {
                         split.getOrNull(1) ?: ""
                     )
             }
-
         }
     }
 }

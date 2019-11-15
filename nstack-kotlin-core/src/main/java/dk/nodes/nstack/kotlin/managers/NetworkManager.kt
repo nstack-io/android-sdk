@@ -253,7 +253,7 @@ class NetworkManager(
      */
     suspend fun getCollectionItem(
         collectionID: Long,
-        itemID : Long
+        itemID: Long
     ): Result<String> = try {
         val request = Request.Builder()
             .url("$baseUrl/api/v2/content/collections/$collectionID/items/$itemID")
