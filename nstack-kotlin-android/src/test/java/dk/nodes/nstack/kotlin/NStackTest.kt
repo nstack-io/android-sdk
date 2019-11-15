@@ -145,9 +145,9 @@ internal class NStackTest {
 
         val result = runBlocking { NStack.appOpen() }
         assert(result is Result.Success)
-        verify { prefManagerMock.setTranslations(language1.locale, translations1) }
-        verify { prefManagerMock.setTranslations(language2.locale, translations2) }
-        verify(exactly = 0) { prefManagerMock.setTranslations(language3.locale, any()) }
+        verify { prefManagerMock.setTranslations(language1.locale!!, translations1) }
+        verify { prefManagerMock.setTranslations(language2.locale!!, translations2) }
+        verify(exactly = 0) { prefManagerMock.setTranslations(language3.locale!!, any()) }
         assert(NStack.defaultLanguage == language2.locale)
     }
 

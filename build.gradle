@@ -24,7 +24,7 @@ buildscript {
         gradlePluginVersion = '3.4.0'
 
         kotlinx_version = '1.3.1'
-        kotlin_version = '1.3.50'
+        kotlin_version = '1.3.60'
         dokkaVersion = '0.9.17'
     }
 

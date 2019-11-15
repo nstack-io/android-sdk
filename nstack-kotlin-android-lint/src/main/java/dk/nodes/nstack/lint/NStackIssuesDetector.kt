@@ -123,7 +123,6 @@ class NStackIssuesDetector :
         reference: UReferenceExpression,
         referenced: PsiElement
     ) {
-
     }
 
     override fun createUastHandler(context: JavaContext): UElementHandler? {
