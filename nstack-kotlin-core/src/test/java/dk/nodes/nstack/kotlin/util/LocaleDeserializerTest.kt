@@ -34,6 +34,18 @@ class LocaleDeserializerTest {
     }
 
     @Test
+    fun `Test combinations`() {
+        val combinations = listOf("en-BR", "en-DK", "pt-CZ", "da-UK")
+        combinations
+            .map(::JsonPrimitive)
+            .forEach {
+            val locale = LocaleDeserializer().deserialize(it, null, null)
+            assertNotNull(locale); locale!!
+            assert(locale.toLanguageTag() != undefined)
+        }
+    }
+
+    @Test
     fun `Test invalid`() {
         // Add more
         val invalids = listOf("asdaszdasd").map(::JsonPrimitive)
