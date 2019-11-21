@@ -1,7 +1,6 @@
 # Built application files
 *.apk
 *.ap_
-.idea/
 
 # Files for the ART/Dalvik VM
 *.dex
@@ -35,11 +34,22 @@ captures/
 
 # Intellij
 *.iml
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/gradle.xml
-.idea/dictionaries
-.idea/libraries
+
+# Ignore all items in the .idea directory, but not the directory itself
+.idea/*
+
+# Exclude the codeStyles directory from being ignored, but still ignore all files inside it
+!.idea/codeStyles/
+.idea/codeStyles/*
+
+# Do the same for the inspectionProfiles directory
+!.idea/inspectionProfiles/
+.idea/inspectionProfiles/*
+
+# Exclude following files from the previous two directories from being ignored
+!.idea/codeStyles/codeStyleConfig.xml
+!.idea/inspectionProfiles/profiles_settings.xml
+!.idea/inspectionProfiles/ktlint.xml
 
 # Keystore files
 # Uncomment the following line if you do not want to check your keystore files in.
@@ -50,6 +60,8 @@ captures/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+
+*.gpg
 
 # Freeline
 freeline.py

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/mainFragment"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="Home" />
+    <item
+        android:id="@+id/termsFragment"
+        android:icon="@drawable/ic_subject_black_24dp"
+        android:title="Terms" />
+    <item
+        android:id="@+id/rateReminderFragment"
+        android:icon="@drawable/ic_star_black_24dp"
+        android:title="Rate" />
+
+    <item
+        android:id="@+id/moreFragment"
+        android:icon="@drawable/ic_more_horiz_black_24dp"
+        android:title="More" />
+</menu>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="nstack_background_tag" type="id" />
+    <item name="nstack_tag" type="id" />
+</resources>

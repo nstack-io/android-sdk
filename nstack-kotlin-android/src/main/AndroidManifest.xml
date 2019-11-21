@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="dk.nodes.nstack">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application>
+        <meta-data
+            android:name="dk.nodes.nstack.appId"
+            android:value="${appId}" />
+        <meta-data
+            android:name="dk.nodes.nstack.apiKey"
+            android:value="${apiKey}" />
+        <meta-data
+            android:name="dk.nodes.nstack.env"
+            android:value="${env}"/>
+
+        <activity android:name=".kotlin.features.feedback.presentation.FeedbackActivity" />
+    </application>
+</manifest>

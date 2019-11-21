@@ -1,0 +1,93 @@
+import dk.nstack.kotlin.plugin.TranslationPlugin
+
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+apply plugin: "androidx.navigation.safeargs.kotlin"
+
+apply plugin: TranslationPlugin
+
+translation {
+    appId = "dTyz7mezul3YJliMtsoM3z8ZhmWqDR8kJLbF"
+    apiKey = "PtmtXCGzgiKGkGrCKoRgFh0JK0uz8AUMLnGS"
+    acceptHeader = "en-US"
+    contentUrl = "https://nstack-staging.vapor.cloud/"
+}
+
+android {
+    signingConfigs {
+        release {
+            storePassword 'test1234'
+            keyAlias = 'key_test'
+            keyPassword 'test1234'
+            storeFile file('/Users/lucassales/StudioProjects/nstack-kotlin/demo/keystore')
+        }
+    }
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId "dk.nodes.nstack.nstackkotlintest"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+
+        manifestPlaceholders = [
+                appId : translation.appId,
+                apiKey: translation.apiKey,
+        ]
+
+    }
+    buildTypes {
+        debug {
+            manifestPlaceholders = [
+                    env: 'staging'
+            ]
+        }
+        release {
+            manifestPlaceholders = [
+                    env: 'production'
+            ]
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation "androidx.appcompat:appcompat:1.1.0"
+    implementation "androidx.core:core-ktx:1.1.0"
+    implementation "androidx.fragment:fragment-ktx:1.1.0"
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0-rc02"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-rc02"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-rc02"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-rc02"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.1.0"
+    implementation "androidx.navigation:navigation-ui-ktx:2.1.0"
+    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+
+    implementation 'com.google.android.material:material:1.1.0-beta01'
+
+
+    implementation project(':nstack-kotlin-android')
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="dk.nodes.nstack.demo.splash.SplashFragment"
+        android:label="Splash"
+        tools:layout="@layout/fragment_splash">
+
+        <action
+            android:id="@+id/action_splashFragment_to_mainFragment"
+            app:destination="@+id/mainFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="dk.nodes.nstack.demo.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/termsFragment"
+        android:name="dk.nodes.nstack.demo.terms.TermsFragment"
+        android:label="Info"
+        tools:layout="@layout/fragment_terms" />
+
+    <fragment
+        android:id="@+id/rateReminderFragment"
+        android:name="dk.nodes.nstack.demo.ratereminder.RateReminderFragment"
+        android:label="Rate"
+        tools:layout="@layout/fragment_ratereminder" />
+
+    <fragment
+        android:id="@+id/moreFragment"
+        android:name="dk.nodes.nstack.demo.more.MoreFragment"
+        android:label="More"
+        tools:layout="@layout/fragment_more" />
+
+</navigation>

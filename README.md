@@ -99,13 +99,7 @@ Minimal setup of this feature will only require to add this line:
 NStack.appOpen()
 ```
 
-Additionaly, if you care about the outcome or want to run code afterwards, you can specify this callback
-```kotlin
-NStack.appOpen { success: AppOpenCallback ->
-  // Your handling
- }
-```
-or take advantage of `Kotlin Coroutines` using `suspend` function:
+Take advantage of `Kotlin Coroutines` using `suspend` function:
 ```kotlin
   GlobalScope.launch {
       withContext(Dispatchers.IO) {
@@ -119,50 +113,15 @@ or take advantage of `Kotlin Coroutines` using `suspend` function:
 }
 ```
 
-## Version Control
-Version control will send the result from `appOpen` to the listener for the application to handle.
-Now it's up to the app to decide how you want to handle the app update status, meaning you must provide your own way to inform the user about the update (i.e. your custom dialog and e.t.c)
 
-> **Warning: You should set this before `appOpen`**
+## Responses
+The purpose of the Responses feature in NStack is to enable you, as a client, to be able to control different data sets that are shown in the app. You can learn more about Responses [here](https://nstack-io.github.io/documentation/docs/features/responses.html)
 
-```kotlin
-NStack.onAppUpdateListener = { appUpdate ->
-    when (appUpdate.state) {
-        AppUpdateState.NONE      -> {
-            // Do nothing because there is no update
-        }
-        AppUpdateState.UPDATE    -> {
-            // Show a user a dialog that is dismissible
-        }
-        AppUpdateState.FORCE     -> {
-            // Show the user an undismissable dialog
-        }
-        AppUpdateState.CHANGELOG -> {
-            // Show change log (Not yet implemented because its never used)
-        }
-    }
-}
-```
-
-
-
-## Collections
-The purpose of the Collections feature in NStack is to enable you, as a client, to be able to control different data sets that are shown in the app. You can learn more about collections [here](https://nstack-io.github.io/documentation/docs/features/collections.html)
-
-In your application, you can obtain your collections either by using method with callback, or use power of Kotlin Coroutines with the `suspend` method.
-
-Example using callback method:
-```kotlin
-  NStack.getCollectionResponse("slug",
-      onSuccess = { response: String -> doSomething(response) },
-      onError = {error: Exception -> handleError(error) }
-  )
-```
-Example with `Coroutines`:
+Example:
 ```kotlin
 GlobalScope.launch {
     withContext(Dispatchers.IO) {
-      val response: String? = NStack.getCollectionResponse("slug")
+      val response: Result<String> = NStack.Responses.getResponse("slug")
       doSomething(response)
   }
 }
