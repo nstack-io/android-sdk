@@ -16,7 +16,7 @@ See the [NStack documentation](https://nstack-io.github.io/documentation/index.h
 2. Add NStack SDK dependency and sync your project
 ```groovy
 dependencies {
-    implementation "dk.nodes.nstack:nstack-kotlin:3.2.0"
+    implementation "dk.nodes.nstack:nstack-kotlin:3.2.2"
 }
 ```
 3. After synchronisation is complete, you can start using the SDK
@@ -49,7 +49,7 @@ Put these keys as meta-data in your `AndroidManifest.xml` like so:
 
           ....
 
-</application/>
+</application>
 ```
 
 > You can also put these values into your `build.gradle` and use placeholders in the manifest
@@ -63,8 +63,7 @@ class MyApplication : Application() {
      // Specify your Translation class where translation string will be stored
      NStack.translationClass = Translation::class.java
      // initilize the SDK
-     NStack.init(this)
-
+     NStack.init(this, BuildConfig.DEBUG)
    }
 }
 ```
@@ -91,39 +90,18 @@ override fun attachBaseContext(newBase: Context) {
 Pretty simple you just need to wrap your `BaseContext` with our custom wrapper
 
 ## App Open
-NStack's have a feature called App open, which enable apps to pull info from several features in one API request, you can learn
+App Open enables apps to pull info from several features in one API request, you can learn
 more about it [here](https://nstack-io.github.io/documentation/docs/app-open.html).
 
-Minimal setup of this feature will only require to add this line:
-```kotlin
-NStack.appOpen()
-```
-
-Take advantage of `Kotlin Coroutines` using `suspend` function:
-```kotlin
-  GlobalScope.launch {
-      withContext(Dispatchers.IO) {
-        val result: AppOpenResult = NStack.appOpen()
-        when (result) {
-          is AppOpenResult.Success -> // handle Success
-          is AppOpenResult.Failure -> // handle failure
-          is AppOpenResult.NoInternet -> // handle when offline
-        }
-    }
-}
-```
-
-
-## Responses
-The purpose of the Responses feature in NStack is to enable you, as a client, to be able to control different data sets that are shown in the app. You can learn more about Responses [here](https://nstack-io.github.io/documentation/docs/features/responses.html)
-
-Example:
+Minimal setup requires calling following function:
 ```kotlin
 GlobalScope.launch {
-    withContext(Dispatchers.IO) {
-      val response: Result<String> = NStack.Responses.getResponse("slug")
-      doSomething(response)
-  }
+    when (val result = withContext(Dispatchers.IO) {
+        NStack.appOpen()
+    }) {
+        is Result.Success -> { }
+        is Result.Error -> { }
+    }
 }
 ```
 
