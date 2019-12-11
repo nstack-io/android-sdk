@@ -14,7 +14,6 @@ data class RateReminder(
     val link: String
 )
 
-//  {"data":{"id":13,"points_to_trigger":2,"days_delay_on_skip":0,"localization":{"title":"Rate the app","body":"We can see you like the application. Would you like to rate it?","yesBtn":"Yes","laterBtn":"Later","noBtn":"No"}}}
 data class RateReminder2(
     val id: Int,
     val title: String,
