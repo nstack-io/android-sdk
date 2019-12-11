@@ -27,13 +27,15 @@ data class RateReminder2(
     companion object {
         fun parse(jsonObject: JsonObject): RateReminder2? {
             return try {
+                val data = jsonObject.getAsJsonObject("data")
+                val localization = jsonObject.getAsJsonObject("data").getAsJsonObject("localization")
                 RateReminder2(
-                        id = jsonObject.getAsJsonObject("data").getAsJsonPrimitive("id").asInt,
-                        title = jsonObject.getAsJsonObject("data").getAsJsonObject("localization").getAsJsonObject("title").asString,
-                        body = jsonObject.getAsJsonObject("data").getAsJsonObject("localization").getAsJsonObject("body").asString,
-                        yesButton = jsonObject.getAsJsonObject("data").getAsJsonObject("localization").getAsJsonObject("yesBtn").asString,
-                        laterButton = jsonObject.getAsJsonObject("data").getAsJsonObject("localization").getAsJsonObject("laterBtn").asString,
-                        noButton = jsonObject.getAsJsonObject("data").getAsJsonObject("localization").getAsJsonObject("noBtn").asString
+                        id = data.getAsJsonPrimitive("id").asInt,
+                        title = localization.getAsJsonObject("title").asString,
+                        body = localization.getAsJsonObject("body").asString,
+                        yesButton = localization.getAsJsonObject("yesBtn").asString,
+                        laterButton = localization.getAsJsonObject("laterBtn").asString,
+                        noButton = localization.getAsJsonObject("noBtn").asString
                 )
             } catch (e: Exception) {
                 null
