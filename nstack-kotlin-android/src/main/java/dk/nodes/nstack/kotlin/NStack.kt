@@ -771,6 +771,11 @@ object NStack {
         suspend fun shouldShow(): Boolean {
             return networkManager.getRateReminder2(settings)?.also {
                 rateReminderId = it.id
+                title = it.title
+                message = it.body
+                yesButton = it.yesButton
+                noButton = it.noButton
+                skipButton = it.laterButton
             } != null
         }
 
