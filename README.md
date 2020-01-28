@@ -21,7 +21,20 @@ dependencies {
 ```
 3. After synchronisation is complete, you can start using the SDK
 
+#### Snapshots
 
+If you need to target SNAPSHOT releases you depend on following repositories:
+
+```groovy
+repositories {
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+}
+
+dependencies {
+    implementation "dk.nodes.nstack:nstack-kotlin:x.x.x-SNAPSHOT"
+}
+```
 
 ### ⚒ Configuration
  In order to use NStack SDK you have to initilize and configure it first.
