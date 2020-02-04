@@ -1,5 +1,4 @@
 package dk.nodes.nstack.kotlin.models
-import com.google.gson.annotations.SerializedName
 
 import com.google.gson.annotations.SerializedName
 
