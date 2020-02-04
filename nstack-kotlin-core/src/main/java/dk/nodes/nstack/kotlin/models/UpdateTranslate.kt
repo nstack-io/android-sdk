@@ -1,4 +1,5 @@
 package dk.nodes.nstack.kotlin.models
+import com.google.gson.annotations.SerializedName
 
 import com.google.gson.annotations.SerializedName
 
@@ -10,5 +11,4 @@ data class UpdateTranslate(
     val positiveButton: String,
     @SerializedName("negativeBtn", alternate = ["negativeButton"])
     val negativeButton: String
-
 )
