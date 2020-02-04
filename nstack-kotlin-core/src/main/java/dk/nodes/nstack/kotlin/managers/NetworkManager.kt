@@ -406,7 +406,7 @@ class NetworkManager(
         settings: AppOpenSettings
     ): RateReminder2? {
         return Request.Builder()["$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}"]
-            .parseJson { RateReminder2(it) }
+            .parseJson { RateReminder2.parse(it) }
     }
 
     suspend fun postRateReminderAction(

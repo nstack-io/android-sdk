@@ -1,9 +1,14 @@
 package dk.nodes.nstack.kotlin.models
 import com.google.gson.annotations.SerializedName
 
+import com.google.gson.annotations.SerializedName
+
 data class UpdateTranslate(
-        val title: String,
-        val message: String,
-        @SerializedName("positiveBtn") val positiveButton: String,
-        @SerializedName("negativeBtn") val negativeButton: String
+    @SerializedName("title", alternate = ["updateHeader", "forceHeader", "newInVersionHeader"])
+    val title: String,
+    val message: String,
+    @SerializedName("positiveBtn", alternate = ["positiveButton"])
+    val positiveButton: String,
+    @SerializedName("negativeBtn", alternate = ["negativeButton"])
+    val negativeButton: String
 )
