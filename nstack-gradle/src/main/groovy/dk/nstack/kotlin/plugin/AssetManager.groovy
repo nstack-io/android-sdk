@@ -52,7 +52,7 @@ class AssetManager {
     static Map saveAllTranslationsToAssets() {
         checkIfAssetsFolderExists()
 
-        String url = TranslationPlugin.project.translation.contentUrl + "api/v2/content/localize/resources/platforms/mobile"
+        String url = TranslationPlugin.project.translation.contentUrl + "api/v2/content/localize/resources/platforms/mobile?dev=true"
         String indexJson = Util.getTextFromUrl(url)
         if (indexJson.isEmpty()) {
             return new HashMap()
