@@ -77,9 +77,12 @@ class TranslationPlugin implements Plugin<Project> {
     }
 
     private static void generateRateReminderActions() {
-        getRateReminderActionsPath()
         def packageName = project.translation.modelPath
         def enumString = RateReminderActionsGenerator.generateActions(packageName)
+        if (enumString.isEmpty()) {
+            return
+        }
+        getRateReminderActionsPath()
         def enumFile = new File(project.translation.classPath)
         if (!enumFile.exists()) {
             enumFile = new File('app/' + project.translation.classPath)
