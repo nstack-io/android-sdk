@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.InstallState
@@ -22,6 +23,7 @@ import dk.nodes.nstack.kotlin.models.state
 import dk.nodes.nstack.kotlin.models.update
 import kotlinx.android.synthetic.main.fragment_app_update.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -38,9 +40,20 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
         setupNStackUpdate()
         setupPlaystoreUpdate()
         setupIntegratedUpdate()
-
+        setupNewUpdate()
         // Before starting an update, register a listener for updates.
         appUpdateManager.registerListener(listener)
+    }
+
+    private fun setupNewUpdate() {
+        newUpdateBtn.setOnClickListener {
+            NStack.checkForAppUpdate({
+                ProcessLifecycleOwner.get().lifecycleScope.launch {
+                    val result = NStack.updateApp(it)
+                    showToast(result.toString())
+                }
+            }, Timber::e)
+        }
     }
 
     private fun setupIntegratedUpdate() {

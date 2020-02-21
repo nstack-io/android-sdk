@@ -15,7 +15,19 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.InstallState
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import dk.nodes.nstack.kotlin.NStack.Messages.show
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateActivity
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateResult
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
@@ -76,6 +88,7 @@ import kotlin.coroutines.suspendCoroutine
 @SuppressLint("StaticFieldLeak", "LogNotTimber")
 object NStack {
 
+    private const val AppUpdateRequestCode: Int = 16656
     // Has our app been started yet?
     private var isInitialized: Boolean = false
 
@@ -116,6 +129,7 @@ object NStack {
     private lateinit var contextWrapper: ContextWrapper
     private lateinit var mainMenuDisplayer: MainMenuDisplayer
     private lateinit var termsRepository: TermsRepository
+    internal lateinit var appUpdateManager: AppUpdateManager
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
@@ -129,6 +143,11 @@ object NStack {
     private val plugins = mutableListOf<Any>()
     private val nstackViewPlugins: List<NStackViewPlugin>
         get() = plugins.filterIsInstance<NStackViewPlugin>()
+
+    // Create a listener to track request state updates.
+    private val installStatusListener = { state: InstallState ->
+        // Show module progress, log state, or install the update.
+    }
 
     /**
      * Device Change Broadcast Listener
@@ -294,7 +313,7 @@ object NStack {
         contextWrapper = nstackModule.provideContextWrapper()
         networkManager = nstackModule.provideNetworkManager()
         mainMenuDisplayer = createMainMenuDisplayer(context)
-
+        appUpdateManager = AppUpdateManagerFactory.create(context)
         termsRepository = repositoryModule.provideTermsRepository()
 
         loadCacheTranslations()
@@ -305,9 +324,53 @@ object NStack {
         if (Environment(env).shouldEnableTestMode) {
             versionUpdateTestMode = true
         }
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            object : LifecycleObserver {
 
+                @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+                fun onResume() {
+                    appUpdateManager.registerListener(installStatusListener)
+                }
+
+                @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                fun onPause() {
+                    appUpdateManager.unregisterListener(installStatusListener)
+                }
+            }
+        )
         isInitialized = true
     }
+
+    fun checkForAppUpdate(successBlock: (AppUpdateInfo) -> Unit, errorBlock: (Throwable) -> Unit) {
+        appUpdateManager
+            .appUpdateInfo
+            .addOnSuccessListener(successBlock)
+        appUpdateManager
+            .appUpdateInfo
+            .addOnFailureListener(errorBlock)
+    }
+
+    suspend fun updateApp(
+        appUpdateInfo: AppUpdateInfo,
+        updateStrategy: Int = AppUpdateType.FLEXIBLE
+    ) =
+        suspendCoroutine<InAppUpdateResult> { continuation ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+
+                val foregroundActivity =
+                    activeActivityHolder?.foregroundActivity ?: return@suspendCoroutine
+                foregroundActivity.startActivity(
+                    InAppUpdateActivity.createIntent(
+                        foregroundActivity,
+                        appUpdateInfo,
+                        updateStrategy
+                    ) {
+                        continuation.resume(it)
+                    })
+            } else {
+                continuation.resume(InAppUpdateResult.Unknown)
+            }
+        }
 
     private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
 
@@ -389,7 +452,10 @@ object NStack {
 
             try {
                 networkLanguages = networkLanguages?.toMutableMap()?.apply {
-                    put(index.language.locale ?: defaultLanguage, translation.asJsonObject ?: return@apply)
+                    put(
+                        index.language.locale ?: defaultLanguage,
+                        translation.asJsonObject ?: return@apply
+                    )
                 }
             } catch (e: Exception) {
                 NLog.e(this, e.toString())
