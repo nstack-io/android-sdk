@@ -62,11 +62,11 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
     private fun setupPlaystoreUpdate() {
         playstoreUpdateBtn.setOnClickListener {
             // Returns an intent object that you use to check for an update.
-            startUpdatePlaystoreFlow(AppUpdateType.IMMEDIATE)
+            startInAppUpdate(AppUpdateType.IMMEDIATE)
         }
     }
 
-    private fun startUpdatePlaystoreFlow(updateType: Int) {
+    private fun startInAppUpdate(updateType: Int) {
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
         // Checks that the platform will allow the specified type of update.
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
@@ -132,7 +132,7 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
             .setMessage(appUpdate.update?.translate?.message ?: return)
             .setPositiveButton(appUpdate.update?.translate?.positiveButton) { dialog, _ ->
                 if (integrate) {
-                    startUpdatePlaystoreFlow(AppUpdateType.FLEXIBLE)
+                    startInAppUpdate(AppUpdateType.FLEXIBLE)
                 } else {
                     startPlayStore()
                 }
@@ -166,7 +166,7 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
             val b = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             b.setOnClickListener {
                 if (integrate) {
-                    startUpdatePlaystoreFlow(AppUpdateType.IMMEDIATE)
+                    startInAppUpdate(AppUpdateType.IMMEDIATE)
                 } else {
                     startPlayStore()
                 }
