@@ -45,4 +45,9 @@
         android:label="More"
         tools:layout="@layout/fragment_more" />
 
+    <fragment android:name="dk.nodes.nstack.demo.update.AppUpdateFragment"
+        android:id="@+id/appUpdateFragment"
+        android:label="In App Update"
+        tools:layout="@layout/fragment_app_update"/>
+
 </navigation>

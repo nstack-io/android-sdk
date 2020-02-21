@@ -17,4 +17,8 @@
         android:id="@+id/moreFragment"
         android:icon="@drawable/ic_more_horiz_black_24dp"
         android:title="More" />
+    <item
+        android:id="@+id/appUpdateFragment"
+        android:icon="@drawable/ic_more_horiz_black_24dp"
+        android:title="App Update" />
 </menu>
