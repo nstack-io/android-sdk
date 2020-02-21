@@ -62,11 +62,11 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
     private fun setupPlaystoreUpdate() {
         playstoreUpdateBtn.setOnClickListener {
             // Returns an intent object that you use to check for an update.
-            startUpdatePlaystoreFlow()
+            startUpdatePlaystoreFlow(AppUpdateType.IMMEDIATE)
         }
     }
 
-    private fun startUpdatePlaystoreFlow() {
+    private fun startUpdatePlaystoreFlow(updateType: Int) {
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
         // Checks that the platform will allow the specified type of update.
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
@@ -79,21 +79,16 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
                     showToast("Update availability unknown")
                 }
                 UpdateAvailability.UPDATE_AVAILABLE -> {
-                    if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                        showToast("App Update available and immediate")
-                        appUpdateManager.startUpdateFlowForResult(
-                            // Pass the intent that is returned by 'getAppUpdateInfo()'.
-                            appUpdateInfo,
-                            // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
-                            AppUpdateType.IMMEDIATE,
-                            // The current activity making the update request.
-                            requireActivity(),
-                            // Include a request code to later monitor this update request.
-                            AppUpdateRequestCode
-                        )
-                    } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                        showToast("App Update available and flexible")
-                    }
+                    if (appUpdateInfo.isUpdateTypeAllowed(updateType))
+                    appUpdateManager.startUpdateFlowForResult(
+                        // Pass the intent that is returned by 'getAppUpdateInfo()'.
+                        appUpdateInfo,
+                        updateType,
+                        // The current activity making the update request.
+                        requireActivity(),
+                        // Include a request code to later monitor this update request.
+                        AppUpdateRequestCode
+                    )
                 }
                 UpdateAvailability.UPDATE_NOT_AVAILABLE -> {
                     showToast("App Update not available")
@@ -152,7 +147,7 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
             .setMessage(appUpdate.update?.translate?.message ?: return)
             .setPositiveButton(appUpdate.update?.translate?.positiveButton) { dialog, _ ->
                 if (integrate) {
-                    startUpdatePlaystoreFlow()
+                    startUpdatePlaystoreFlow(AppUpdateType.FLEXIBLE)
                 } else {
                     startPlayStore()
                 }
@@ -186,7 +181,7 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
             val b = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             b.setOnClickListener {
                 if (integrate) {
-                    startUpdatePlaystoreFlow()
+                    startUpdatePlaystoreFlow(AppUpdateType.IMMEDIATE)
                 } else {
                     startPlayStore()
                 }
