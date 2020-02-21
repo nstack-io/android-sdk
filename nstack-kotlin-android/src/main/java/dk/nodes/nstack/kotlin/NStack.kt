@@ -29,6 +29,7 @@ import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.appupdate.InAppUpdateActivity
 import dk.nodes.nstack.kotlin.appupdate.InAppUpdateAvailability
 import dk.nodes.nstack.kotlin.appupdate.InAppUpdateResult
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateStrategy
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
@@ -343,7 +344,7 @@ object NStack {
         )
         isInitialized = true
     }
-    
+
 
     suspend fun checkAppUpdateAvailability(): Result<InAppUpdateAvailability> =
         suspendCoroutine { continuation ->
@@ -359,13 +360,13 @@ object NStack {
                 }
         }
 
-    suspend fun updateApp(updateStrategy: Int) =
+    suspend fun updateApp(updateStrategy: InAppUpdateStrategy) =
         suspendCoroutine<InAppUpdateResult> { continuation ->
             appUpdateManager
                 .appUpdateInfo
                 .addOnSuccessListener {
                     GlobalScope.launch(continuation.context) {
-                        continuation.resume(updateApp(it, updateStrategy))
+                        continuation.resume(updateApp(it, updateStrategy.ordinal))
                     }
                 }
             appUpdateManager

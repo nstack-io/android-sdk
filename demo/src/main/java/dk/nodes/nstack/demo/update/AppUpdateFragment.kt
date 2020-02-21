@@ -16,6 +16,7 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import dk.nodes.nstack.demo.R
 import dk.nodes.nstack.demo.extensions.showToast
 import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateStrategy
 import dk.nodes.nstack.kotlin.models.AppUpdate
 import dk.nodes.nstack.kotlin.models.AppUpdateState
 import dk.nodes.nstack.kotlin.models.Result
@@ -48,7 +49,7 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
     private fun setupNewUpdate() {
         newUpdateBtn.setOnClickListener {
             ProcessLifecycleOwner.get().lifecycleScope.launch {
-                val result = NStack.updateApp(AppUpdateType.FLEXIBLE)
+                val result = NStack.updateApp(InAppUpdateStrategy.Flexible)
                 showToast(result.toString())
             }
         }

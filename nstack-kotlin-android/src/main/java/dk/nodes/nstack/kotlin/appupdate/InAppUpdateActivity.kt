@@ -9,7 +9,7 @@ import com.google.android.play.core.install.model.ActivityResult
 import com.google.android.play.core.install.model.AppUpdateType
 import dk.nodes.nstack.kotlin.NStack
 
-class InAppUpdateActivity : Activity() {
+internal class InAppUpdateActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
