@@ -47,12 +47,10 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
 
     private fun setupNewUpdate() {
         newUpdateBtn.setOnClickListener {
-            NStack.checkForAppUpdate({
-                ProcessLifecycleOwner.get().lifecycleScope.launch {
-                    val result = NStack.updateApp(it)
-                    showToast(result.toString())
-                }
-            }, Timber::e)
+            ProcessLifecycleOwner.get().lifecycleScope.launch {
+                val result = NStack.updateApp(AppUpdateType.FLEXIBLE)
+                showToast(result.toString())
+            }
         }
     }
 

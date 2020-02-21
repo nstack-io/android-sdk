@@ -27,6 +27,7 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.appupdate.InAppUpdateActivity
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateAvailability
 import dk.nodes.nstack.kotlin.appupdate.InAppUpdateResult
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
@@ -74,6 +75,8 @@ import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -340,23 +343,45 @@ object NStack {
         )
         isInitialized = true
     }
+    
 
-    fun checkForAppUpdate(successBlock: (AppUpdateInfo) -> Unit, errorBlock: (Throwable) -> Unit) {
-        appUpdateManager
-            .appUpdateInfo
-            .addOnSuccessListener(successBlock)
-        appUpdateManager
-            .appUpdateInfo
-            .addOnFailureListener(errorBlock)
-    }
+    suspend fun checkAppUpdateAvailability(): Result<InAppUpdateAvailability> =
+        suspendCoroutine { continuation ->
+            appUpdateManager
+                .appUpdateInfo
+                .addOnSuccessListener {
+                    continuation.resume(Result.Success(InAppUpdateAvailability.fromInt(it.updateAvailability())))
+                }
+            appUpdateManager
+                .appUpdateInfo
+                .addOnFailureListener {
+                    continuation.resume(Result.Error(Error.ThrowableError(it)))
+                }
+        }
 
-    suspend fun updateApp(
+    suspend fun updateApp(updateStrategy: Int) =
+        suspendCoroutine<InAppUpdateResult> { continuation ->
+            appUpdateManager
+                .appUpdateInfo
+                .addOnSuccessListener {
+                    GlobalScope.launch(continuation.context) {
+                        continuation.resume(updateApp(it, updateStrategy))
+                    }
+                }
+            appUpdateManager
+                .appUpdateInfo
+                .addOnFailureListener {
+                    continuation.resume(InAppUpdateResult.Fail)
+                }
+
+        }
+
+    private suspend fun updateApp(
         appUpdateInfo: AppUpdateInfo,
         updateStrategy: Int = AppUpdateType.FLEXIBLE
     ) =
         suspendCoroutine<InAppUpdateResult> { continuation ->
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-
                 val foregroundActivity =
                     activeActivityHolder?.foregroundActivity ?: return@suspendCoroutine
                 foregroundActivity.startActivity(
@@ -368,7 +393,13 @@ object NStack {
                         continuation.resume(it)
                     })
             } else {
-                continuation.resume(InAppUpdateResult.Unknown)
+                continuation.resume(
+                    InAppUpdateResult.Unavailable(
+                        InAppUpdateAvailability.fromInt(
+                            appUpdateInfo.updateAvailability()
+                        )
+                    )
+                )
             }
         }
 

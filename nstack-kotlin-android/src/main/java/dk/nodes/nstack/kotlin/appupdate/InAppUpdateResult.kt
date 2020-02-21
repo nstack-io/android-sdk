@@ -5,5 +5,5 @@ sealed class InAppUpdateResult {
     object Fail: InAppUpdateResult()
     object Cancelled: InAppUpdateResult()
     object Unknown: InAppUpdateResult()
-    data class Unavailable(val code: Int): InAppUpdateResult()
+    data class Unavailable(val code: InAppUpdateAvailability): InAppUpdateResult()
 }

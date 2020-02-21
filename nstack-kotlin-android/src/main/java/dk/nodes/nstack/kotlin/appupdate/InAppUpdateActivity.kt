@@ -34,7 +34,7 @@ class InAppUpdateActivity : Activity() {
                 REQ_CODE
             )
         else {
-            onResult(InAppUpdateResult.Unavailable(appUpdateInfo.updateAvailability()))
+            onResult(InAppUpdateResult.Unavailable(InAppUpdateAvailability.fromInt(appUpdateInfo.updateAvailability())))
             finish()
         }
     }
