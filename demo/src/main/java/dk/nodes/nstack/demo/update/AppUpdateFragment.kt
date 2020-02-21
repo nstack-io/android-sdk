@@ -80,34 +80,19 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
                 }
                 UpdateAvailability.UPDATE_AVAILABLE -> {
                     if (appUpdateInfo.isUpdateTypeAllowed(updateType))
-                    appUpdateManager.startUpdateFlowForResult(
-                        // Pass the intent that is returned by 'getAppUpdateInfo()'.
-                        appUpdateInfo,
-                        updateType,
-                        // The current activity making the update request.
-                        requireActivity(),
-                        // Include a request code to later monitor this update request.
-                        AppUpdateRequestCode
-                    )
+                        appUpdateManager.startUpdateFlowForResult(
+                            // Pass the intent that is returned by 'getAppUpdateInfo()'.
+                            appUpdateInfo,
+                            updateType,
+                            // The current activity making the update request.
+                            requireActivity(),
+                            // Include a request code to later monitor this update request.
+                            AppUpdateRequestCode
+                        )
                 }
                 UpdateAvailability.UPDATE_NOT_AVAILABLE -> {
                     showToast("App Update not available")
                 }
-            }
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                // For a flexible update, use AppUpdateType.FLEXIBLE
-                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-            ) {
-                appUpdateManager.startUpdateFlowForResult(
-                    // Pass the intent that is returned by 'getAppUpdateInfo()'.
-                    appUpdateInfo,
-                    // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
-                    AppUpdateType.IMMEDIATE,
-                    // The current activity making the update request.
-                    requireActivity(),
-                    // Include a request code to later monitor this update request.
-                    AppUpdateRequestCode
-                )
             }
         }
         appUpdateInfoTask.addOnFailureListener {
