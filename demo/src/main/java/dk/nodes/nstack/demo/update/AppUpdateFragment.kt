@@ -35,70 +35,90 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        nstackUpdateBtn.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launchWhenCreated {
-                checkNStackUpdate()
-            }
-        }
-
-        playstoreUpdateBtn.setOnClickListener {
-            // Returns an intent object that you use to check for an update.
-            val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-            // Checks that the platform will allow the specified type of update.
-            appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-
-                when (appUpdateInfo.updateAvailability()) {
-                    UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> {
-                        showToast("Update in progress")
-                    }
-                    UpdateAvailability.UNKNOWN -> {
-                        showToast("Update availability unknown")
-                    }
-                    UpdateAvailability.UPDATE_AVAILABLE -> {
-                        if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                            showToast("App Update available and immediate")
-                            appUpdateManager.startUpdateFlowForResult(
-                                // Pass the intent that is returned by 'getAppUpdateInfo()'.
-                                appUpdateInfo,
-                                // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
-                                AppUpdateType.IMMEDIATE,
-                                // The current activity making the update request.
-                                requireActivity(),
-                                // Include a request code to later monitor this update request.
-                                AppUpdateRequestCode
-                            )
-                        } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                            showToast("App Update available and flexible")
-                        }
-                    }
-                    UpdateAvailability.UPDATE_NOT_AVAILABLE -> {
-                        showToast("App Update not available")
-                    }
-                }
-                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                    // For a flexible update, use AppUpdateType.FLEXIBLE
-                    appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-                ) {
-                    appUpdateManager.startUpdateFlowForResult(
-                        // Pass the intent that is returned by 'getAppUpdateInfo()'.
-                        appUpdateInfo,
-                        // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
-                        AppUpdateType.IMMEDIATE,
-                        // The current activity making the update request.
-                        requireActivity(),
-                        // Include a request code to later monitor this update request.
-                        AppUpdateRequestCode
-                    )
-                }
-            }
-            appUpdateInfoTask.addOnFailureListener {
-                Timber.e(it)
-                showToast(it.toString())
-            }
-        }
+        setupNStackUpdate()
+        setupPlaystoreUpdate()
+        setupIntegratedUpdate()
 
         // Before starting an update, register a listener for updates.
         appUpdateManager.registerListener(listener)
+    }
+
+    private fun setupIntegratedUpdate() {
+        integratedUpdateBtn.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+                checkNStackUpdate(true)
+            }
+        }
+    }
+
+    private fun setupNStackUpdate() {
+        nstackUpdateBtn.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launchWhenCreated {
+                checkNStackUpdate(false)
+            }
+        }
+    }
+
+    private fun setupPlaystoreUpdate() {
+        playstoreUpdateBtn.setOnClickListener {
+            // Returns an intent object that you use to check for an update.
+            startUpdatePlaystoreFlow()
+        }
+    }
+
+    private fun startUpdatePlaystoreFlow() {
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        // Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+
+            when (appUpdateInfo.updateAvailability()) {
+                UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> {
+                    showToast("Update in progress")
+                }
+                UpdateAvailability.UNKNOWN -> {
+                    showToast("Update availability unknown")
+                }
+                UpdateAvailability.UPDATE_AVAILABLE -> {
+                    if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                        showToast("App Update available and immediate")
+                        appUpdateManager.startUpdateFlowForResult(
+                            // Pass the intent that is returned by 'getAppUpdateInfo()'.
+                            appUpdateInfo,
+                            // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
+                            AppUpdateType.IMMEDIATE,
+                            // The current activity making the update request.
+                            requireActivity(),
+                            // Include a request code to later monitor this update request.
+                            AppUpdateRequestCode
+                        )
+                    } else if (appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                        showToast("App Update available and flexible")
+                    }
+                }
+                UpdateAvailability.UPDATE_NOT_AVAILABLE -> {
+                    showToast("App Update not available")
+                }
+            }
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                // For a flexible update, use AppUpdateType.FLEXIBLE
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                appUpdateManager.startUpdateFlowForResult(
+                    // Pass the intent that is returned by 'getAppUpdateInfo()'.
+                    appUpdateInfo,
+                    // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
+                    AppUpdateType.IMMEDIATE,
+                    // The current activity making the update request.
+                    requireActivity(),
+                    // Include a request code to later monitor this update request.
+                    AppUpdateRequestCode
+                )
+            }
+        }
+        appUpdateInfoTask.addOnFailureListener {
+            Timber.e(it)
+            showToast(it.toString())
+        }
     }
 
     override fun onDestroyView() {
@@ -107,14 +127,14 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
         appUpdateManager.unregisterListener(listener)
     }
 
-    private suspend fun checkNStackUpdate() {
+    private suspend fun checkNStackUpdate(integrate: Boolean) {
         when (val result = withContext(Dispatchers.IO) { NStack.appOpen() }) {
             is Result.Success -> {
                 when (result.value.data.update.state) {
                     AppUpdateState.NONE -> { /* Nothing to do */
                     }
-                    AppUpdateState.UPDATE -> showUpdateDialog(result.value.data.update)
-                    AppUpdateState.FORCE -> showForceDialog(result.value.data.update)
+                    AppUpdateState.UPDATE -> showUpdateDialog(result.value.data.update, integrate)
+                    AppUpdateState.FORCE -> showForceDialog(result.value.data.update, integrate)
                     AppUpdateState.CHANGELOG -> showChangelogDialog(result.value.data.update)
                 }
             }
@@ -124,11 +144,18 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
         }
     }
 
-    private fun showUpdateDialog(appUpdate: AppUpdate) {
+    private fun showUpdateDialog(
+        appUpdate: AppUpdate, integrate: Boolean
+    ) {
         AlertDialog.Builder(requireContext())
             .setTitle(appUpdate.update?.translate?.title ?: return)
             .setMessage(appUpdate.update?.translate?.message ?: return)
             .setPositiveButton(appUpdate.update?.translate?.positiveButton) { dialog, _ ->
+                if (integrate) {
+                    startUpdatePlaystoreFlow()
+                } else {
+                    startPlayStore()
+                }
                 dialog.dismiss()
             }
             .show()
@@ -144,7 +171,10 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
             .show()
     }
 
-    private fun showForceDialog(appUpdate: AppUpdate) {
+    private fun showForceDialog(
+        appUpdate: AppUpdate,
+        integrate: Boolean
+    ) {
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle(appUpdate.update?.translate?.title ?: return)
             .setMessage(appUpdate.update?.translate?.message ?: return)
@@ -155,7 +185,11 @@ class AppUpdateFragment : Fragment(R.layout.fragment_app_update) {
         dialog.setOnShowListener {
             val b = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             b.setOnClickListener {
-                startPlayStore()
+                if (integrate) {
+                    startUpdatePlaystoreFlow()
+                } else {
+                    startPlayStore()
+                }
             }
         }
 
