@@ -38,12 +38,12 @@ class AppUpdateIntegratedFragment : Fragment(R.layout.fragment_button) {
     private fun setupIntegratedUpdate() {
         updateBtn.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launchWhenCreated {
-                checkNStackUpdate(true)
+                checkNStackUpdate()
             }
         }
     }
 
-    private suspend fun checkNStackUpdate(integrate: Boolean) {
+    private suspend fun checkNStackUpdate() {
         when (val result = withContext(Dispatchers.IO) { NStack.appOpen() }) {
             is Result.Success -> {
                 when (result.value.data.update.state) {

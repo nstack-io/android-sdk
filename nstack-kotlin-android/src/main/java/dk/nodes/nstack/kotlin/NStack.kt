@@ -19,6 +19,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.coroutineScope
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -46,6 +47,7 @@ import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppUpdateState
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.FeedbackType
@@ -56,6 +58,7 @@ import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.models.TermsDetails
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.Environment
+import dk.nodes.nstack.kotlin.models.state
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.providers.ManagersModule
@@ -345,7 +348,6 @@ object NStack {
         isInitialized = true
     }
 
-
     suspend fun checkAppUpdateAvailability(): Result<InAppUpdateAvailability> =
         suspendCoroutine { continuation ->
             appUpdateManager
@@ -458,6 +460,14 @@ object NStack {
 
                 termsRepository.setLatestTerms(result.value.data.terms)
                 result.value.data.localize.forEach { handleLocalizeIndex(it) }
+                when (result.value.data.update.state) {
+                    AppUpdateState.UPDATE -> ProcessLifecycleOwner.get().lifecycle.coroutineScope.launch {
+                        updateApp(InAppUpdateStrategy.Flexible)
+                    }
+                    AppUpdateState.FORCE -> ProcessLifecycleOwner.get().lifecycle.coroutineScope.launch {
+                        updateApp(InAppUpdateStrategy.Immediate)
+                    }
+                }
 
                 val shouldUpdateTranslationClass =
                     result.value.data.localize.any { it.shouldUpdate }
