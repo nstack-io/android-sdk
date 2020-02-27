@@ -2,7 +2,6 @@ package dk.nodes.nstack.kotlin
 
 import android.content.ContentProvider
 import android.content.ContentValues
-import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -42,19 +41,6 @@ class NStackContentProvider : ContentProvider() {
         }
 
         return false
-    }
-
-    private fun findTranslationClass(context: Context) {
-        val str = "${context.packageName}.Translation"
-
-        NStack.translationClass = Class.forName(str)
-    }
-
-    private fun getTranslationPath(): String {
-        val m: PackageManager = context!!.packageManager
-        val s: String = context!!.packageName
-        val p = m.getPackageInfo(s, 0)
-        return p.applicationInfo.dataDir
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? = null
