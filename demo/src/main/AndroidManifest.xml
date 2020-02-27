@@ -28,6 +28,10 @@
             android:value="${env}"
             tools:replace="android:value" />
 
+        <meta-data
+            android:name="dk.nodes.nstack.Translation"
+            android:value="dk.nodes.nstack.demo.Translation"
+            tools:replace="android:value" />
 
         <activity android:name=".MainActivity">
             <intent-filter>

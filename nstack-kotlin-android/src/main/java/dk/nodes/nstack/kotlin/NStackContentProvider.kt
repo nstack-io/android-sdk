@@ -2,6 +2,7 @@ package dk.nodes.nstack.kotlin
 
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -13,14 +14,26 @@ class NStackContentProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
         try {
-            val ai: ApplicationInfo = context!!.packageManager
-                .getApplicationInfo(context!!.packageName, PackageManager.GET_META_DATA)
+            val context = context ?: return false
+            val ai: ApplicationInfo = context.packageManager
+                .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
             val bundle: Bundle = ai.metaData
-            if (bundle.containsKey("dk.nodes.nstack.appId") && bundle.containsKey("dk.nodes.nstack.apiKey")) {
-                val appId = bundle.getString("dk.nodes.nstack.appId")
-                val apiKey = bundle.getString("dk.nodes.nstack.apiKey")
-                //Log.e(TAG, "Read appId = " + appId + " apiKey = " + apiKey);
-                NStack.init(context!!, false)
+            if (
+                bundle.containsKey("dk.nodes.nstack.appId") &&
+                bundle.containsKey("dk.nodes.nstack.apiKey") &&
+                bundle.containsKey("dk.nodes.nstack.env") &&
+                bundle.containsKey("dk.nodes.nstack.Translation")
+            ) {
+                val appId = bundle.getString("dk.nodes.nstack.appId")!!
+                val apiKey = bundle.getString("dk.nodes.nstack.apiKey")!!
+                val env = bundle.getString("dk.nodes.nstack.env")!!
+                val translationClass = bundle.getString("dk.nodes.nstack.Translation")!!
+                val isStaging = env == "staging"
+                if (isStaging) {
+                    NStack.baseUrl = "https://nstack-staging.vapor.cloud"
+                }
+                NStack.translationClass = Class.forName(translationClass)
+                NStack.init(context, isStaging)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed to load meta-data, NameNotFound: " + e.message)
@@ -29,6 +42,19 @@ class NStackContentProvider : ContentProvider() {
         }
 
         return false
+    }
+
+    private fun findTranslationClass(context: Context) {
+        val str = "${context.packageName}.Translation"
+
+        NStack.translationClass = Class.forName(str)
+    }
+
+    private fun getTranslationPath(): String {
+        val m: PackageManager = context!!.packageManager
+        val s: String = context!!.packageName
+        val p = m.getPackageInfo(s, 0)
+        return p.applicationInfo.dataDir
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? = null
