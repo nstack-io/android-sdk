@@ -152,15 +152,7 @@ object NStack {
         }
     }
 
-
     private var appOpenConsumable by consumable<Result<AppOpen>>()
-
-    init {
-        ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
-            appOpenConsumable = appOpen()
-        }
-    }
-
 
     @SuppressWarnings("deprecation")
     private fun getSystemLocaleLegacy(config: Configuration): Locale {
@@ -320,6 +312,9 @@ object NStack {
         }
 
         isInitialized = true
+        ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
+            appOpenConsumable = withContext(Dispatchers.IO) { appOpen() }
+        }
     }
 
     private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
@@ -386,12 +381,10 @@ object NStack {
                         onLanguageChanged()
                     }
                 }
-                appOpenConsumable = result
                 result
             }
             else -> {
                 NLog.e(this, "Error: onAppOpened")
-                appOpenConsumable = result
                 result
             }
         }
@@ -404,7 +397,10 @@ object NStack {
 
             try {
                 networkLanguages = networkLanguages?.toMutableMap()?.apply {
-                    put(index.language.locale ?: defaultLanguage, translation.asJsonObject ?: return@apply)
+                    put(
+                        index.language.locale ?: defaultLanguage,
+                        translation.asJsonObject ?: return@apply
+                    )
                 }
             } catch (e: Exception) {
                 NLog.e(this, e.toString())

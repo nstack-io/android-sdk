@@ -97,10 +97,9 @@ internal inline fun <T : Any> MutableList<T?>.removeFirst(predicate: (T) -> Bool
     asSequence().filterNotNull().indexOfFirst(predicate).takeUnless { it == -1 }?.let { removeAt(it) }
 }
 
-fun <T> consumable() = ConsumableDelegate<T>()
-fun <T> consumable(t: T) = ConsumableDelegate<T>(t)
+internal fun <T> consumable() = ConsumableDelegate<T>()
 
-class Consumable<out T>(private val content: T) {
+internal class Consumable<out T>(private val content: T) {
     private var consumed = false
     fun consume(): T? {
         return if (consumed) {
@@ -112,7 +111,7 @@ class Consumable<out T>(private val content: T) {
     }
 }
 
-class ConsumableDelegate<T> {
+internal class ConsumableDelegate<T> {
 
     constructor()
     constructor(value: T) {
