@@ -27,12 +27,8 @@ class NStackContentProvider : ContentProvider() {
                 val apiKey = bundle.getString("dk.nodes.nstack.apiKey")!!
                 val env = bundle.getString("dk.nodes.nstack.env")!!
                 val translationClass = bundle.getString("dk.nodes.nstack.Translation")!!
-                val isStaging = env == "staging"
-                if (isStaging) {
-                    NStack.baseUrl = "https://nstack-staging.vapor.cloud"
-                }
                 NStack.translationClass = Class.forName(translationClass)
-                NStack.init(context, isStaging)
+                NStack.init(context)
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed to load meta-data, NameNotFound: " + e.message)
