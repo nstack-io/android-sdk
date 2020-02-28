@@ -15,6 +15,8 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.coroutineScope
 import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
@@ -58,6 +60,7 @@ import dk.nodes.nstack.kotlin.util.ShakeDetector
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
+import dk.nodes.nstack.kotlin.util.extensions.consumable
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
@@ -148,6 +151,16 @@ object NStack {
             }
         }
     }
+
+
+    private var appOpenConsumable by consumable<Result<AppOpen>>()
+
+    init {
+        ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
+            appOpenConsumable = appOpen()
+        }
+    }
+
 
     @SuppressWarnings("deprecation")
     private fun getSystemLocaleLegacy(config: Configuration): Locale {
@@ -349,7 +362,7 @@ object NStack {
      *
      * @see [AppOpen]
      */
-    suspend fun appOpen() = guardConnectivity {
+    suspend fun appOpen() = appOpenConsumable ?: guardConnectivity {
         check(isInitialized) { "init() has not been called" }
 
         val localeString = language.toString()
@@ -373,10 +386,12 @@ object NStack {
                         onLanguageChanged()
                     }
                 }
+                appOpenConsumable = result
                 result
             }
             else -> {
                 NLog.e(this, "Error: onAppOpened")
+                appOpenConsumable = result
                 result
             }
         }
