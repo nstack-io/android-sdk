@@ -320,7 +320,11 @@ object NStack {
         contextWrapper = nstackModule.provideContextWrapper()
         networkManager = nstackModule.provideNetworkManager()
         mainMenuDisplayer = createMainMenuDisplayer(context)
-        appUpdateManager = AppUpdateManagerFactory.create(context)
+        // Unit test bypass
+        try {
+            appUpdateManager = AppUpdateManagerFactory.create(context)
+        } catch (ignored: Throwable) {
+        }
         termsRepository = repositoryModule.provideTermsRepository()
 
         loadCacheTranslations()
