@@ -375,7 +375,7 @@ object NStack {
                 val shouldUpdateTranslationClass =
                     result.value.data.localize.any { it.shouldUpdate }
                 if (shouldUpdateTranslationClass) {
-                    NLog.e(this, "ShouldUpdate is set, updating Translations class...")
+                    NLog.v(this, "ShouldUpdate is set, updating Translations class...")
                     withContext(Dispatchers.Main) {
                         onLanguagesChanged()
                         onLanguageChanged()
@@ -504,7 +504,7 @@ object NStack {
      * Loads our languages from the asset cache
      */
     private fun loadCacheTranslations() {
-        NLog.e(this, "loadCacheTranslations")
+        NLog.v(this, "loadCacheTranslations")
 
         // Load our network cached data
         networkLanguages = prefManager.getTranslations()

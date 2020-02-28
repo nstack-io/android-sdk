@@ -10,5 +10,4 @@ data class UpdateTranslate(
     val positiveButton: String,
     @SerializedName("negativeBtn", alternate = ["negativeButton"])
     val negativeButton: String
-
 )
