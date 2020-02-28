@@ -94,7 +94,7 @@ internal class ViewTranslationManager(private val translationHolder: Translation
         val translatedSubtitle = translationHolder.getTranslationByKey(translationData.subtitle)
         // All views should have this
 
-        translatedContentDescription?.let(view::setContentDescription)
+        (translatedContentDescription ?: translatedDescription?: translatedText)?.let(view::setContentDescription)
         view.setTag(NStackViewTag, translationData)
 
         updateViewListeners.forEach {
