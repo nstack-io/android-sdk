@@ -6,7 +6,7 @@ import dk.nodes.nstack.kotlin.managers.PrefManager
 import org.koin.dsl.module
 
 val managersModule = module {
-    single { AppOpenSettingsManager( get(), get()) }
+    single { AppOpenSettingsManager(get(), get()) }
     single { AssetCacheManager(get()) }
-    single { PrefManager(get() )}
+    single { PrefManager(get()) }
 }

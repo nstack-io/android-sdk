@@ -14,7 +14,6 @@ import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.models.TermDetailsResponse
 import dk.nodes.nstack.kotlin.models.TermsDetails
-import dk.nodes.nstack.kotlin.provider.GsonProvider
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import okhttp3.Call
 import okhttp3.Callback
@@ -36,7 +35,6 @@ class NetworkManager(
     private val debugMode: Boolean,
     private val gson: Gson
 ) {
-
 
     fun loadTranslation(
         url: String,

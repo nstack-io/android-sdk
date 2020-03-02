@@ -67,7 +67,6 @@ import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import java.lang.ref.WeakReference
@@ -109,22 +108,21 @@ object NStack {
     private var currentLanguage: JSONObject? = null
 
     private var activeActivityHolder: ActiveActivityHolder? = null
-
-    private lateinit var koinApplication: KoinApplication
+    private lateinit var koinComponent: NStackKoinComponent
 
     // Internally used classes
-    private val classTranslationManager: ClassTranslationManager by lazy { NStackKoinComponent.classTranslationManager }
-    private val viewTranslationManager: ViewTranslationManager by lazy { NStackKoinComponent.viewTranslationManager }
-    private val assetCacheManager: AssetCacheManager by lazy { NStackKoinComponent.assetCacheManager }
-    private val connectionManager: ConnectionManager by lazy { NStackKoinComponent.connectionManager }
-    private val appInfo: ClientAppInfo by lazy { NStackKoinComponent.appInfo }
-    private val networkManager: NetworkManager by lazy { NStackKoinComponent.networkManager }
-    private val appOpenSettingsManager: AppOpenSettingsManager by lazy { NStackKoinComponent.appOpenSettingsManager }
-    private val prefManager: PrefManager by lazy { NStackKoinComponent.prefManager }
-    private val contextWrapper: ContextWrapper by lazy { NStackKoinComponent.contextWrapper }
-    private val mainMenuDisplayer: MainMenuDisplayer by lazy { NStackKoinComponent.mainMenuDisplayer }
-    private val termsRepository: TermsRepository by lazy { NStackKoinComponent.termsRepository }
-    private val nstackMeta by lazy { NStackKoinComponent.nstackMeta }
+    private val classTranslationManager: ClassTranslationManager by lazy { koinComponent.classTranslationManager }
+    private val viewTranslationManager: ViewTranslationManager by lazy { koinComponent.viewTranslationManager }
+    private val assetCacheManager: AssetCacheManager by lazy { koinComponent.assetCacheManager }
+    private val connectionManager: ConnectionManager by lazy { koinComponent.connectionManager }
+    private val appInfo: ClientAppInfo by lazy { koinComponent.appInfo }
+    private val networkManager: NetworkManager by lazy { koinComponent.networkManager }
+    private val appOpenSettingsManager: AppOpenSettingsManager by lazy { koinComponent.appOpenSettingsManager }
+    private val prefManager: PrefManager by lazy { koinComponent.prefManager }
+    private val contextWrapper: ContextWrapper by lazy { koinComponent.contextWrapper }
+    private val mainMenuDisplayer: MainMenuDisplayer by lazy { koinComponent.mainMenuDisplayer }
+    private val termsRepository: TermsRepository by lazy { koinComponent.termsRepository }
+    private val nstackMeta by lazy { koinComponent.nstackMeta }
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
@@ -278,7 +276,7 @@ object NStack {
         }
         this.debugMode = debugMode
 
-        val application = startKoin {
+        startKoin {
             val contextModule = module {
                 single { context }
                 single { createMainMenuDisplayer() }
@@ -293,16 +291,16 @@ object NStack {
             )
         }
 
+        koinComponent = NStackKoinComponent()
+
         appIdKey = nstackMeta.appIdKey
         appApiKey = nstackMeta.apiKey
         env = nstackMeta.env
-
 
         registerLocaleChangeBroadcastListener(context)
 
         plugins.addAll(plugin)
         plugins += viewTranslationManager
-
 
         loadCacheTranslations()
 
@@ -588,17 +586,16 @@ object NStack {
 
             // Try to find the exact match
             availableLanguages
-                    // Do our languages match
-                    .find { it.language == locale.toLanguageTag().replace("-", "_").toLowerCase() }
-                    // Return the first value or null
-                    .let { languages[it] } ?:
-
-            availableLanguages // Search our available languages for any keys that might match
                 // Do our languages match
-                .find { it.languageCode == locale.languageCode }
-                    // Return the first value or null
+                .find { it.language == locale.toLanguageTag().replace("-", "_").toLowerCase() }
+                // Return the first value or null
                 .let { languages[it] }
 
+                ?: availableLanguages // Search our available languages for any keys that might match
+                    // Do our languages match
+                    .find { it.languageCode == locale.languageCode }
+                    // Return the first value or null
+                    .let { languages[it] }
         }
     }
 

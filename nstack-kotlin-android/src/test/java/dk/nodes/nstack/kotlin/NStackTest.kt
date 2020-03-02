@@ -23,8 +23,7 @@ import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.NStackMeta
 import dk.nodes.nstack.kotlin.models.Result
-import dk.nodes.nstack.kotlin.providers.ManagersModule
-import dk.nodes.nstack.kotlin.providers.NStackModule
+import dk.nodes.nstack.kotlin.providers.NStackKoinComponent
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import io.mockk.coEvery
 import io.mockk.every
@@ -264,19 +263,19 @@ internal class NStackTest {
         private var currentLanguage: Locale? = null
 
         init {
-            mockkConstructor(NStackModule::class)
-            mockkConstructor(ManagersModule::class)
-
-            every { anyConstructed<ManagersModule>().provideAssetCacheManager() } returns assetCacheManagerMock
-            every { anyConstructed<ManagersModule>().provideAppOpenSettingsManager() } returns appOpenSettingsManagerMock
-            every { anyConstructed<ManagersModule>().providePrefManager() } returns prefManagerMock
-            every { anyConstructed<NStackModule>().provideNStackMeta() } returns nstackMeta
-            every { anyConstructed<NStackModule>().provideClientAppInfo() } returns clientAppInfoMock
-            every { anyConstructed<NStackModule>().provideViewTranslationManager() } returns viewTranslationManagerMock
-            every { anyConstructed<NStackModule>().provideClassTranslationManager() } returns classTranslationManagerMock
-            every { anyConstructed<NStackModule>().provideConnectionManager() } returns connectionManagerMock
-            every { anyConstructed<NStackModule>().provideNetworkManager() } returns networkManagerMock
-            every { anyConstructed<NStackModule>().provideContextWrapper() } returns contextWrapperMock
+            mockkConstructor(NStackKoinComponent::class)
+            // mockkConstructor(ManagersModule::class)
+            //
+            every { anyConstructed<NStackKoinComponent>().assetCacheManager } returns assetCacheManagerMock
+            every { anyConstructed<NStackKoinComponent>().appOpenSettingsManager } returns appOpenSettingsManagerMock
+            every { anyConstructed<NStackKoinComponent>().prefManager } returns prefManagerMock
+            every { anyConstructed<NStackKoinComponent>().nstackMeta } returns nstackMeta
+            every { anyConstructed<NStackKoinComponent>().appInfo } returns clientAppInfoMock
+            every { anyConstructed<NStackKoinComponent>().viewTranslationManager } returns viewTranslationManagerMock
+            every { anyConstructed<NStackKoinComponent>().classTranslationManager } returns classTranslationManagerMock
+            every { anyConstructed<NStackKoinComponent>().connectionManager } returns connectionManagerMock
+            every { anyConstructed<NStackKoinComponent>().networkManager } returns networkManagerMock
+            every { anyConstructed<NStackKoinComponent>().contextWrapper } returns contextWrapperMock
 
             every { nstackMeta.appIdKey } returns appId
             every { nstackMeta.apiKey } returns apiKey

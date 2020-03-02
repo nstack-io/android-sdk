@@ -28,16 +28,7 @@ val nStackModule = module {
 
     single {
         NetworkManager(
-            HttpClientProvider.getHttpClient(
-                appIdKey = NStack.appIdKey,
-                appApiKey = NStack.appApiKey,
-                sdkVersion = BuildConfig.SDK_VERSION,
-                environment = NStack.env,
-                versionName = NStack.appClientInfo.versionName,
-                versionRelease = Build.VERSION.RELEASE,
-                model = Build.MODEL,
-                debugMode = NStack.debugMode
-            ),
+            get(),
             NStack.baseUrl,
             NStack.debugMode,
             get()
@@ -63,5 +54,17 @@ val nStackModule = module {
     single {
         ContextWrapper(get())
     }
-}
 
+    single {
+        HttpClientProvider.getHttpClient(
+            appIdKey = NStack.appIdKey,
+            appApiKey = NStack.appApiKey,
+            sdkVersion = BuildConfig.SDK_VERSION,
+            environment = NStack.env,
+            versionName = NStack.appClientInfo.versionName,
+            versionRelease = Build.VERSION.RELEASE,
+            model = Build.MODEL,
+            debugMode = NStack.debugMode
+        )
+    }
+}

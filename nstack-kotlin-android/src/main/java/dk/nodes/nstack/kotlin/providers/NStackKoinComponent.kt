@@ -17,7 +17,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
 
-internal object NStackKoinComponent: KoinComponent {
+internal class NStackKoinComponent : KoinComponent {
     val nstackMeta: NStackMeta by inject()
     val classTranslationManager: ClassTranslationManager by inject()
     val viewTranslationManager: ViewTranslationManager by inject { parametersOf(NStack.translationHolder) }

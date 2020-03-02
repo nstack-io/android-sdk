@@ -4,7 +4,6 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
-import kotlin.reflect.KClass
 
 val httpClientModule = module {
     factory { (appIdKey: String, appApiKey: String, sdkVersion: String) ->
@@ -28,9 +27,6 @@ val httpClientModule = module {
             model = model
         )
     }
-
-
-
 }
 
 object HttpClientProvider {
@@ -78,42 +74,27 @@ object HttpClientProvider {
         model: String,
         debugMode: Boolean = false
     ): OkHttpClient {
-        return getLazyDependency(OkHttpClient::class) {
-            OkHttpClient()
-                .newBuilder()
-                .connectTimeout(CONNECT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
-                .writeTimeout(WRITE_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(READ_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
-                .addInterceptor(
-                    provideNStackInterceptor(
-                        appIdKey = appIdKey,
-                        appApiKey = appApiKey,
-                        sdkVersion = sdkVersion
-                    )
+        return OkHttpClient()
+            .newBuilder()
+            .connectTimeout(CONNECT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(WRITE_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .addInterceptor(
+                provideNStackInterceptor(
+                    appIdKey = appIdKey,
+                    appApiKey = appApiKey,
+                    sdkVersion = sdkVersion
                 )
-                .addInterceptor(
-                    provideNMetaInterceptor(
-                        environment = environment,
-                        versionName = versionName,
-                        versionRelease = versionRelease,
-                        model = model
-                    )
+            )
+            .addInterceptor(
+                provideNMetaInterceptor(
+                    environment = environment,
+                    versionName = versionName,
+                    versionRelease = versionRelease,
+                    model = model
                 )
-                .addInterceptor(provideHttpLoggingInterceptor(debugMode))
-                .build()
-        }
+            )
+            .addInterceptor(provideHttpLoggingInterceptor(debugMode))
+            .build()
     }
-
-    @Suppress("UNCHECKED_CAST")
-    private inline fun <T : Any> getLazyDependency(
-        clazz: KClass<T>,
-        crossinline block: () -> T
-    ): T {
-        if (!dependenciesMap.containsKey(clazz)) {
-            dependenciesMap[clazz] = block()
-        }
-        return dependenciesMap[clazz] as T
-    }
-
-    private val dependenciesMap = mutableMapOf<KClass<*>, Any>()
 }
