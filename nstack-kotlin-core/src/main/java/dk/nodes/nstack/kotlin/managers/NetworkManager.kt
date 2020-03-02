@@ -1,5 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import dk.nodes.nstack.kotlin.models.AppOpen
@@ -32,10 +33,10 @@ import java.util.Locale
 class NetworkManager(
     private val client: OkHttpClient,
     private val baseUrl: String,
-    private val debugMode: Boolean
+    private val debugMode: Boolean,
+    private val gson: Gson
 ) {
 
-    private val gson = GsonProvider.provideGson()
 
     fun loadTranslation(
         url: String,

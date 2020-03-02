@@ -44,9 +44,12 @@ import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.Environment
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.providers.ManagersModule
-import dk.nodes.nstack.kotlin.providers.NStackModule
-import dk.nodes.nstack.kotlin.providers.RepositoryModule
+import dk.nodes.nstack.kotlin.provider.gsonModule
+import dk.nodes.nstack.kotlin.provider.httpClientModule
+import dk.nodes.nstack.kotlin.providers.NStackKoinComponent
+import dk.nodes.nstack.kotlin.providers.managersModule
+import dk.nodes.nstack.kotlin.providers.nStackModule
+import dk.nodes.nstack.kotlin.providers.repositoryModule
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
 import dk.nodes.nstack.kotlin.util.NLog
@@ -64,6 +67,9 @@ import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.koin.core.KoinApplication
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
@@ -104,18 +110,21 @@ object NStack {
 
     private var activeActivityHolder: ActiveActivityHolder? = null
 
+    private lateinit var koinApplication: KoinApplication
+
     // Internally used classes
-    private lateinit var classTranslationManager: ClassTranslationManager
-    private lateinit var viewTranslationManager: ViewTranslationManager
-    private lateinit var assetCacheManager: AssetCacheManager
-    private lateinit var connectionManager: ConnectionManager
-    private lateinit var appInfo: ClientAppInfo
-    private lateinit var networkManager: NetworkManager
-    private lateinit var appOpenSettingsManager: AppOpenSettingsManager
-    private lateinit var prefManager: PrefManager
-    private lateinit var contextWrapper: ContextWrapper
-    private lateinit var mainMenuDisplayer: MainMenuDisplayer
-    private lateinit var termsRepository: TermsRepository
+    private val classTranslationManager: ClassTranslationManager by lazy { NStackKoinComponent.classTranslationManager }
+    private val viewTranslationManager: ViewTranslationManager by lazy { NStackKoinComponent.viewTranslationManager }
+    private val assetCacheManager: AssetCacheManager by lazy { NStackKoinComponent.assetCacheManager }
+    private val connectionManager: ConnectionManager by lazy { NStackKoinComponent.connectionManager }
+    private val appInfo: ClientAppInfo by lazy { NStackKoinComponent.appInfo }
+    private val networkManager: NetworkManager by lazy { NStackKoinComponent.networkManager }
+    private val appOpenSettingsManager: AppOpenSettingsManager by lazy { NStackKoinComponent.appOpenSettingsManager }
+    private val prefManager: PrefManager by lazy { NStackKoinComponent.prefManager }
+    private val contextWrapper: ContextWrapper by lazy { NStackKoinComponent.contextWrapper }
+    private val mainMenuDisplayer: MainMenuDisplayer by lazy { NStackKoinComponent.mainMenuDisplayer }
+    private val termsRepository: TermsRepository by lazy { NStackKoinComponent.termsRepository }
+    private val nstackMeta by lazy { NStackKoinComponent.nstackMeta }
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
@@ -269,33 +278,31 @@ object NStack {
         }
         this.debugMode = debugMode
 
-        val nstackModule = NStackModule(context, translationHolder)
-        val managersModule = ManagersModule(nstackModule)
-        val repositoryModule = RepositoryModule(nstackModule)
+        val application = startKoin {
+            val contextModule = module {
+                single { context }
+                single { createMainMenuDisplayer() }
+            }
+            modules(
+                managersModule,
+                nStackModule,
+                repositoryModule,
+                gsonModule,
+                httpClientModule,
+                contextModule
+            )
+        }
 
-        val nstackMeta = nstackModule.provideNStackMeta()
         appIdKey = nstackMeta.appIdKey
         appApiKey = nstackMeta.apiKey
         env = nstackMeta.env
 
-        viewTranslationManager = nstackModule.provideViewTranslationManager()
-        classTranslationManager = nstackModule.provideClassTranslationManager()
 
         registerLocaleChangeBroadcastListener(context)
 
         plugins.addAll(plugin)
-        viewTranslationManager = nstackModule.provideViewTranslationManager()
-        appInfo = nstackModule.provideClientAppInfo()
         plugins += viewTranslationManager
-        connectionManager = nstackModule.provideConnectionManager()
-        assetCacheManager = managersModule.provideAssetCacheManager()
-        appOpenSettingsManager = managersModule.provideAppOpenSettingsManager()
-        prefManager = managersModule.providePrefManager()
-        contextWrapper = nstackModule.provideContextWrapper()
-        networkManager = nstackModule.provideNetworkManager()
-        mainMenuDisplayer = createMainMenuDisplayer(context)
 
-        termsRepository = repositoryModule.provideTermsRepository()
 
         loadCacheTranslations()
 
@@ -309,7 +316,7 @@ object NStack {
         isInitialized = true
     }
 
-    private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
+    private fun createMainMenuDisplayer(): MainMenuDisplayer {
 
         val liveEditManager = LiveEditManager(
             translationHolder,
@@ -389,7 +396,10 @@ object NStack {
 
             try {
                 networkLanguages = networkLanguages?.toMutableMap()?.apply {
-                    put(index.language.locale ?: defaultLanguage, translation.asJsonObject ?: return@apply)
+                    put(
+                        index.language.locale ?: defaultLanguage,
+                        translation.asJsonObject ?: return@apply
+                    )
                 }
             } catch (e: Exception) {
                 NLog.e(this, e.toString())

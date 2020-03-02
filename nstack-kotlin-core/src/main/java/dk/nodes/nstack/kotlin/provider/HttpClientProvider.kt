@@ -1,9 +1,37 @@
 package dk.nodes.nstack.kotlin.provider
 
-import kotlin.reflect.KClass
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.dsl.module
+import kotlin.reflect.KClass
+
+val httpClientModule = module {
+    factory { (appIdKey: String, appApiKey: String, sdkVersion: String) ->
+        NStackInterceptor(appIdKey, appApiKey, sdkVersion)
+    }
+    factory { (debugMode: Boolean) ->
+        val logging = HttpLoggingInterceptor()
+        logging.level =
+            if (debugMode) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        logging
+    }
+
+    factory { (environment: String,
+        versionName: String,
+        versionRelease: String,
+        model: String) ->
+        NMetaInterceptor(
+            environment = environment,
+            versionName = versionName,
+            versionRelease = versionRelease,
+            model = model
+        )
+    }
+
+
+
+}
 
 object HttpClientProvider {
 
@@ -56,7 +84,13 @@ object HttpClientProvider {
                 .connectTimeout(CONNECT_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
                 .writeTimeout(WRITE_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
                 .readTimeout(READ_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
-                .addInterceptor(provideNStackInterceptor(appIdKey = appIdKey, appApiKey = appApiKey, sdkVersion = sdkVersion))
+                .addInterceptor(
+                    provideNStackInterceptor(
+                        appIdKey = appIdKey,
+                        appApiKey = appApiKey,
+                        sdkVersion = sdkVersion
+                    )
+                )
                 .addInterceptor(
                     provideNMetaInterceptor(
                         environment = environment,
