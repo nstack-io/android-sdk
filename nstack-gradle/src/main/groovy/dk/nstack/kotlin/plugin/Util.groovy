@@ -19,11 +19,18 @@ class Util {
             setRequestProperty("X-Application-Id", TranslationPlugin.project.translation.appId)
             setRequestProperty("X-Rest-Api-Key", TranslationPlugin.project.translation.apiKey)
             setRequestProperty("N-Meta", 'androidstudio;debug;1.0;1.0;gradleplugin')
-            if (responseCode < 200 || responseCode >= 300) {
-                throw new RuntimeException("$url: $responseCode - $responseMessage")
-            }
-            conn.content.withReader { r ->
-                return r.text
+            switch (responseCode) {
+                case 404:
+                    Log.info("Rate reminder does not seem to be set up, ignoring RateReminderActions...")
+                    return ""
+                case [200, 201]:
+                    conn.content.withReader { r ->
+                        return r.text
+                    }
+                    break
+                default:
+                    throw new RuntimeException("$url: $responseCode - $responseMessage")
+                    return
             }
         }
     }
