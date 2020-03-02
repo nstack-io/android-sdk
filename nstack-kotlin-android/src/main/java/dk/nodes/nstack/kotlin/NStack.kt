@@ -374,7 +374,7 @@ object NStack {
                 val shouldUpdateTranslationClass =
                     result.value.data.localize.any { it.shouldUpdate }
                 if (shouldUpdateTranslationClass) {
-                    NLog.e(this, "ShouldUpdate is set, updating Translations class...")
+                    NLog.v(this, "ShouldUpdate is set, updating Translations class...")
                     withContext(Dispatchers.Main) {
                         onLanguagesChanged()
                         onLanguageChanged()
@@ -503,7 +503,7 @@ object NStack {
      * Loads our languages from the asset cache
      */
     private fun loadCacheTranslations() {
-        NLog.e(this, "loadCacheTranslations")
+        NLog.v(this, "loadCacheTranslations")
 
         // Load our network cached data
         networkLanguages = prefManager.getTranslations()
@@ -585,15 +585,20 @@ object NStack {
         return if (languages.containsKey(language)) {
             languages[language]
         } else {
-            // Search our available languages for any keys that might match
+
+            // Try to find the exact match
             availableLanguages
-                .asSequence()
+                    // Do our languages match
+                    .find { it.language == locale.toLanguageTag().replace("-", "_").toLowerCase() }
+                    // Return the first value or null
+                    .let { languages[it] } ?:
+
+            availableLanguages // Search our available languages for any keys that might match
                 // Do our languages match
-                .filter { it.languageCode == locale.languageCode }
-                // Find the value for that language
-                .map { languages[it] }
-                // Return the first value or null
-                .firstOrNull()
+                .find { it.languageCode == locale.languageCode }
+                    // Return the first value or null
+                .let { languages[it] }
+
         }
     }
 
