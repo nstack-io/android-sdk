@@ -1,5 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import dk.nodes.nstack.kotlin.models.AppOpen
@@ -13,7 +14,6 @@ import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.models.TermDetailsResponse
 import dk.nodes.nstack.kotlin.models.TermsDetails
-import dk.nodes.nstack.kotlin.provider.GsonProvider
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import okhttp3.Call
 import okhttp3.Callback
@@ -32,10 +32,9 @@ import java.util.Locale
 class NetworkManager(
     private val client: OkHttpClient,
     private val baseUrl: String,
-    private val debugMode: Boolean
+    private val debugMode: Boolean,
+    private val gson: Gson
 ) {
-
-    private val gson = GsonProvider.provideGson()
 
     fun loadTranslation(
         url: String,
