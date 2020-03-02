@@ -61,9 +61,12 @@ import dk.nodes.nstack.kotlin.models.local.Environment
 import dk.nodes.nstack.kotlin.models.state
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.providers.ManagersModule
-import dk.nodes.nstack.kotlin.providers.NStackModule
-import dk.nodes.nstack.kotlin.providers.RepositoryModule
+import dk.nodes.nstack.kotlin.provider.gsonModule
+import dk.nodes.nstack.kotlin.provider.httpClientModule
+import dk.nodes.nstack.kotlin.providers.NStackKoinComponent
+import dk.nodes.nstack.kotlin.providers.managersModule
+import dk.nodes.nstack.kotlin.providers.nStackModule
+import dk.nodes.nstack.kotlin.providers.repositoryModule
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
 import dk.nodes.nstack.kotlin.util.NLog
@@ -83,6 +86,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
@@ -123,19 +128,21 @@ object NStack {
     private var currentLanguage: JSONObject? = null
 
     private var activeActivityHolder: ActiveActivityHolder? = null
+    private lateinit var koinComponent: NStackKoinComponent
 
     // Internally used classes
-    private lateinit var classTranslationManager: ClassTranslationManager
-    private lateinit var viewTranslationManager: ViewTranslationManager
-    private lateinit var assetCacheManager: AssetCacheManager
-    private lateinit var connectionManager: ConnectionManager
-    private lateinit var appInfo: ClientAppInfo
-    private lateinit var networkManager: NetworkManager
-    private lateinit var appOpenSettingsManager: AppOpenSettingsManager
-    private lateinit var prefManager: PrefManager
-    private lateinit var contextWrapper: ContextWrapper
-    private lateinit var mainMenuDisplayer: MainMenuDisplayer
-    private lateinit var termsRepository: TermsRepository
+    private val classTranslationManager: ClassTranslationManager by lazy { koinComponent.classTranslationManager }
+    private val viewTranslationManager: ViewTranslationManager by lazy { koinComponent.viewTranslationManager }
+    private val assetCacheManager: AssetCacheManager by lazy { koinComponent.assetCacheManager }
+    private val connectionManager: ConnectionManager by lazy { koinComponent.connectionManager }
+    private val appInfo: ClientAppInfo by lazy { koinComponent.appInfo }
+    private val networkManager: NetworkManager by lazy { koinComponent.networkManager }
+    private val appOpenSettingsManager: AppOpenSettingsManager by lazy { koinComponent.appOpenSettingsManager }
+    private val prefManager: PrefManager by lazy { koinComponent.prefManager }
+    private val contextWrapper: ContextWrapper by lazy { koinComponent.contextWrapper }
+    private val mainMenuDisplayer: MainMenuDisplayer by lazy { koinComponent.mainMenuDisplayer }
+    private val termsRepository: TermsRepository by lazy { koinComponent.termsRepository }
+    private val nstackMeta by lazy { koinComponent.nstackMeta }
     internal lateinit var appUpdateManager: AppUpdateManager
 
     // Cache Maps
@@ -295,23 +302,30 @@ object NStack {
         }
         this.debugMode = debugMode
 
-        val nstackModule = NStackModule(context, translationHolder)
-        val managersModule = ManagersModule(nstackModule)
-        val repositoryModule = RepositoryModule(nstackModule)
+        startKoin {
+            val contextModule = module {
+                single { context }
+                single { createMainMenuDisplayer() }
+            }
+            modules(
+                managersModule,
+                nStackModule,
+                repositoryModule,
+                gsonModule,
+                httpClientModule,
+                contextModule
+            )
+        }
 
-        val nstackMeta = nstackModule.provideNStackMeta()
+        koinComponent = NStackKoinComponent()
+
         appIdKey = nstackMeta.appIdKey
         appApiKey = nstackMeta.apiKey
         env = nstackMeta.env
 
-        viewTranslationManager = nstackModule.provideViewTranslationManager()
-        classTranslationManager = nstackModule.provideClassTranslationManager()
-
         registerLocaleChangeBroadcastListener(context)
 
         plugins.addAll(plugin)
-        viewTranslationManager = nstackModule.provideViewTranslationManager()
-        appInfo = nstackModule.provideClientAppInfo()
         plugins += viewTranslationManager
         connectionManager = nstackModule.provideConnectionManager()
         assetCacheManager = managersModule.provideAssetCacheManager()
@@ -350,6 +364,17 @@ object NStack {
             }
         )
         isInitialized = true
+    }
+    private fun createMainMenuDisplayer(): MainMenuDisplayer {
+
+        val liveEditManager = LiveEditManager(
+            translationHolder,
+            viewTranslationManager,
+            networkManager,
+            appOpenSettingsManager
+        )
+
+        return MainMenuDisplayer(liveEditManager)
     }
 
     suspend fun checkAppUpdateAvailability(): Result<InAppUpdateAvailability> =
@@ -411,16 +436,6 @@ object NStack {
         }
 
     private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
-
-        val liveEditManager = LiveEditManager(
-            translationHolder,
-            viewTranslationManager,
-            networkManager,
-            appOpenSettingsManager
-        )
-
-        return MainMenuDisplayer(liveEditManager)
-    }
 
     private fun registerActiveActivityHolderToAppLifecycle(
         context: Context,
@@ -687,15 +702,19 @@ object NStack {
         return if (languages.containsKey(language)) {
             languages[language]
         } else {
-            // Search our available languages for any keys that might match
+
+            // Try to find the exact match
             availableLanguages
-                .asSequence()
                 // Do our languages match
-                .filter { it.languageCode == locale.languageCode }
-                // Find the value for that language
-                .map { languages[it] }
+                .find { it.language == locale.toLanguageTag().replace("-", "_").toLowerCase() }
                 // Return the first value or null
-                .firstOrNull()
+                .let { languages[it] }
+
+                ?: availableLanguages // Search our available languages for any keys that might match
+                    // Do our languages match
+                    .find { it.languageCode == locale.languageCode }
+                    // Return the first value or null
+                    .let { languages[it] }
         }
     }
 
