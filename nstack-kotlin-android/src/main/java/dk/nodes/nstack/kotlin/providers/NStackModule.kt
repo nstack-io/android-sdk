@@ -1,6 +1,8 @@
 package dk.nodes.nstack.kotlin.providers
 
 import android.os.Build
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.coroutineScope
 import dk.nodes.nstack.BuildConfig
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
@@ -53,6 +55,10 @@ val nStackModule = module {
 
     single {
         ContextWrapper(get())
+    }
+
+    single {
+        ProcessLifecycleOwner.get().lifecycle.coroutineScope
     }
 
     single {

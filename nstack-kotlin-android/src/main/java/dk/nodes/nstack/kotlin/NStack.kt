@@ -126,6 +126,7 @@ object NStack {
     private val mainMenuDisplayer: MainMenuDisplayer by lazy { koinComponent.mainMenuDisplayer }
     private val termsRepository: TermsRepository by lazy { koinComponent.termsRepository }
     private val nstackMeta by lazy { koinComponent.nstackMeta }
+    private val processScope by lazy { koinComponent.processScope }
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
@@ -153,7 +154,7 @@ object NStack {
             } else {
                 getSystemLocaleLegacy(configuration)
             }
-            ProcessLifecycleOwner.get().lifecycle.coroutineScope.launch {
+            processScope.launch {
                 val response =
                     withContext(Dispatchers.IO) { networkManager.getLocalizeResource(newLocale.toLanguageTag()) }
                 if (response is Result.Success) {

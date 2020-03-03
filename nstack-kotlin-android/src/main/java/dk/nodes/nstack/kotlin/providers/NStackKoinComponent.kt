@@ -1,5 +1,6 @@
 package dk.nodes.nstack.kotlin.providers
 
+import androidx.lifecycle.LifecycleCoroutineScope
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
 import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
@@ -13,6 +14,7 @@ import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.NStackMeta
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
+import kotlinx.coroutines.CoroutineScope
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
@@ -30,4 +32,5 @@ internal class NStackKoinComponent : KoinComponent {
     val contextWrapper: ContextWrapper by inject()
     val mainMenuDisplayer: MainMenuDisplayer by inject()
     val termsRepository: TermsRepository by inject()
+    val processScope: LifecycleCoroutineScope by inject()
 }
