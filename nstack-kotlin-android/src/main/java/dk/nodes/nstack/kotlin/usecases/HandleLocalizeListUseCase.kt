@@ -8,7 +8,7 @@ import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 
-internal class HandleLocalizeIndexUseCase(
+internal class HandleLocalizeListUseCase(
     private val networkManager: NetworkManager,
     private val prefManager: PrefManager,
     private val appOpenSettingsManager: AppOpenSettingsManager
@@ -39,14 +39,13 @@ internal class HandleLocalizeIndexUseCase(
                 }
             }
         }
-
         if (wasUpdated) appOpenSettingsManager.setUpdateDate()
-
-        indexes.find { it.language.isDefault }
+        val defaultLanguage = indexes.find { it.language.isDefault }
+        defaultLanguage
             ?.let { it.language.locale }
             ?.let { NStack.defaultLanguage = it }
 
-        indexes.find { it.language.isBestFit }
+        indexes.find { it.language.isBestFit } ?: defaultLanguage
             ?.let { it.language.locale }
             ?.let { NStack.language = it }
     }

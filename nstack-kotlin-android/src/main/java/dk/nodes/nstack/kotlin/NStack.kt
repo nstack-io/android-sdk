@@ -38,7 +38,6 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.FeedbackType
-import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.Result
@@ -63,7 +62,6 @@ import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.ShakeDetector
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
-import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
@@ -130,6 +128,7 @@ object NStack {
     private val nstackMeta by lazy { koinComponent.nstackMeta }
     private val processScope by lazy { koinComponent.processScope }
     private val processLifecycle by lazy { koinComponent.processLifecycle }
+    private val handleLocalizeIndexUseCase by lazy { koinComponent.handleLocalizeListUseCase }
 
     // Cache Maps
     internal var networkLanguages: Map<Locale, JSONObject>? = null
@@ -161,7 +160,7 @@ object NStack {
                 val response =
                     withContext(Dispatchers.IO) { networkManager.getLocalizeResource(newLocale.toLanguageTag()) }
                 if (response is Result.Success) {
-                    koinComponent.handleLocalizeIndexUseCase(response.value)
+                    handleLocalizeIndexUseCase(response.value)
                 }
             }
             if (autoChangeLanguage) {
@@ -392,7 +391,7 @@ object NStack {
                 NLog.d(this, "NStack appOpen")
 
                 termsRepository.setLatestTerms(result.value.data.terms)
-                koinComponent.handleLocalizeIndexUseCase(result.value.data.localize)
+                handleLocalizeIndexUseCase(result.value.data.localize)
 
                 val shouldUpdateTranslationClass =
                     result.value.data.localize.any { it.shouldUpdate }
