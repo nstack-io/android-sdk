@@ -15,8 +15,6 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
-import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.lifecycle.coroutineScope
 import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData

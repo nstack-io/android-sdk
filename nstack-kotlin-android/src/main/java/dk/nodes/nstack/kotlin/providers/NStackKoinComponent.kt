@@ -14,7 +14,6 @@ import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.NStackMeta
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
-import kotlinx.coroutines.CoroutineScope
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
