@@ -1,5 +1,6 @@
 package dk.nodes.nstack.kotlin.providers
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import dk.nodes.nstack.kotlin.NStack
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
@@ -32,4 +33,5 @@ internal class NStackKoinComponent : KoinComponent {
     val mainMenuDisplayer: MainMenuDisplayer by inject()
     val termsRepository: TermsRepository by inject()
     val processScope: LifecycleCoroutineScope by inject()
+    val processLifecycle: Lifecycle by inject()
 }
