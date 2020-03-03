@@ -53,6 +53,7 @@ import dk.nodes.nstack.kotlin.providers.NStackKoinComponent
 import dk.nodes.nstack.kotlin.providers.managersModule
 import dk.nodes.nstack.kotlin.providers.nStackModule
 import dk.nodes.nstack.kotlin.providers.repositoryModule
+import dk.nodes.nstack.kotlin.providers.useCaseModule
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
 import dk.nodes.nstack.kotlin.util.NLog
@@ -131,7 +132,7 @@ object NStack {
     private val processLifecycle by lazy { koinComponent.processLifecycle }
 
     // Cache Maps
-    private var networkLanguages: Map<Locale, JSONObject>? = null
+    internal var networkLanguages: Map<Locale, JSONObject>? = null
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
 
     private val handler: Handler = Handler()
@@ -160,7 +161,7 @@ object NStack {
                 val response =
                     withContext(Dispatchers.IO) { networkManager.getLocalizeResource(newLocale.toLanguageTag()) }
                 if (response is Result.Success) {
-                    response.value.forEach { handleLocalizeIndex(it) }
+                    koinComponent.handleLocalizeIndexUseCase(response.value)
                 }
             }
             if (autoChangeLanguage) {
@@ -216,11 +217,12 @@ object NStack {
     var baseUrl = "https://nstack.io"
 
     var defaultLanguage: Locale = Locale.UK
-    /**
+    internal set
+        /**
      * Used for settings or getting the current locale selected for language
      */
     var language: Locale = Locale.getDefault()
-        set(value) {
+        internal set(value) {
             field = value
             onLanguageChanged()
         }
@@ -300,6 +302,7 @@ object NStack {
                 repositoryModule,
                 gsonModule,
                 httpClientModule,
+                useCaseModule,
                 contextModule
             )
         }
@@ -389,7 +392,7 @@ object NStack {
                 NLog.d(this, "NStack appOpen")
 
                 termsRepository.setLatestTerms(result.value.data.terms)
-                result.value.data.localize.forEach { handleLocalizeIndex(it) }
+                koinComponent.handleLocalizeIndexUseCase(result.value.data.localize)
 
                 val shouldUpdateTranslationClass =
                     result.value.data.localize.any { it.shouldUpdate }
@@ -406,32 +409,6 @@ object NStack {
                 NLog.e(this, "Error: onAppOpened")
                 result
             }
-        }
-    }
-
-    private suspend fun handleLocalizeIndex(index: LocalizeIndex) {
-        if (index.shouldUpdate) {
-            val translation = networkManager.loadTranslation(index.url) ?: return
-            prefManager.setTranslations(index.language.locale ?: defaultLanguage, translation)
-
-            try {
-                networkLanguages = networkLanguages?.toMutableMap()?.apply {
-                    put(
-                        index.language.locale ?: defaultLanguage,
-                        translation.asJsonObject ?: return@apply
-                    )
-                }
-            } catch (e: Exception) {
-                NLog.e(this, e.toString())
-            }
-
-            appOpenSettingsManager.setUpdateDate()
-        }
-        if (index.language.isDefault) {
-            defaultLanguage = index.language.locale ?: defaultLanguage
-        }
-        if (index.language.isBestFit) {
-            language = index.language.locale ?: defaultLanguage
         }
     }
 

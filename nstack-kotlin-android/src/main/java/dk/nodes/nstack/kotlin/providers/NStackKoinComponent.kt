@@ -14,6 +14,7 @@ import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.NStackMeta
+import dk.nodes.nstack.kotlin.usecases.HandleLocalizeIndexUseCase
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -34,4 +35,6 @@ internal class NStackKoinComponent : KoinComponent {
     val termsRepository: TermsRepository by inject()
     val processScope: LifecycleCoroutineScope by inject()
     val processLifecycle: Lifecycle by inject()
+    // Use cases
+    val handleLocalizeIndexUseCase: HandleLocalizeIndexUseCase by inject()
 }

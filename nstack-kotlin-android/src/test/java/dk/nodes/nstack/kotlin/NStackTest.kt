@@ -58,8 +58,6 @@ internal class NStackTest {
         assert(apiKey == NStack.appApiKey)
         assert(env == NStack.env)
 
-        verify { contextMock.registerReceiver(any(), any()) }
-
         assert(NStack.languages.containsKey(locale1))
 
         assert(languagesChanged)
@@ -147,7 +145,13 @@ internal class NStackTest {
         verify { prefManagerMock.setTranslations(language1.locale!!, translations1) }
         verify { prefManagerMock.setTranslations(language2.locale!!, translations2) }
         verify(exactly = 0) { prefManagerMock.setTranslations(language3.locale!!, any()) }
+        assert(NStack.language == Locale.getDefault())
         assert(NStack.defaultLanguage == language2.locale)
+    }
+
+    @Test
+    fun `Test language selection`() {
+
     }
 
     @Test
