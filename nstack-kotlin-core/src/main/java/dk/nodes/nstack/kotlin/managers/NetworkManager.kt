@@ -431,8 +431,9 @@ class NetworkManager(
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun getLocalizeResource(): Result<List<LocalizeIndex>> = try {
+    suspend fun getLocalizeResource(acceptLanguage: String): Result<List<LocalizeIndex>> = try {
         val request = Request.Builder()
+            .header("Accept-Language", acceptLanguage)
             .url("$baseUrl/api/v2/content/localize/resources/platforms/mobile")
         val response = client.newCall(request.build()).execute()
         if (response.isSuccessful) {

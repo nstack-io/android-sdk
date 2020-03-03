@@ -32,7 +32,7 @@ class NetworkManagerTest {
         every { okHttpClient.newCall(any()).execute() } returns responseMock
         every { responseMock.isSuccessful } returns true
         every { responseMock.body()!!.string() } returns localizeResourceJson
-        val response = networkManager.getLocalizeResource()
+        val response = networkManager.getLocalizeResource("")
         assert(response is Result.Success)
     }
 }

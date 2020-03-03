@@ -15,6 +15,8 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.coroutineScope
 import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
@@ -65,6 +67,7 @@ import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.koin.core.context.startKoin
@@ -149,6 +152,13 @@ object NStack {
                 getSystemLocale(configuration)
             } else {
                 getSystemLocaleLegacy(configuration)
+            }
+            ProcessLifecycleOwner.get().lifecycle.coroutineScope.launch {
+                val response =
+                    withContext(Dispatchers.IO) { networkManager.getLocalizeResource(newLocale.toLanguageTag()) }
+                if (response is Result.Success) {
+                    response.value.forEach { handleLocalizeIndex(it) }
+                }
             }
             if (autoChangeLanguage) {
                 language = newLocale
