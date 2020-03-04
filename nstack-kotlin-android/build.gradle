@@ -5,7 +5,7 @@ apply from: 'publish-nstack-kotlin.gradle'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion '29.0.2'
+    buildToolsVersion '29.0.3'
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
@@ -13,6 +13,9 @@ android {
         versionName VERSION_NAME
         manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder", env: "production"]
         buildConfigField "String", "SDK_VERSION", "\"$VERSION_NAME\""
+    }
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 

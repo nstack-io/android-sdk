@@ -16,36 +16,33 @@ internal class HandleLocalizeListUseCase(
 
     suspend operator fun invoke(indexes: List<LocalizeIndex>) {
         var wasUpdated = false
-        indexes.forEach { index ->
-            if (index.shouldUpdate) {
-                networkManager.loadTranslation(index.url)?.let { translation ->
+        val defaultLanguage = indexes.find { it.language.isDefault }.also { def ->
+            def?.let { it.language.locale }
+                ?.let { NStack.defaultLanguage = it }
+        }
+        indexes.filter { it.shouldUpdate }.forEach { index ->
+            networkManager.loadTranslation(index.url)?.let { translation ->
+                prefManager.setTranslations(
+                    index.language.locale ?: NStack.defaultLanguage,
+                    translation
+                )
 
-                    prefManager.setTranslations(
-                        index.language.locale ?: NStack.defaultLanguage,
-                        translation
-                    )
-
-                    try {
-                        NStack.networkLanguages = NStack.networkLanguages?.toMutableMap()?.apply {
-                            put(
-                                index.language.locale ?: NStack.defaultLanguage,
-                                translation.asJsonObject ?: return@apply
-                            )
-                        }
-                        wasUpdated = true
-                    } catch (e: Exception) {
-                        NLog.e(this, e.toString())
+                try {
+                    NStack.networkLanguages = (NStack.networkLanguages?.toMutableMap() ?: mutableMapOf()).apply {
+                        put(
+                            index.language.locale ?: NStack.defaultLanguage,
+                            translation.asJsonObject ?: return@apply
+                        )
                     }
+                    wasUpdated = true
+                } catch (e: Exception) {
+                    NLog.e(this, e.toString())
                 }
             }
         }
         if (wasUpdated) appOpenSettingsManager.setUpdateDate()
-        val defaultLanguage = indexes.find { it.language.isDefault }
-        defaultLanguage
-            ?.let { it.language.locale }
-            ?.let { NStack.defaultLanguage = it }
 
-        indexes.find { it.language.isBestFit } ?: defaultLanguage
+        (indexes.find { it.language.isBestFit } ?: defaultLanguage)
             ?.let { it.language.locale }
             ?.let { NStack.language = it }
     }
