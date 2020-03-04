@@ -54,7 +54,6 @@ internal class NStackTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(mainThreadSurrogate)
-        NStack.init(contextMock, true)
     }
 
     @Test
