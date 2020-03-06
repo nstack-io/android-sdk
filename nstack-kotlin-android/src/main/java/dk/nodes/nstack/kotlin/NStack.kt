@@ -327,19 +327,12 @@ object NStack {
 
         plugins.addAll(plugin)
         plugins += viewTranslationManager
-        connectionManager = nstackModule.provideConnectionManager()
-        assetCacheManager = managersModule.provideAssetCacheManager()
-        appOpenSettingsManager = managersModule.provideAppOpenSettingsManager()
-        prefManager = managersModule.providePrefManager()
-        contextWrapper = nstackModule.provideContextWrapper()
-        networkManager = nstackModule.provideNetworkManager()
-        mainMenuDisplayer = createMainMenuDisplayer(context)
+
         // Unit test bypass
         try {
             appUpdateManager = AppUpdateManagerFactory.create(context)
         } catch (ignored: Throwable) {
         }
-        termsRepository = repositoryModule.provideTermsRepository()
 
         loadCacheTranslations()
 
@@ -365,6 +358,7 @@ object NStack {
         )
         isInitialized = true
     }
+
     private fun createMainMenuDisplayer(): MainMenuDisplayer {
 
         val liveEditManager = LiveEditManager(
@@ -434,8 +428,6 @@ object NStack {
                 )
             }
         }
-
-    private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
 
     private fun registerActiveActivityHolderToAppLifecycle(
         context: Context,
