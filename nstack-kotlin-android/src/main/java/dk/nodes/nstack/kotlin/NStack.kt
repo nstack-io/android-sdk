@@ -15,7 +15,22 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.coroutineScope
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.InstallState
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import dk.nodes.nstack.kotlin.NStack.Messages.show
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateActivity
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateAvailability
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateResult
+import dk.nodes.nstack.kotlin.appupdate.InAppUpdateStrategy
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
@@ -32,6 +47,7 @@ import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
 import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
+import dk.nodes.nstack.kotlin.models.AppUpdateState
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.FeedbackType
@@ -42,6 +58,7 @@ import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.models.TermsDetails
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.Environment
+import dk.nodes.nstack.kotlin.models.state
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
 import dk.nodes.nstack.kotlin.provider.gsonModule
@@ -65,6 +82,8 @@ import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.koin.core.context.startKoin
@@ -81,6 +100,7 @@ import kotlin.coroutines.suspendCoroutine
 @SuppressLint("StaticFieldLeak", "LogNotTimber")
 object NStack {
 
+    private const val AppUpdateRequestCode: Int = 16656
     // Has our app been started yet?
     private var isInitialized: Boolean = false
 
@@ -123,6 +143,7 @@ object NStack {
     private val mainMenuDisplayer: MainMenuDisplayer by lazy { koinComponent.mainMenuDisplayer }
     private val termsRepository: TermsRepository by lazy { koinComponent.termsRepository }
     private val nstackMeta by lazy { koinComponent.nstackMeta }
+    internal lateinit var appUpdateManager: AppUpdateManager
 
     // Cache Maps
     private var networkLanguages: Map<Locale, JSONObject>? = null
@@ -136,6 +157,11 @@ object NStack {
     private val plugins = mutableListOf<Any>()
     private val nstackViewPlugins: List<NStackViewPlugin>
         get() = plugins.filterIsInstance<NStackViewPlugin>()
+
+    // Create a listener to track request state updates.
+    private val installStatusListener = { state: InstallState ->
+        // Show module progress, log state, or install the update.
+    }
 
     /**
      * Device Change Broadcast Listener
@@ -302,6 +328,12 @@ object NStack {
         plugins.addAll(plugin)
         plugins += viewTranslationManager
 
+        // Unit test bypass
+        try {
+            appUpdateManager = AppUpdateManagerFactory.create(context)
+        } catch (ignored: Throwable) {
+        }
+
         loadCacheTranslations()
 
         this.activeActivityHolder = ActiveActivityHolder()
@@ -310,7 +342,20 @@ object NStack {
         if (Environment(env).shouldEnableTestMode) {
             versionUpdateTestMode = true
         }
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            object : LifecycleObserver {
 
+                @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+                fun onResume() {
+                    appUpdateManager.registerListener(installStatusListener)
+                }
+
+                @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                fun onPause() {
+                    appUpdateManager.unregisterListener(installStatusListener)
+                }
+            }
+        )
         isInitialized = true
     }
 
@@ -325,6 +370,64 @@ object NStack {
 
         return MainMenuDisplayer(liveEditManager)
     }
+
+    suspend fun checkAppUpdateAvailability(): Result<InAppUpdateAvailability> =
+        suspendCoroutine { continuation ->
+            appUpdateManager
+                .appUpdateInfo
+                .addOnSuccessListener {
+                    continuation.resume(Result.Success(InAppUpdateAvailability.fromInt(it.updateAvailability())))
+                }
+            appUpdateManager
+                .appUpdateInfo
+                .addOnFailureListener {
+                    continuation.resume(Result.Error(Error.ThrowableError(it)))
+                }
+        }
+
+    suspend fun updateApp(updateStrategy: InAppUpdateStrategy) =
+        suspendCoroutine<InAppUpdateResult> { continuation ->
+            appUpdateManager
+                .appUpdateInfo
+                .addOnSuccessListener {
+                    GlobalScope.launch(continuation.context) {
+                        continuation.resume(updateApp(it, updateStrategy.ordinal))
+                    }
+                }
+            appUpdateManager
+                .appUpdateInfo
+                .addOnFailureListener {
+                    continuation.resume(InAppUpdateResult.Fail)
+                }
+
+        }
+
+    private suspend fun updateApp(
+        appUpdateInfo: AppUpdateInfo,
+        updateStrategy: Int = AppUpdateType.FLEXIBLE
+    ) =
+        suspendCoroutine<InAppUpdateResult> { continuation ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+                val foregroundActivity =
+                    activeActivityHolder?.foregroundActivity ?: return@suspendCoroutine
+                foregroundActivity.startActivity(
+                    InAppUpdateActivity.createIntent(
+                        foregroundActivity,
+                        appUpdateInfo,
+                        updateStrategy
+                    ) {
+                        continuation.resume(it)
+                    })
+            } else {
+                continuation.resume(
+                    InAppUpdateResult.Unavailable(
+                        InAppUpdateAvailability.fromInt(
+                            appUpdateInfo.updateAvailability()
+                        )
+                    )
+                )
+            }
+        }
 
     private fun registerActiveActivityHolderToAppLifecycle(
         context: Context,
@@ -368,6 +471,14 @@ object NStack {
 
                 termsRepository.setLatestTerms(result.value.data.terms)
                 result.value.data.localize.forEach { handleLocalizeIndex(it) }
+                when (result.value.data.update.state) {
+                    AppUpdateState.UPDATE -> ProcessLifecycleOwner.get().lifecycle.coroutineScope.launch {
+                        updateApp(InAppUpdateStrategy.Flexible)
+                    }
+                    AppUpdateState.FORCE -> ProcessLifecycleOwner.get().lifecycle.coroutineScope.launch {
+                        updateApp(InAppUpdateStrategy.Immediate)
+                    }
+                }
 
                 val shouldUpdateTranslationClass =
                     result.value.data.localize.any { it.shouldUpdate }

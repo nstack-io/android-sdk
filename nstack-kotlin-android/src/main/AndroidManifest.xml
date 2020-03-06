@@ -15,5 +15,6 @@
             android:value="${env}"/>
 
         <activity android:name=".kotlin.features.feedback.presentation.FeedbackActivity" />
+        <activity android:name=".kotlin.appupdate.InAppUpdateActivity" />
     </application>
 </manifest>
