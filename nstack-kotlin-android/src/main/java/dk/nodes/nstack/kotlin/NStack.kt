@@ -160,7 +160,7 @@ object NStack {
                 val response =
                     withContext(Dispatchers.IO) { networkManager.getLocalizeResource(newLocale.toLanguageTag()) }
                 if (response is Result.Success) {
-                    handleLocalizeIndexUseCase(response.value)
+                    withContext(Dispatchers.IO) { handleLocalizeIndexUseCase(response.value) }
                 }
             }
             if (autoChangeLanguage) {
