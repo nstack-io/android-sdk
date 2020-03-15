@@ -15,6 +15,9 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
@@ -35,7 +38,6 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.FeedbackType
-import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.Result
@@ -50,6 +52,7 @@ import dk.nodes.nstack.kotlin.providers.NStackKoinComponent
 import dk.nodes.nstack.kotlin.providers.managersModule
 import dk.nodes.nstack.kotlin.providers.nStackModule
 import dk.nodes.nstack.kotlin.providers.repositoryModule
+import dk.nodes.nstack.kotlin.providers.useCaseModule
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
 import dk.nodes.nstack.kotlin.util.NLog
@@ -59,12 +62,12 @@ import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.ShakeDetector
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
-import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.koin.core.context.startKoin
@@ -123,9 +126,12 @@ object NStack {
     private val mainMenuDisplayer: MainMenuDisplayer by lazy { koinComponent.mainMenuDisplayer }
     private val termsRepository: TermsRepository by lazy { koinComponent.termsRepository }
     private val nstackMeta by lazy { koinComponent.nstackMeta }
+    private val processScope by lazy { koinComponent.processScope }
+    private val processLifecycle by lazy { koinComponent.processLifecycle }
+    private val handleLocalizeIndexUseCase by lazy { koinComponent.handleLocalizeListUseCase }
 
     // Cache Maps
-    private var networkLanguages: Map<Locale, JSONObject>? = null
+    internal var networkLanguages: Map<Locale, JSONObject>? = null
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
 
     private val handler: Handler = Handler()
@@ -149,6 +155,13 @@ object NStack {
                 getSystemLocale(configuration)
             } else {
                 getSystemLocaleLegacy(configuration)
+            }
+            processScope.launch {
+                val response =
+                    withContext(Dispatchers.IO) { networkManager.getLocalizeResource(newLocale.toLanguageTag()) }
+                if (response is Result.Success) {
+                    withContext(Dispatchers.IO) { handleLocalizeIndexUseCase(response.value) }
+                }
             }
             if (autoChangeLanguage) {
                 language = newLocale
@@ -203,11 +216,12 @@ object NStack {
     var baseUrl = "https://nstack.io"
 
     var defaultLanguage: Locale = Locale.UK
-    /**
+    internal set
+        /**
      * Used for settings or getting the current locale selected for language
      */
     var language: Locale = Locale.getDefault()
-        set(value) {
+        internal set(value) {
             field = value
             onLanguageChanged()
         }
@@ -287,6 +301,7 @@ object NStack {
                 repositoryModule,
                 gsonModule,
                 httpClientModule,
+                useCaseModule,
                 contextModule
             )
         }
@@ -297,12 +312,21 @@ object NStack {
         appApiKey = nstackMeta.apiKey
         env = nstackMeta.env
 
-        registerLocaleChangeBroadcastListener(context)
-
         plugins.addAll(plugin)
         plugins += viewTranslationManager
 
         loadCacheTranslations()
+        processLifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            fun onCreate() {
+                registerLocaleChangeBroadcastListener(context)
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun onDestroy() {
+                destroy(context)
+            }
+        })
 
         this.activeActivityHolder = ActiveActivityHolder()
             .also { holder -> registerActiveActivityHolderToAppLifecycle(context, holder) }
@@ -367,7 +391,7 @@ object NStack {
                 NLog.d(this, "NStack appOpen")
 
                 termsRepository.setLatestTerms(result.value.data.terms)
-                result.value.data.localize.forEach { handleLocalizeIndex(it) }
+                handleLocalizeIndexUseCase(result.value.data.localize)
 
                 val shouldUpdateTranslationClass =
                     result.value.data.localize.any { it.shouldUpdate }
@@ -384,32 +408,6 @@ object NStack {
                 NLog.e(this, "Error: onAppOpened")
                 result
             }
-        }
-    }
-
-    private suspend fun handleLocalizeIndex(index: LocalizeIndex) {
-        if (index.shouldUpdate) {
-            val translation = networkManager.loadTranslation(index.url) ?: return
-            prefManager.setTranslations(index.language.locale ?: defaultLanguage, translation)
-
-            try {
-                networkLanguages = networkLanguages?.toMutableMap()?.apply {
-                    put(
-                        index.language.locale ?: defaultLanguage,
-                        translation.asJsonObject ?: return@apply
-                    )
-                }
-            } catch (e: Exception) {
-                NLog.e(this, e.toString())
-            }
-
-            appOpenSettingsManager.setUpdateDate()
-        }
-        if (index.language.isDefault) {
-            defaultLanguage = index.language.locale ?: defaultLanguage
-        }
-        if (index.language.isBestFit) {
-            language = index.language.locale ?: defaultLanguage
         }
     }
 

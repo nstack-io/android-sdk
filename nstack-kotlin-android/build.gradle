@@ -5,7 +5,7 @@ apply from: 'publish-nstack-kotlin.gradle'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion '29.0.2'
+    buildToolsVersion '29.0.3'
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
@@ -13,6 +13,9 @@ android {
         versionName VERSION_NAME
         manifestPlaceholders = [appId: "placeholder", apiKey: "placeholder", env: "production"]
         buildConfigField "String", "SDK_VERSION", "\"$VERSION_NAME\""
+    }
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 
@@ -31,9 +34,10 @@ dependencies {
 
     implementation "androidx.core:core-ktx:1.1.0"
     implementation "androidx.appcompat:appcompat:1.1.0"
-    implementation "androidx.lifecycle:lifecycle-extensions:2.1.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-rc02"
-    implementation 'com.google.android.material:material:1.1.0-beta01'
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+    implementation 'com.google.android.material:material:1.1.0'
 
     implementation "org.koin:koin-core:$koin_version"
     implementation "org.koin:koin-core-ext:$koin_version"
