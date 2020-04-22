@@ -5,7 +5,7 @@
 
 # NStack Kotlin
 NStackSDK is the companion software development kit to the NStack backend.
-See the [NStack documentation](https://nstack-io.github.io/documentation/index.html) for more information about NStack
+See the [NStack documentation](https://nstack-io.github.io/docs/docs/guides/Android/android-installation.html) for more information about NStack
 
 
 ## Quick  Setup
