@@ -1,6 +1,7 @@
 package dk.nodes.nstack.kotlin.managers
 
 import dk.nodes.nstack.kotlin.util.NLog
+import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import org.json.JSONObject
 
 class ClassTranslationManager {
@@ -51,6 +52,26 @@ class ClassTranslationManager {
             NLog.d("", e.message ?: "")
             NLog.d("ClassTranslationManager", "Error updating field: $key : $value")
         }
+    }
+
+    fun getFieldValue(xmlKey: String): String? {
+        try {
+            var sectionName = xmlKey.cleanKeyName.split("_").firstOrNull() ?: return null
+            val keyName = xmlKey.cleanKeyName.split("_").lastOrNull() ?: return null
+
+            if (sectionName.equals("default", ignoreCase = true)) {
+                sectionName = "defaultSection"
+            }
+
+            val sectionClass = Class.forName(translationClass!!.name + "$" + sectionName)
+            val actualValue = sectionClass.getField(keyName).get(null) as? String
+
+            return actualValue
+        } catch (e: Exception) {
+            NLog.d("", e.message ?: "")
+        }
+
+        return null
     }
 
     companion object {
