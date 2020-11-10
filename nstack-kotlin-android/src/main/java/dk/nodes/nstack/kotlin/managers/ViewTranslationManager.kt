@@ -1,7 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
 import android.os.Handler
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.ToggleButton
@@ -11,6 +10,7 @@ import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
+import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
@@ -142,7 +142,7 @@ internal class ViewTranslationManager(private val translationHolder: Translation
                 translatedHint?.let(view::setHint)
             }
             else -> {
-                Log.d("ViewTranslationManager", view.context.resources.getResourceEntryName(view.id))
+                NLog.d("ViewTranslationManager", view.context.resources.getResourceEntryName(view.id))
             }
         }
     }
