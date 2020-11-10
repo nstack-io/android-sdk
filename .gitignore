@@ -69,3 +69,4 @@ freeline/
 freeline_project_description.json
 
 sample/
+**/RateReminderActions.kt
