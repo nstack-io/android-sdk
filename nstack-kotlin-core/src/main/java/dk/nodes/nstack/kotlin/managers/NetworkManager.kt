@@ -1,5 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import dk.nodes.nstack.kotlin.models.AppOpen
@@ -8,12 +9,12 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.Empty
 import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.FeedbackType
+import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Proposal
 import dk.nodes.nstack.kotlin.models.RateReminder2
 import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.models.TermDetailsResponse
 import dk.nodes.nstack.kotlin.models.TermsDetails
-import dk.nodes.nstack.kotlin.provider.GsonProvider
 import dk.nodes.nstack.kotlin.util.DateDeserializer.Companion.DATE_FORMAT
 import okhttp3.Call
 import okhttp3.Callback
@@ -32,10 +33,9 @@ import java.util.Locale
 class NetworkManager(
     private val client: OkHttpClient,
     private val baseUrl: String,
-    private val debugMode: Boolean
+    private val debugMode: Boolean,
+    private val gson: Gson
 ) {
-
-    private val gson = GsonProvider.provideGson()
 
     fun loadTranslation(
         url: String,
@@ -428,6 +428,24 @@ class NetworkManager(
             it["guid"] = settings.guid
             it["answer"] = answer
         }.post("$baseUrl/api/v2/notify/rate_reminder_v2/$rateReminderId/answers")
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    suspend fun getLocalizeResource(acceptLanguage: String): Result<List<LocalizeIndex>> = try {
+        val request = Request.Builder()
+            .header("Accept-Language", acceptLanguage)
+            .url("$baseUrl/api/v2/content/localize/resources/platforms/mobile")
+        val response = client.newCall(request.build()).execute()
+        if (response.isSuccessful) {
+            val json = response.body()!!.string()
+            val data = json.asJsonObject!!.getAsJsonArray("data").toString()
+            val type = object : TypeToken<ArrayList<LocalizeIndex>>() {}.type
+            Result.Success(value = gson.fromJson<ArrayList<LocalizeIndex>>(data, type))
+        } else {
+            Result.Error(Error.ApiError(errorCode = response.code()))
+        }
+    } catch (t: Throwable) {
+        Result.Error(Error.UnknownError)
     }
 
     suspend fun postFeedback(

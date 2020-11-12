@@ -15,6 +15,9 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
 import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
@@ -35,7 +38,6 @@ import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.ClientAppInfo
 import dk.nodes.nstack.kotlin.models.Error
 import dk.nodes.nstack.kotlin.models.FeedbackType
-import dk.nodes.nstack.kotlin.models.LocalizeIndex
 import dk.nodes.nstack.kotlin.models.Message
 import dk.nodes.nstack.kotlin.models.RateReminderAnswer
 import dk.nodes.nstack.kotlin.models.Result
@@ -44,9 +46,13 @@ import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.models.local.Environment
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
-import dk.nodes.nstack.kotlin.providers.ManagersModule
-import dk.nodes.nstack.kotlin.providers.NStackModule
-import dk.nodes.nstack.kotlin.providers.RepositoryModule
+import dk.nodes.nstack.kotlin.provider.gsonModule
+import dk.nodes.nstack.kotlin.provider.httpClientModule
+import dk.nodes.nstack.kotlin.providers.NStackKoinComponent
+import dk.nodes.nstack.kotlin.providers.managersModule
+import dk.nodes.nstack.kotlin.providers.nStackModule
+import dk.nodes.nstack.kotlin.providers.repositoryModule
+import dk.nodes.nstack.kotlin.providers.useCaseModule
 import dk.nodes.nstack.kotlin.util.LanguageListener
 import dk.nodes.nstack.kotlin.util.LanguagesListener
 import dk.nodes.nstack.kotlin.util.NLog
@@ -56,14 +62,16 @@ import dk.nodes.nstack.kotlin.util.OnLanguagesChangedFunction
 import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.ShakeDetector
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
-import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
 import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Locale
@@ -103,22 +111,27 @@ object NStack {
     private var currentLanguage: JSONObject? = null
 
     private var activeActivityHolder: ActiveActivityHolder? = null
+    private lateinit var koinComponent: NStackKoinComponent
 
     // Internally used classes
-    private lateinit var classTranslationManager: ClassTranslationManager
-    private lateinit var viewTranslationManager: ViewTranslationManager
-    private lateinit var assetCacheManager: AssetCacheManager
-    private lateinit var connectionManager: ConnectionManager
-    private lateinit var appInfo: ClientAppInfo
-    private lateinit var networkManager: NetworkManager
-    private lateinit var appOpenSettingsManager: AppOpenSettingsManager
-    private lateinit var prefManager: PrefManager
-    private lateinit var contextWrapper: ContextWrapper
-    private lateinit var mainMenuDisplayer: MainMenuDisplayer
-    private lateinit var termsRepository: TermsRepository
+    private val classTranslationManager: ClassTranslationManager by lazy { koinComponent.classTranslationManager }
+    private val viewTranslationManager: ViewTranslationManager by lazy { koinComponent.viewTranslationManager }
+    private val assetCacheManager: AssetCacheManager by lazy { koinComponent.assetCacheManager }
+    private val connectionManager: ConnectionManager by lazy { koinComponent.connectionManager }
+    private val appInfo: ClientAppInfo by lazy { koinComponent.appInfo }
+    private val networkManager: NetworkManager by lazy { koinComponent.networkManager }
+    private val appOpenSettingsManager: AppOpenSettingsManager by lazy { koinComponent.appOpenSettingsManager }
+    private val prefManager: PrefManager by lazy { koinComponent.prefManager }
+    private val contextWrapper: ContextWrapper by lazy { koinComponent.contextWrapper }
+    private val mainMenuDisplayer: MainMenuDisplayer by lazy { koinComponent.mainMenuDisplayer }
+    private val termsRepository: TermsRepository by lazy { koinComponent.termsRepository }
+    private val nstackMeta by lazy { koinComponent.nstackMeta }
+    private val processScope by lazy { koinComponent.processScope }
+    private val processLifecycle by lazy { koinComponent.processLifecycle }
+    private val handleLocalizeIndexUseCase by lazy { koinComponent.handleLocalizeListUseCase }
 
     // Cache Maps
-    private var networkLanguages: Map<Locale, JSONObject>? = null
+    internal var networkLanguages: Map<Locale, JSONObject>? = null
     private var cacheLanguages: Map<Locale, JSONObject> = hashMapOf()
 
     private val handler: Handler = Handler()
@@ -142,6 +155,13 @@ object NStack {
                 getSystemLocale(configuration)
             } else {
                 getSystemLocaleLegacy(configuration)
+            }
+            processScope.launch {
+                val response =
+                    withContext(Dispatchers.IO) { networkManager.getLocalizeResource(newLocale.toLanguageTag()) }
+                if (response is Result.Success) {
+                    withContext(Dispatchers.IO) { handleLocalizeIndexUseCase(response.value) }
+                }
             }
             if (autoChangeLanguage) {
                 language = newLocale
@@ -196,11 +216,12 @@ object NStack {
     var baseUrl = "https://nstack.io"
 
     var defaultLanguage: Locale = Locale.UK
-    /**
+    internal set
+        /**
      * Used for settings or getting the current locale selected for language
      */
     var language: Locale = Locale.getDefault()
-        set(value) {
+        internal set(value) {
             field = value
             onLanguageChanged()
         }
@@ -269,35 +290,43 @@ object NStack {
         }
         this.debugMode = debugMode
 
-        val nstackModule = NStackModule(context, translationHolder)
-        val managersModule = ManagersModule(nstackModule)
-        val repositoryModule = RepositoryModule(nstackModule)
+        startKoin {
+            val contextModule = module {
+                single { context }
+                single { createMainMenuDisplayer() }
+            }
+            modules(
+                managersModule,
+                nStackModule,
+                repositoryModule,
+                gsonModule,
+                httpClientModule,
+                useCaseModule,
+                contextModule
+            )
+        }
 
-        val nstackMeta = nstackModule.provideNStackMeta()
+        koinComponent = NStackKoinComponent()
+
         appIdKey = nstackMeta.appIdKey
         appApiKey = nstackMeta.apiKey
         env = nstackMeta.env
 
-        viewTranslationManager = nstackModule.provideViewTranslationManager()
-        classTranslationManager = nstackModule.provideClassTranslationManager()
-
-        registerLocaleChangeBroadcastListener(context)
-
         plugins.addAll(plugin)
-        viewTranslationManager = nstackModule.provideViewTranslationManager()
-        appInfo = nstackModule.provideClientAppInfo()
         plugins += viewTranslationManager
-        connectionManager = nstackModule.provideConnectionManager()
-        assetCacheManager = managersModule.provideAssetCacheManager()
-        appOpenSettingsManager = managersModule.provideAppOpenSettingsManager()
-        prefManager = managersModule.providePrefManager()
-        contextWrapper = nstackModule.provideContextWrapper()
-        networkManager = nstackModule.provideNetworkManager()
-        mainMenuDisplayer = createMainMenuDisplayer(context)
-
-        termsRepository = repositoryModule.provideTermsRepository()
 
         loadCacheTranslations()
+        processLifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            fun onCreate() {
+                registerLocaleChangeBroadcastListener(context)
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun onDestroy() {
+                destroy(context)
+            }
+        })
 
         this.activeActivityHolder = ActiveActivityHolder()
             .also { holder -> registerActiveActivityHolderToAppLifecycle(context, holder) }
@@ -309,7 +338,7 @@ object NStack {
         isInitialized = true
     }
 
-    private fun createMainMenuDisplayer(context: Context): MainMenuDisplayer {
+    private fun createMainMenuDisplayer(): MainMenuDisplayer {
 
         val liveEditManager = LiveEditManager(
             translationHolder,
@@ -362,12 +391,12 @@ object NStack {
                 NLog.d(this, "NStack appOpen")
 
                 termsRepository.setLatestTerms(result.value.data.terms)
-                result.value.data.localize.forEach { handleLocalizeIndex(it) }
+                handleLocalizeIndexUseCase(result.value.data.localize)
 
                 val shouldUpdateTranslationClass =
                     result.value.data.localize.any { it.shouldUpdate }
                 if (shouldUpdateTranslationClass) {
-                    NLog.e(this, "ShouldUpdate is set, updating Translations class...")
+                    NLog.v(this, "ShouldUpdate is set, updating Translations class...")
                     withContext(Dispatchers.Main) {
                         onLanguagesChanged()
                         onLanguageChanged()
@@ -379,29 +408,6 @@ object NStack {
                 NLog.e(this, "Error: onAppOpened")
                 result
             }
-        }
-    }
-
-    private suspend fun handleLocalizeIndex(index: LocalizeIndex) {
-        if (index.shouldUpdate) {
-            val translation = networkManager.loadTranslation(index.url) ?: return
-            prefManager.setTranslations(index.language.locale ?: defaultLanguage, translation)
-
-            try {
-                networkLanguages = networkLanguages?.toMutableMap()?.apply {
-                    put(index.language.locale ?: defaultLanguage, translation.asJsonObject ?: return@apply)
-                }
-            } catch (e: Exception) {
-                NLog.e(this, e.toString())
-            }
-
-            appOpenSettingsManager.setUpdateDate()
-        }
-        if (index.language.isDefault) {
-            defaultLanguage = index.language.locale ?: defaultLanguage
-        }
-        if (index.language.isBestFit) {
-            language = index.language.locale ?: defaultLanguage
         }
     }
 
@@ -493,7 +499,7 @@ object NStack {
      * Loads our languages from the asset cache
      */
     private fun loadCacheTranslations() {
-        NLog.e(this, "loadCacheTranslations")
+        NLog.v(this, "loadCacheTranslations")
 
         // Load our network cached data
         networkLanguages = prefManager.getTranslations()
@@ -575,15 +581,19 @@ object NStack {
         return if (languages.containsKey(language)) {
             languages[language]
         } else {
-            // Search our available languages for any keys that might match
+
+            // Try to find the exact match
             availableLanguages
-                .asSequence()
                 // Do our languages match
-                .filter { it.languageCode == locale.languageCode }
-                // Find the value for that language
-                .map { languages[it] }
+                .find { it.language == locale.toLanguageTag().replace("-", "_").toLowerCase() }
                 // Return the first value or null
-                .firstOrNull()
+                .let { languages[it] }
+
+                ?: availableLanguages // Search our available languages for any keys that might match
+                    // Do our languages match
+                    .find { it.languageCode == locale.languageCode }
+                    // Return the first value or null
+                    .let { languages[it] }
         }
     }
 
