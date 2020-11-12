@@ -2,6 +2,7 @@ package dk.nodes.nstack.kotlin
 
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -28,9 +29,7 @@ class NStackContentProvider : ContentProvider() {
                 val env = bundle.getString("dk.nodes.nstack.env")!!
                 val translationClass = bundle.getString("dk.nodes.nstack.Translation")!!
                 NStack.translationClass = Class.forName(translationClass)
-                val forName = Class.forName(context.javaClass.getPackage()!!.name + ".BuildConfig")
-                val field = forName.getField("DEBUG")
-                NStack.init(context, field.getBoolean(null))
+                NStack.init(context, context.getBuildConfigField("DEBUG", false))
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed to load meta-data, NameNotFound: " + e.message)
@@ -61,6 +60,12 @@ class NStackContentProvider : ContentProvider() {
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?) = 0
 
     override fun getType(uri: Uri): String? = null
+
+    private inline fun <reified T> Context.getBuildConfigField(fieldName: String, defaultValue: T): T {
+        val clazz = Class.forName(javaClass.getPackage()!!.name + ".BuildConfig")
+        val field = clazz.getField(fieldName)
+        return (field.get(null) as? T) ?: defaultValue
+    }
 
     companion object {
         private val TAG = NStackContentProvider::class.qualifiedName!!
