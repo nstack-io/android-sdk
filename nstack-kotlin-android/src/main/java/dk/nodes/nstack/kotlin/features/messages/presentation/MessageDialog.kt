@@ -26,12 +26,12 @@ internal class MessageDialog(private val context: Context) {
             .setCancelable(false)
             .setMessage(message.message)
             .setPositiveButton(
-                message.localization.okBtn ?: "Ok",
+                message.localization?.okBtn ?: "Ok",
                 null
             )
             .setConditionalNegativeButton(
                 message.url != null,
-                message.localization.urlBtn ?: "Open URL",
+                message.localization?.urlBtn ?: "Open URL",
                 null
             )
             .create()
