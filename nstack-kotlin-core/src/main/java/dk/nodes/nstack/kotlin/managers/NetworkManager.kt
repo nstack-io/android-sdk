@@ -107,7 +107,7 @@ class NetworkManager(
         settings: AppOpenSettings,
         acceptLanguage: String
     ): Result<AppOpen> = try {
-        FormBody.Builder().also {
+        val response = FormBody.Builder().also {
             it["guid"] = settings.guid
             it["version"] = settings.version
             it["old_version"] = settings.oldVersion
@@ -116,11 +116,15 @@ class NetworkManager(
             it["dev"] = debugMode.toString()
             it["test"] = settings.versionUpdateTestMode.toString()
         }.buildRequest(
-            "$baseUrl/api/v2/open",
-            "Accept-Language" to acceptLanguage
-        ).execute().body()?.string()?.let {
-            Result.Success(gson.fromJson(it, AppOpen::class.java))
-        } ?: Result.Error(Error.UnknownError)
+                "$baseUrl/api/v2/open",
+                "Accept-Language" to acceptLanguage
+        ).execute()
+        if (response.isSuccessful) {
+            response.body()?.string()?.let {
+                Result.Success(gson.fromJson(it, AppOpen::class.java))
+            } ?: Result.Error(Error.UnknownError)
+        } else Result.Error(Error.UnknownError)
+
     } catch (e: IOException) {
         Result.Error(Error.NetworkError)
     } catch (e: Exception) {
