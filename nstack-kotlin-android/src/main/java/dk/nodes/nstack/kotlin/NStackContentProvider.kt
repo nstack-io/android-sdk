@@ -28,7 +28,9 @@ class NStackContentProvider : ContentProvider() {
                 val env = bundle.getString("dk.nodes.nstack.env")!!
                 val translationClass = bundle.getString("dk.nodes.nstack.Translation")!!
                 NStack.translationClass = Class.forName(translationClass)
-                NStack.init(context, env == "staging")
+                val forName = Class.forName(context.javaClass.getPackage()!!.name + ".BuildConfig")
+                val field = forName.getField("DEBUG")
+                NStack.init(context, field.getBoolean(null))
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed to load meta-data, NameNotFound: " + e.message)
