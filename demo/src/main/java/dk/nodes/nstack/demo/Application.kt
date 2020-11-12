@@ -7,6 +7,7 @@ class Application : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        NStack.baseUrl = "https://nstack-staging.vapor.cloud"
         if (BuildConfig.DEBUG) {
             NStack.enableMenuOnShake(this)
         }
