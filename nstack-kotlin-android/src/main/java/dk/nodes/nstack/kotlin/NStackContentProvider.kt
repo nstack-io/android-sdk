@@ -14,6 +14,7 @@ import dk.nodes.nstack.kotlin.util.NLog
 class NStackContentProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
+        Log.d(TAG, "OnCreate")
         try {
             val context = context ?: return false
             val ai: ApplicationInfo = context.packageManager
@@ -30,7 +31,13 @@ class NStackContentProvider : ContentProvider() {
                 val env = bundle.getString("dk.nodes.nstack.env")!!
                 val translationClass = bundle.getString("dk.nodes.nstack.Translation")!!
                 NStack.translationClass = Class.forName(translationClass)
-                NStack.init(context, context.getBuildConfigField("DEBUG", false))
+                NStack.initInternal(
+                        context,
+                        context.getBuildConfigField("DEBUG", false),
+                        appId,
+                        apiKey,
+                        env
+                )
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed to load meta-data, NameNotFound: " + e.message)

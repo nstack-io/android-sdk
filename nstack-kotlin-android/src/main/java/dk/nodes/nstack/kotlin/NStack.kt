@@ -172,6 +172,73 @@ object NStack {
         }
     }
 
+    internal fun initInternal(
+            context: Context,
+            debugMode: Boolean,
+            appId: String,
+            apiKey: String,
+            env: String,
+            vararg plugin: Any
+    ) {
+        NLog.i(this, "NStack initializing")
+        if (isInitialized) {
+            NLog.w(this, "NStack already initialized")
+            return
+        }
+        this.debugMode = debugMode
+
+        startKoin {
+            val contextModule = module {
+                single { context }
+                single { createMainMenuDisplayer() }
+            }
+            modules(
+                    managersModule,
+                    nStackModule,
+                    repositoryModule,
+                    gsonModule,
+                    httpClientModule,
+                    useCaseModule,
+                    contextModule
+            )
+        }
+        koinComponent = NStackKoinComponent()
+
+        this.appIdKey = appId
+        this.appApiKey = apiKey
+        this.env = env
+
+        plugins.addAll(plugin)
+        plugins += viewTranslationManager
+
+        loadCacheTranslations()
+        processLifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            fun onCreate() {
+                registerLocaleChangeBroadcastListener(context)
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun onDestroy() {
+                destroy(context)
+            }
+        })
+
+        this.activeActivityHolder = ActiveActivityHolder()
+                .also { holder -> registerActiveActivityHolderToAppLifecycle(context, holder) }
+
+        if (Environment(env).shouldEnableTestMode) {
+            versionUpdateTestMode = true
+        }
+
+        isInitialized = true
+        ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
+            appOpenConsumable = withContext(Dispatchers.IO) { appOpen() }
+        }
+
+
+    }
+
     private var appOpenConsumable by consumable<Result<AppOpen>>()
 
     @SuppressWarnings("deprecation")
