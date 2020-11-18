@@ -15,6 +15,8 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -63,6 +65,7 @@ import dk.nodes.nstack.kotlin.util.OnLanguagesChangedListener
 import dk.nodes.nstack.kotlin.util.ShakeDetector
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import dk.nodes.nstack.kotlin.util.extensions.cleanKeyName
+import dk.nodes.nstack.kotlin.util.extensions.consumable
 import dk.nodes.nstack.kotlin.util.extensions.languageCode
 import dk.nodes.nstack.kotlin.util.extensions.locale
 import dk.nodes.nstack.kotlin.util.extensions.removeFirst
@@ -168,6 +171,8 @@ object NStack {
             }
         }
     }
+
+    private var appOpenConsumable by consumable<Result<AppOpen>>()
 
     @SuppressWarnings("deprecation")
     private fun getSystemLocaleLegacy(config: Configuration): Locale {
@@ -336,6 +341,9 @@ object NStack {
         }
 
         isInitialized = true
+        ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
+            appOpenConsumable = withContext(Dispatchers.IO) { appOpen() }
+        }
     }
 
     private fun createMainMenuDisplayer(): MainMenuDisplayer {
@@ -378,7 +386,7 @@ object NStack {
      *
      * @see [AppOpen]
      */
-    suspend fun appOpen() = guardConnectivity {
+    suspend fun appOpen() = appOpenConsumable ?: guardConnectivity {
         check(isInitialized) { "init() has not been called" }
 
         val localeString = language.toString()

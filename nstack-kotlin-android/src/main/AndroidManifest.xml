@@ -4,6 +4,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application>
+        <provider
+            android:authorities="${applicationId}.NStackContentProvider"
+            android:name=".kotlin.NStackContentProvider"
+            android:exported="false" />
         <meta-data
             android:name="dk.nodes.nstack.appId"
             android:value="${appId}" />

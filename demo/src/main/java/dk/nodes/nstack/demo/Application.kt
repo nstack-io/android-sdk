@@ -7,10 +7,7 @@ class Application : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
         NStack.baseUrl = "https://nstack-staging.vapor.cloud"
-        NStack.translationClass = Translation::class.java
-        NStack.init(this, BuildConfig.DEBUG)
         if (BuildConfig.DEBUG) {
             NStack.enableMenuOnShake(this)
         }
