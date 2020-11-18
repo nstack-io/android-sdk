@@ -26,10 +26,18 @@ class NStackContentProvider : ContentProvider() {
                     bundle.containsKey("dk.nodes.nstack.env") &&
                     bundle.containsKey("dk.nodes.nstack.Translation")
             ) {
-                val appId = bundle.getString("dk.nodes.nstack.appId")!!
-                val apiKey = bundle.getString("dk.nodes.nstack.apiKey")!!
-                val env = bundle.getString("dk.nodes.nstack.env")!!
-                val translationClass = bundle.getString("dk.nodes.nstack.Translation")!!
+                val appId = bundle.getString("dk.nodes.nstack.appId")!!.also {
+                    log("AppId $it")
+                }
+                val apiKey = bundle.getString("dk.nodes.nstack.apiKey")!!.also {
+                    log("apiKey $it")
+                }
+                val env = bundle.getString("dk.nodes.nstack.env")!!.also {
+                    log("env $it")
+                }
+                val translationClass = bundle.getString("dk.nodes.nstack.Translation")!!.also {
+                    log("translationClass $it")
+                }
                 NStack.translationClass = Class.forName(translationClass)
                 NStack.initInternal(
                         context,
@@ -38,6 +46,7 @@ class NStackContentProvider : ContentProvider() {
                         apiKey,
                         env
                 )
+                log("Init success")
             }
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed to load meta-data, NameNotFound: " + e.message)
@@ -46,6 +55,10 @@ class NStackContentProvider : ContentProvider() {
         }
 
         return false
+    }
+
+    private fun log(string: String) {
+        Log.d(TAG, string)
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? = null
