@@ -178,6 +178,7 @@ object NStack {
             appId: String,
             apiKey: String,
             env: String,
+            autoAppOpenEnabled: Boolean,
             vararg plugin: Any
     ) {
         NLog.i(this, "NStack initializing")
@@ -232,11 +233,10 @@ object NStack {
         }
 
         isInitialized = true
-        ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
-            appOpenConsumable = withContext(Dispatchers.IO) { appOpen() }
+
+        if (autoAppOpenEnabled) {
+            subscribeForAutoAppOpen()
         }
-
-
     }
 
     private var appOpenConsumable by consumable<Result<AppOpen>>()
@@ -354,7 +354,7 @@ object NStack {
         init(context, false)
     }
 
-    fun init(context: Context, debugMode: Boolean, vararg plugin: Any) {
+    fun init(context: Context, debugMode: Boolean, autoAppOpenEnabled: Boolean = true, vararg plugin: Any) {
         NLog.i(this, "NStack initializing")
         if (isInitialized) {
             NLog.w(this, "NStack already initialized")
@@ -408,8 +408,9 @@ object NStack {
         }
 
         isInitialized = true
-        ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
-            appOpenConsumable = withContext(Dispatchers.IO) { appOpen() }
+
+        if (autoAppOpenEnabled) {
+            subscribeForAutoAppOpen()
         }
     }
 
@@ -806,6 +807,15 @@ object NStack {
             block()
         } else {
             Result.Error(Error.NetworkError)
+        }
+    }
+
+    /**
+     * Automatically calls appOpen each time app becomes foreground.
+     */
+    private fun subscribeForAutoAppOpen() {
+        ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
+            appOpenConsumable = withContext(Dispatchers.IO) { appOpen() }
         }
     }
 

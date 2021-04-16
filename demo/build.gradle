@@ -50,7 +50,8 @@ android {
         manifestPlaceholders = [
                 appId : translation.appId,
                 apiKey: translation.apiKey,
-                AutoInitEnabled: true
+                AutoInitEnabled: true,
+                AutoAppOpenEnabled: true
         ]
 
     }

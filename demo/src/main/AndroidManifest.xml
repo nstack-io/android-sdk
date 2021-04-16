@@ -38,6 +38,11 @@
             android:value="${AutoInitEnabled}"
             tools:replace="android:value" />
 
+        <meta-data
+            android:name="dk.nodes.nstack.AutoAppOpenEnabled"
+            android:value="${AutoAppOpenEnabled}"
+            tools:replace="android:value" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

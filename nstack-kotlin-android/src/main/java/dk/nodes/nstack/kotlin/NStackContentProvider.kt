@@ -21,11 +21,7 @@ class NStackContentProvider : ContentProvider() {
                     .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
             val bundle: Bundle = ai.metaData
 
-            val autoInitEnabled = if (bundle.containsKey("dk.nodes.nstack.AutoInitEnabled")) {
-                bundle.getBoolean("dk.nodes.nstack.AutoInitEnabled")
-            } else {
-                true
-            }
+            val autoInitEnabled = bundle.getBoolean("dk.nodes.nstack.AutoInitEnabled", true)
 
             if (
                     autoInitEnabled &&
@@ -46,13 +42,16 @@ class NStackContentProvider : ContentProvider() {
                 val translationClass = bundle.getString("dk.nodes.nstack.Translation")!!.also {
                     log("translationClass $it")
                 }
+                val autoAppOpenEnabled = bundle.getBoolean("dk.nodes.nstack.AutoAppOpenEnabled", true)
+
                 NStack.translationClass = Class.forName(translationClass)
                 NStack.initInternal(
                         context,
                         context.getBuildConfigField("DEBUG", false),
                         appId,
                         apiKey,
-                        env
+                        env,
+                        autoAppOpenEnabled
                 )
                 log("Init success")
             }
