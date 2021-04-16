@@ -20,7 +20,15 @@ class NStackContentProvider : ContentProvider() {
             val ai: ApplicationInfo = context.packageManager
                     .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
             val bundle: Bundle = ai.metaData
+
+            val autoInitEnabled = if (bundle.containsKey("dk.nodes.nstack.AutoInitEnabled")) {
+                bundle.getBoolean("dk.nodes.nstack.AutoInitEnabled")
+            } else {
+                true
+            }
+
             if (
+                    autoInitEnabled &&
                     bundle.containsKey("dk.nodes.nstack.appId") &&
                     bundle.containsKey("dk.nodes.nstack.apiKey") &&
                     bundle.containsKey("dk.nodes.nstack.env") &&
