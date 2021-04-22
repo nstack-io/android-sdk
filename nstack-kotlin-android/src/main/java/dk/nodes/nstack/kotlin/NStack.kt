@@ -454,7 +454,7 @@ object NStack {
      *
      * @see [AppOpen]
      */
-    suspend fun appOpen() = appOpenConsumable ?: guardConnectivity {
+    @Synchronized suspend fun appOpen() = appOpenConsumable ?: guardConnectivity {
         check(isInitialized) { "init() has not been called" }
 
         val localeString = language.toString()
@@ -484,6 +484,8 @@ object NStack {
                 NLog.e(this, "Error: onAppOpened")
                 result
             }
+        }.also {
+            appOpenConsumable = it
         }
     }
 
@@ -815,7 +817,7 @@ object NStack {
      */
     private fun subscribeForAutoAppOpen() {
         ProcessLifecycleOwner.get().lifecycle.coroutineScope.launchWhenCreated {
-            appOpenConsumable = withContext(Dispatchers.IO) { appOpen() }
+            withContext(Dispatchers.IO) { appOpen() }
         }
     }
 
