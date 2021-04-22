@@ -132,6 +132,8 @@ object NStack {
     private val processScope by lazy { koinComponent.processScope }
     private val processLifecycle by lazy { koinComponent.processLifecycle }
     private val handleLocalizeIndexUseCase by lazy { koinComponent.handleLocalizeListUseCase }
+    private val state
+        get() = koinComponent.stateHolder
 
     // Cache Maps
     internal var networkLanguages: Map<Locale, JSONObject>? = null
@@ -454,7 +456,7 @@ object NStack {
      *
      * @see [AppOpen]
      */
-    @Synchronized suspend fun appOpen() = appOpenConsumable ?: guardConnectivity {
+    @Synchronized suspend fun appOpen() = state.appOpenConsumable ?: guardConnectivity {
         check(isInitialized) { "init() has not been called" }
 
         val localeString = language.toString()
@@ -485,7 +487,7 @@ object NStack {
                 result
             }
         }.also {
-            appOpenConsumable = it
+            state.appOpenConsumable = it
         }
     }
 
