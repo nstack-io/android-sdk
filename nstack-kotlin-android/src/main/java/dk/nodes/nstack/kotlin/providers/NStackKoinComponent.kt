@@ -3,6 +3,7 @@ package dk.nodes.nstack.kotlin.providers
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.NStackStateHolder
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
 import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
@@ -29,6 +30,7 @@ internal class NStackKoinComponent : KoinComponent {
     val appInfo: ClientAppInfo by inject()
     val networkManager: NetworkManager by inject()
     val appOpenSettingsManager: AppOpenSettingsManager by inject()
+    val stateHolder: NStackStateHolder by inject()
     val prefManager: PrefManager by inject()
     val contextWrapper: ContextWrapper by inject()
     val mainMenuDisplayer: MainMenuDisplayer by inject()

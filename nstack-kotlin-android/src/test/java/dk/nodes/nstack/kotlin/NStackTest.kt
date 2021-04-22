@@ -54,6 +54,7 @@ internal class NStackTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(mainThreadSurrogate)
+        every { anyConstructed<NStackKoinComponent>().stateHolder } returns NStackStateHolder()
     }
 
     @Test

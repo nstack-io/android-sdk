@@ -6,6 +6,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.coroutineScope
 import dk.nodes.nstack.BuildConfig
 import dk.nodes.nstack.kotlin.NStack
+import dk.nodes.nstack.kotlin.NStackStateHolder
 import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
 import dk.nodes.nstack.kotlin.managers.ConnectionManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
@@ -77,5 +78,9 @@ val nStackModule = module {
             model = Build.MODEL,
             debugMode = NStack.debugMode
         )
+    }
+
+    single {
+        NStackStateHolder()
     }
 }
