@@ -7,7 +7,7 @@ data class Message(
     val showSetting: ShowSetting,
     val message: String,
     val url: String?,
-    val localization: Localization
+    val localization: Localization?
 ) {
     data class Localization(
         val okBtn: String?,

@@ -46,10 +46,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
+                android:textOff="@string/nstack_home_off"
+                android:textOn="@string/nstack_home_on"
                 android:layout_marginEnd="16dp"
                 android:text="@string/nstack_home_title" />
 
             <ToggleButton
+                android:id="@+id/toggle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
@@ -63,6 +66,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
+                android:textOff="@string/nstack_home_off"
+                android:textOn="@string/nstack_home_on"
                 android:text="@string/nstack_home_title"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
@@ -71,6 +76,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
+                android:textOff="@string/nstack_home_off"
+                android:textOn="@string/nstack_home_on"
                 android:text="@string/nstack_home_title"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
@@ -79,12 +86,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
+                android:textOff="@string/nstack_home_off"
+                android:textOn="@string/nstack_home_on"
                 android:text="@string/nstack_home_title"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
             <RadioButton
                 android:id="@+id/first"
                 android:layout_width="match_parent"
+                android:textOff="@string/nstack_home_off"
+                android:textOn="@string/nstack_home_on"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
