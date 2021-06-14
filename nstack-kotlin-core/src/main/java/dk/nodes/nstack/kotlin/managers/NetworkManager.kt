@@ -425,7 +425,7 @@ class NetworkManager(
     ): RateReminder2? = try {
         Request.Builder()["$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}"]
             .parseJson { RateReminder2.parse(it) }
-    }catch (e: Exception) {
+    } catch (e: Exception) {
         null
     }
 
