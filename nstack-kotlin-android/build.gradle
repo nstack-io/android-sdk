@@ -21,6 +21,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    sourceSets {
+        test {
+            resources.srcDirs += ['src/test/assets']
+        }
+    }
 }
 
 dependencies {
@@ -45,4 +50,6 @@ dependencies {
     testImplementation "io.mockk:mockk:1.11.0"
     testImplementation "org.json:json:20180130"
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.1'
+
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.6.0'
 }
