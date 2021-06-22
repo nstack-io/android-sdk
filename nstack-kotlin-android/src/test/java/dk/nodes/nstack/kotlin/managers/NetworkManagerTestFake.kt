@@ -64,6 +64,7 @@ class NetworkManagerTestFake : TestCase() {
         mockWebServer.setResponse("response_empty.json", 200)
         val response = runBlocking { manager.loadTranslation(mockWebServer.url("").toString()) }
         assert(response == "null")
+        TODO("Response is 'null' but it's string instead of normal null as expected")
     }
 
     fun testPostAppOpenSuccess() {
