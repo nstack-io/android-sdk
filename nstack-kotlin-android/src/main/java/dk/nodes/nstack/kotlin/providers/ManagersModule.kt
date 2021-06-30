@@ -3,20 +3,10 @@ package dk.nodes.nstack.kotlin.providers
 import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
 import dk.nodes.nstack.kotlin.managers.AssetCacheManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
+import org.koin.dsl.module
 
-internal class ManagersModule(
-    private val nStackModule: NStackModule
-) {
-
-    fun provideAppOpenSettingsManager(): AppOpenSettingsManager {
-        return AppOpenSettingsManager(nStackModule.provideClientAppInfo(), nStackModule.providePreferences())
-    }
-
-    fun provideAssetCacheManager(): AssetCacheManager {
-        return AssetCacheManager(nStackModule.provideContextWrapper())
-    }
-
-    fun providePrefManager(): PrefManager {
-        return PrefManager(nStackModule.providePreferences())
-    }
+val managersModule = module {
+    single { AppOpenSettingsManager(get(), get()) }
+    single { AssetCacheManager(get()) }
+    single { PrefManager(get()) }
 }

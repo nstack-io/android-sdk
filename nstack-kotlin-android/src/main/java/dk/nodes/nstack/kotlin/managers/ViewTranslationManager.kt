@@ -92,7 +92,9 @@ internal class ViewTranslationManager(private val translationHolder: Translation
         val translatedSubtitle = translationHolder.getTranslationByKey(translationData.subtitle)
         // All views should have this
 
-        translatedContentDescription?.let(view::setContentDescription)
+        // Always set contentDescription for accessibility
+        val accessibilityContent = translatedContentDescription ?: translatedKey ?: translatedText
+        accessibilityContent?.let(view::setContentDescription)
         view.setTag(NStackViewTag, translationData)
 
         updateViewListeners.forEach {

@@ -7,6 +7,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import org.json.JSONObject
+import kotlin.reflect.KProperty
 
 // Extension
 
@@ -94,4 +95,32 @@ val Locale.languageCode: String
 
 internal inline fun <T : Any> MutableList<T?>.removeFirst(predicate: (T) -> Boolean) {
     asSequence().filterNotNull().indexOfFirst(predicate).takeUnless { it == -1 }?.let { removeAt(it) }
+}
+
+internal fun <T> consumable() = ConsumableDelegate<T>()
+
+internal class Consumable<out T>(private val content: T) {
+    private var consumed = false
+    fun consume(): T? {
+        return if (consumed) {
+            null
+        } else {
+            consumed = true
+            content
+        }
+    }
+}
+
+internal class ConsumableDelegate<T> {
+
+    constructor()
+    constructor(value: T) {
+        consumable = Consumable(value)
+    }
+
+    private var consumable: Consumable<T?>? = null
+    operator fun getValue(thisRef: Any, property: KProperty<*>): T? = consumable?.consume()
+    operator fun setValue(thisRef: Any, property: KProperty<*>, value: T?) {
+        consumable = Consumable(value)
+    }
 }

@@ -1,15 +1,10 @@
 package dk.nodes.nstack.kotlin.providers
 
 import dk.nodes.nstack.kotlin.features.terms.data.TermsRepository
-import dk.nodes.nstack.kotlin.provider.GsonProvider
+import org.koin.dsl.module
 
-internal class RepositoryModule(
-    private val nStackModule: NStackModule
-) {
-
-    fun provideTermsRepository(): TermsRepository =
-        TermsRepository(
-            preferences = nStackModule.providePreferences(),
-            gson = GsonProvider.provideGson()
-        )
+val repositoryModule = module {
+    single {
+        TermsRepository(get(), get())
+    }
 }
