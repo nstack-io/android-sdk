@@ -41,7 +41,7 @@ class NetworkManager(
         url: String,
         onSuccess: (String) -> Unit,
         onError: (Exception) -> Unit
-    ) {
+    ) = try {
         client.newCall(Request.Builder().url(url).build())
             .enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
@@ -57,16 +57,20 @@ class NetworkManager(
                     }
                 }
             })
+    } catch (e: Exception) {
+        onError(e)
     }
 
-    suspend fun loadTranslation(url: String): String? {
+    suspend fun loadTranslation(url: String): String? = try {
         val response = client.newCall(Request.Builder().url(url).build()).execute()
         val responseBody = response.body()
-        return when {
+        when {
             response.isSuccessful && responseBody != null -> responseBody.string().asJsonObject
                 ?.getAsJsonObject("data").toString()
             else -> null
         }
+    } catch (e: Exception) {
+        null
     }
 
     fun postAppOpen(
@@ -74,7 +78,7 @@ class NetworkManager(
         acceptLanguage: String,
         onSuccess: (AppOpenData) -> Unit,
         onError: (Exception) -> Unit
-    ) {
+    ) = try {
         FormBody.Builder().also {
             it["guid"] = settings.guid
             it["version"] = settings.version
@@ -101,6 +105,8 @@ class NetworkManager(
                 }
             }
         })
+    } catch (e: Exception) {
+        onError(e)
     }
 
     suspend fun postAppOpen(
@@ -135,7 +141,7 @@ class NetworkManager(
      * Notifies the backend that the message has been seen
      */
     @Deprecated("Use suspend fun postMessageSeen()")
-    fun postMessageSeen(guid: String, messageId: Int) {
+    fun postMessageSeen(guid: String, messageId: Int) = try {
         FormBody.Builder().also {
             it["guid"] = guid
             it["message_id"] = messageId.toString()
@@ -149,6 +155,8 @@ class NetworkManager(
                 override fun onResponse(call: Call, response: Response) {
                 }
             })
+    } catch (e: Exception) {
+        // Silent
     }
 
     /**
@@ -181,7 +189,7 @@ class NetworkManager(
     /**
      * Notifies the backend that the rate reminder has been seen
      */
-    fun postRateReminderSeen(appOpenSettings: AppOpenSettings, rated: Boolean) {
+    fun postRateReminderSeen(appOpenSettings: AppOpenSettings, rated: Boolean) = try {
         val answer = if (rated) "yes" else "no"
 
         val formBuilder = FormBody.Builder()
@@ -204,6 +212,8 @@ class NetworkManager(
                 override fun onResponse(call: Call, response: Response) {
                 }
             })
+    } catch (e: Exception) {
+        // Silent
     }
 
     /**
@@ -284,7 +294,7 @@ class NetworkManager(
         newValue: String,
         onSuccess: () -> Unit,
         onError: (Exception) -> Unit
-    ) {
+    ) = try {
         FormBody.Builder().also {
             it["key"] = key
             it["section"] = section
@@ -310,12 +320,14 @@ class NetworkManager(
                     }
                 }
             )
+    } catch (e: Exception) {
+        onError(e)
     }
 
     fun fetchProposals(
         onSuccess: (List<Proposal>) -> Unit,
         onError: (Exception) -> Unit
-    ) {
+    ) = try {
         val request = Request.Builder()
             .url("$baseUrl/api/v2/content/localize/proposals")
             .get()
@@ -340,6 +352,8 @@ class NetworkManager(
                 }
             }
         })
+    } catch (e: Exception) {
+        onError(e)
     }
 
     suspend fun getLatestTerms(
@@ -408,30 +422,36 @@ class NetworkManager(
 
     suspend fun getRateReminder2(
         settings: AppOpenSettings
-    ): RateReminder2? {
-        return Request.Builder()["$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}"]
+    ): RateReminder2? = try {
+        Request.Builder()["$baseUrl/api/v2/notify/rate_reminder_v2?guid=${settings.guid}"]
             .parseJson { RateReminder2.parse(it) }
+    } catch (e: Exception) {
+        null
     }
 
     suspend fun postRateReminderAction(
         settings: AppOpenSettings,
         action: String
-    ) {
+    ) = try {
         FormBody.Builder().also {
             it["guid"] = settings.guid
             it["action"] = action
         }.post("$baseUrl/api/v2/notify/rate_reminder_v2/events")
+    } catch (e: Exception) {
+        // Silent
     }
 
     suspend fun postRateReminderAction(
         settings: AppOpenSettings,
         rateReminderId: Int,
         answer: String
-    ) {
+    ) = try {
         FormBody.Builder().also {
             it["guid"] = settings.guid
             it["answer"] = answer
         }.post("$baseUrl/api/v2/notify/rate_reminder_v2/$rateReminderId/answers")
+    } catch (e: Exception) {
+        // Silent
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")

@@ -6,35 +6,15 @@ import android.content.Intent
 import android.preference.PreferenceManager
 import android.util.Log
 import com.google.gson.reflect.TypeToken
-import dk.nodes.nstack.kotlin.managers.AppOpenSettingsManager
-import dk.nodes.nstack.kotlin.managers.AssetCacheManager
-import dk.nodes.nstack.kotlin.managers.ClassTranslationManager
-import dk.nodes.nstack.kotlin.managers.ConnectionManager
-import dk.nodes.nstack.kotlin.managers.NetworkManager
-import dk.nodes.nstack.kotlin.managers.PrefManager
-import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
-import dk.nodes.nstack.kotlin.models.AppOpen
-import dk.nodes.nstack.kotlin.models.AppOpenData
-import dk.nodes.nstack.kotlin.models.AppOpenMeta
-import dk.nodes.nstack.kotlin.models.AppOpenSettings
-import dk.nodes.nstack.kotlin.models.ClientAppInfo
-import dk.nodes.nstack.kotlin.models.Error
-import dk.nodes.nstack.kotlin.models.LocalizeIndex
-import dk.nodes.nstack.kotlin.models.Message
-import dk.nodes.nstack.kotlin.models.NStackMeta
+import dk.nodes.nstack.kotlin.managers.*
+import dk.nodes.nstack.kotlin.models.*
 import dk.nodes.nstack.kotlin.models.Result
 import dk.nodes.nstack.kotlin.providers.NStackKoinComponent
 import dk.nodes.nstack.kotlin.usecases.HandleLocalizeListUseCase
 import dk.nodes.nstack.kotlin.util.GsonProvider
 import dk.nodes.nstack.kotlin.util.extensions.ContextWrapper
 import dk.nodes.nstack.kotlin.util.extensions.asJsonObject
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkConstructor
-import io.mockk.mockkStatic
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
@@ -44,8 +24,7 @@ import org.json.JSONObject
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 internal class NStackTest {
 
@@ -87,7 +66,7 @@ internal class NStackTest {
     @Test
     fun `Test languages set`() = runBlockingTest {
         val handleLocalizeListUseCase = HandleLocalizeListUseCase(
-            networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
+                networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
         )
         handleLocalizeListUseCase(indexList)
         assert(NStack.defaultLanguage.toLanguageTag() == "en-GB")
@@ -97,7 +76,7 @@ internal class NStackTest {
     @Test
     fun `Test languages set no best fit`() = runBlockingTest {
         val handleLocalizeListUseCase = HandleLocalizeListUseCase(
-            networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
+                networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
         )
         handleLocalizeListUseCase(indexList.map {
             it.copy(language = it.language.copy(isBestFit = false))
@@ -108,7 +87,7 @@ internal class NStackTest {
     @Test
     fun `Test languages set random best fit`() = runBlockingTest {
         val handleLocalizeListUseCase = HandleLocalizeListUseCase(
-            networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
+                networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
         )
         val random = indexList.random()
 
@@ -123,7 +102,7 @@ internal class NStackTest {
     @Test
     fun `Test languages shouldn't update`() = runBlockingTest {
         val handleLocalizeListUseCase = HandleLocalizeListUseCase(
-            networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
+                networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
         )
 
         handleLocalizeListUseCase(indexList.map {
@@ -141,16 +120,16 @@ internal class NStackTest {
 
         verify {
             networkManagerMock.loadTranslation(
-                languageIndex1.url,
-                capture(loadTranslations1Slot),
-                any()
+                    languageIndex1.url,
+                    capture(loadTranslations1Slot),
+                    any()
             )
         }
         verify {
             networkManagerMock.loadTranslation(
-                languageIndex2.url,
-                capture(loadTranslations2Slot),
-                any()
+                    languageIndex2.url,
+                    capture(loadTranslations2Slot),
+                    any()
             )
         }
         verify(exactly = 0) { networkManagerMock.loadTranslation(languageIndex3.url, any(), any()) }
@@ -215,14 +194,14 @@ internal class NStackTest {
     @Test
     fun `Test message seen`() {
         val message = Message(
-            id = 101,
-            showSetting = Message.ShowSetting.ONCE,
-            message = "",
-            url = null,
-            localization = Message.Localization(
-                okBtn = "",
-                urlBtn = ""
-            )
+                id = 101,
+                showSetting = Message.ShowSetting.ONCE,
+                message = "",
+                url = null,
+                localization = Message.Localization(
+                        okBtn = "",
+                        urlBtn = ""
+                )
         )
 
         NStack.messageSeen(message)
@@ -248,7 +227,7 @@ internal class NStackTest {
         private val clientAppInfoMock = mockk<ClientAppInfo>()
         private val viewTranslationManagerMock = mockk<ViewTranslationManager>(relaxUnitFun = true)
         private val classTranslationManagerMock =
-            mockk<ClassTranslationManager>(relaxUnitFun = true)
+                mockk<ClassTranslationManager>(relaxUnitFun = true)
         private val connectionManagerMock = mockk<ConnectionManager>()
         private val networkManagerMock = mockk<NetworkManager>(relaxUnitFun = true)
         private val contextWrapperMock = mockk<ContextWrapper>(relaxUnitFun = true)
@@ -267,12 +246,12 @@ internal class NStackTest {
         private const val osVersion = "osVersion"
         private val lastUpdated = Date()
         private val appOpenSettings = AppOpenSettings(
-            guid = guid,
-            version = version,
-            oldVersion = oldVersion,
-            lastUpdated = lastUpdated,
-            device = device,
-            osVersion = osVersion
+                guid = guid,
+                version = version,
+                oldVersion = oldVersion,
+                lastUpdated = lastUpdated,
+                device = device,
+                osVersion = osVersion
         )
         private val indexList: List<LocalizeIndex> by lazy {
             val data = localizeResourceJson.asJsonObject!!.getJSONArray("data").toString()
@@ -293,16 +272,16 @@ internal class NStackTest {
         private val appUpdateDate = AppOpenData(localize = indexList)
 
         private val appUpdateResponse =
-            AppOpen(appUpdateDate, AppOpenMeta(language1.locale.toString()))
+                AppOpen(appUpdateDate, AppOpenMeta(language1.locale.toString()))
 
         private val translations1 = JSONObject(localizeUrlEnUk).getJSONObject("data")
         private val translations2 = JSONObject(localizeUrlEsEs).getJSONObject("data")
         private val translations3 = JSONObject(localizeUrlDaDk).getJSONObject("data")
 
         private val translations = mapOf(
-            locale1 to translations1,
-            locale2 to translations2,
-            locale3 to translations3
+                locale1 to translations1,
+                locale2 to translations2,
+                locale3 to translations3
         )
 
         private var languagesChanged = false
@@ -323,7 +302,7 @@ internal class NStackTest {
             every { anyConstructed<NStackKoinComponent>().networkManager } returns networkManagerMock
             every { anyConstructed<NStackKoinComponent>().contextWrapper } returns contextWrapperMock
             every { anyConstructed<NStackKoinComponent>().handleLocalizeListUseCase } returns HandleLocalizeListUseCase(
-                networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
+                    networkManagerMock, prefManagerMock, appOpenSettingsManagerMock
             )
 
             coEvery { networkManagerMock.loadTranslation("https://nstack-staging.vapor.cloud/api/v2/content/localize/resources/16") } returns translations1.toString()

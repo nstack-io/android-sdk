@@ -5,39 +5,43 @@
 
 # NStack Kotlin
 NStackSDK is the companion software development kit to the NStack backend.
-See the [NStack documentation](https://nstack-io.github.io/documentation/index.html) for more information about NStack
+See the [NStack documentation](https://nstack-io.github.io/docs/docs/guides/Android/android-installation.html) for more information about NStack
 
 
 ## Quick  Setup
 
 ### 📦 Installation
 
-1. Open `build.gradle` file located in your project folder
-2. Add NStack SDK dependency and sync your project
+1. Add NStack gradle plugin to your top-level `build.gradle` file located in your project folder
 ```groovy
-dependencies {
-    implementation "dk.nodes.nstack:nstack-kotlin:3.2.2"
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "dk.nodes.nstack:translation:3.2.6"
+    }
 }
 ```
-3. After synchronisation is complete, you can start using the SDK
-
-#### Snapshots
-
-If you need to target SNAPSHOT releases you depend on following repositories:
-
+2. Add NStack SDK dependency to your app module
 ```groovy
-repositories {
-    mavenCentral()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+translation {
+    appId = "replace with NStack Application id"
+    apiKey = "replace with NStack Rest API key"
+    acceptHeader = "en-GB"
 }
 
 dependencies {
-    implementation "dk.nodes.nstack:nstack-kotlin:x.x.x-SNAPSHOT"
+    implementation "dk.nodes.nstack:nstack-kotlin:3.2.6"
 }
 ```
+3. Create an empty `Translation.java` file in the app module
+4. Create an empty `RateReminderActions.kt` file in the app module
+4. Sync your project with gradle files. After synchronisation is complete, you can start using the SDK
 
 ### ⚒ Configuration
- In order to use NStack SDK you have to initilize and configure it first.
+In order to use NStack SDK you have to initialize and configure it first.
 
 In order to connect NStack API with your application you will need `ApplicationId`, `REST API Key`. For more information how to get these keys checkout our  [Getting Start Guide](https://nstack-io.github.io/documentation/docs/guides/getting-started.html).
 
@@ -66,6 +70,16 @@ Put these keys as meta-data in your `AndroidManifest.xml` like so:
 ```
 
 > You can also put these values into your `build.gradle` and use placeholders in the manifest
+```groovy
+android {
+    defaultConfig {
+        manifestPlaceholders = [
+            appId : translation.appId,
+            apiKey: translation.apiKey
+        ]
+    }
+}
+```
 
  Best place to initialise SDK will be in you Application `onCreate()` method as it requires your's application `Context`. `Application` is a the class for maintaining global application state. Heres a basic SDK initiation example
 
@@ -87,9 +101,6 @@ NStack.debugMode = true - Enables debug mode for the library (Outputs messages t
 NStack.setRefreshPeriod(60, TimeUnit.MINUTES) - Allows you to set the period for how often NStack should check for updates
 ```
 > Warning: In almost every instance you want to set these optional methods before NStack is initialized
-
-
-
 
 ## Activity Setup
 Add this to which ever activity you are trying to use NStack in
@@ -225,3 +236,17 @@ Where "staging" is a string you pass in a buildconfig flag or something similar
 
 ## Dependencies
 - okhttp 3.8.0
+
+#### Snapshots
+If you need to target SNAPSHOT releases you depend on following repositories:
+
+```groovy
+repositories {
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+}
+
+dependencies {
+    implementation "dk.nodes.nstack:nstack-kotlin:x.x.x-SNAPSHOT"
+}
+```
