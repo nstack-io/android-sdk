@@ -1,6 +1,6 @@
 package dk.nodes.nstack.kotlin.managers
 
-import dk.nodes.nstack.kotlin.NStackTest
+import com.google.gson.Gson
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.FeedbackType
 import io.mockk.every
@@ -44,7 +44,7 @@ class NetworkManagerTest {
     @Test
     fun `Handle certificate expired`() {
         val client = mockk<OkHttpClient>()
-        val manager = NetworkManager(client, "https://127.0.0.1", true)
+        val manager = NetworkManager(client, "https://127.0.0.1", true, Gson())
         every { client.newCall(any()).execute() } throws CertificateExpiredException()
         every { client.newCall(any()).enqueue(any()) } throws CertificateExpiredException()
 
@@ -54,7 +54,7 @@ class NetworkManagerTest {
     @Test
     fun `Handle invalid certificate`() {
         val client = mockk<OkHttpClient>()
-        val manager = NetworkManager(client, "https://127.0.0.1", true)
+        val manager = NetworkManager(client, "https://127.0.0.1", true, Gson())
         every { client.newCall(any()).execute() } throws CertPathValidatorException()
         every { client.newCall(any()).enqueue(any()) } throws CertPathValidatorException()
 
@@ -64,7 +64,7 @@ class NetworkManagerTest {
     @Test
     fun `Handle IO Exception`() {
         val client = mockk<OkHttpClient>()
-        val manager = NetworkManager(client, "https://127.0.0.1", true)
+        val manager = NetworkManager(client, "https://127.0.0.1", true, Gson())
         every { client.newCall(any()).execute() } throws IOException()
         every { client.newCall(any()).enqueue(any()) } throws IOException()
 
