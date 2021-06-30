@@ -14,7 +14,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Before
-import java.util.concurrent.CountDownLatch
+//import java.util.concurrent.CountDownLatch
 
 
 class NetworkManagerTestFake : TestCase() {
@@ -64,7 +64,7 @@ class NetworkManagerTestFake : TestCase() {
         mockWebServer.setResponse("response_empty.json", 200)
         val response = runBlocking { manager.loadTranslation(mockWebServer.url("").toString()) }
         assert(response == "null")
-        TODO("Response is 'null' but it's string instead of normal null as expected")
+//        TODO("Response is 'null' but it's string instead of normal null as expected")
     }
 
     fun testPostAppOpenSuccess() {
@@ -122,9 +122,35 @@ class NetworkManagerTestFake : TestCase() {
         assert(response == apiError)
     }
 
-    fun testPostRateReminderSeen() {}
+    fun testPostRateReminderSeen() {
+        manager.postRateReminderSeen(AppOpenSettingsMockFactory.getAppSettings(), true)
+    }
 
-    fun testGetResponse() {}
+    fun testGetResponseSuccess() {
+        mockWebServer.setResponse("slug_response.json", 200)
+        val response = runBlocking {
+            manager.getResponse("slug")
+        }
+        val successResult = Result.Success(Helper.getFileAsString("slug_response.json"))
+        assert(response == successResult)
+    }
+
+    fun testGetResponseApiError() {
+        mockWebServer.setResponse("slug_response.json", 500)
+        val response = runBlocking {
+            manager.getResponse("slug")
+        }
+        val apiError = Result.Error(Error.ApiError(errorCode = 500))
+        assert(response == apiError)
+    }
+
+    fun testGetResponseNetworkError() {
+        val response = runBlocking {
+            manager.getResponse("slug")
+        }
+        val networkError = Result.Error(Error.NetworkError)
+        assert(response == networkError)
+    }
 
     fun testGetCollection() {}
 
