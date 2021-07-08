@@ -178,7 +178,31 @@ class NetworkManagerTestFake : TestCase() {
         assert(response == networkError)
     }
 
-    fun testGetCollectionItem() {}
+    fun testGetCollectionItemSuccess() {
+        mockWebServer.setResponse("response.json", 200)
+        val response = runBlocking {
+            manager.getCollectionItem(1, 1)
+        }
+        val successResult = Result.Success(Helper.getFileAsString("response.json"))
+        assert(response == successResult)
+    }
+
+    fun testGetCollectionItemApiError() {
+        mockWebServer.setResponse("response.json", 500)
+        val response = runBlocking {
+            manager.getCollectionItem(1, 1)
+        }
+        val apiError = Result.Error(Error.ApiError(errorCode = 500))
+        assert(response == apiError)
+    }
+
+    fun testGetCollectionItemNetworkError() {
+        val response = runBlocking {
+            manager.getCollectionItem(1, 1)
+        }
+        val networkError = Result.Error(Error.NetworkError)
+        assert(response == networkError)
+    }
 
     fun testPostProposal() {}
 
