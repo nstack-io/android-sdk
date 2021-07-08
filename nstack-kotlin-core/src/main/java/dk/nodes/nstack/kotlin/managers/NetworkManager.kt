@@ -220,15 +220,16 @@ class NetworkManager(
      * Get a Response (as String) from NStack Responses
      */
     suspend fun getResponse(
-        slug: String
+            slug: String
     ): Result<String> = try {
         val request = Request.Builder()
-            .url("$baseUrl/api/v2/content/responses/$slug")
-            .get()
-            .build()
+                .url("$baseUrl/api/v2/content/responses/$slug")
+                .get()
+                .build()
         val response = client.newCall(request).execute()
-        if (response.isSuccessful) {
-            val responseString = response.body().toString()
+        val body = response.body()
+        if (response.isSuccessful && body != null ) {
+            val responseString = body.string()
             Result.Success(value = responseString)
         } else {
             Result.Error(Error.ApiError(errorCode = response.code()))
@@ -250,8 +251,9 @@ class NetworkManager(
             .get()
             .build()
         val response = client.newCall(request).execute()
-        if (response.isSuccessful) {
-            val responseString = response.body().toString()
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            val responseString = body.string()
             Result.Success(value = responseString)
         } else {
             Result.Error(Error.ApiError(errorCode = response.code()))
@@ -274,8 +276,9 @@ class NetworkManager(
             .get()
             .build()
         val response = client.newCall(request).execute()
-        if (response.isSuccessful) {
-            val responseString = response.body().toString()
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            val responseString = body.string()
             Result.Success(value = responseString)
         } else {
             Result.Error(Error.ApiError(errorCode = response.code()))

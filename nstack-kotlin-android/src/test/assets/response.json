@@ -1,0 +1,47 @@
+{
+  "data": {
+    "default": {
+      "yes": "Yes",
+      "no": "No thanks",
+      "later": "Later"
+    },
+    "home": {
+      "title": "NStack Demo",
+      "subTitle": "staging",
+      "message": "Lorum ipsum dolor amet magna meatball jerky in, shank sunt do burgdoggen spare ribs. Lorem boudin eiusmod short ribs pastrami. Sausage bresaola do turkey, dolor qui tail ground round culpa boudin nulla minim sunt beef ribs ham. Cillum in pastrami adipisicing swine lorem, velit sunt meatloaf bresaola short loin fugiat tri-tip boudin.",
+      "on": "on",
+      "off": "off",
+      "sendFeedbackButton": "Send feedback",
+      "hint": "Name"
+    },
+    "terms": {
+      "termsNotFound": "Terms not found.",
+      "acceptLabel": "Accept",
+      "acceptedLabel": "Accepted"
+    },
+    "rateReminder": {
+      "firstAction": "First Action",
+      "secondAction": "Second Action",
+      "rateReminderTitle": "Rate this app",
+      "rateReminderMessage": "It seems like you like this app, do you want to give it a rating?",
+      "title": "Rate Reminder"
+    },
+    "more": {
+      "title": "Some title"
+    }
+  },
+  "meta": {
+    "language": {
+      "id": 12,
+      "name": "English (US)",
+      "locale": "en-US",
+      "direction": "LRM",
+      "is_default": false,
+      "is_best_fit": false
+    },
+    "platform": {
+      "id": 435,
+      "slug": "mobile"
+    }
+  }
+}
