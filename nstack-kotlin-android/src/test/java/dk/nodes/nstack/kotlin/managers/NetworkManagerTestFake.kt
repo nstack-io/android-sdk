@@ -73,7 +73,7 @@ class NetworkManagerTestFake : TestCase() {
             manager.postAppOpen(AppOpenSettingsMockFactory.getAppSettings(),
                     "da-DK")
         }
-        val successResult = Result.Success(gson.fromJson(Helper.getFileAsString("response2_check.json"), AppOpen::class.java))
+        val successResult = Result.Success(gson.fromJson(Helper.getFileAsString("response2.json"), AppOpen::class.java))
         assert(response == successResult)
     }
 
