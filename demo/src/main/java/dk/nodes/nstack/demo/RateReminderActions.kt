@@ -7,8 +7,18 @@ import dk.nodes.nstack.kotlin.NStack
  */
 object RateReminderActions {
 
+	private const val CRASH = "crash"
+	private const val DONATED = "donated"
 	private const val FIRSTACTION = "firstaction"
 	private const val SECONDACTION = "secondaction"
+
+	suspend fun crash() {
+		send(CRASH)
+	}
+
+	suspend fun donated() {
+		send(DONATED)
+	}
 
 	suspend fun firstaction() {
 		send(FIRSTACTION)

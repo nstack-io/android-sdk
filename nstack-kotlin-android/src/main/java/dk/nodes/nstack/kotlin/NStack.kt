@@ -718,7 +718,11 @@ object NStack {
      */
     private suspend fun <T> guardConnectivity(block: suspend () -> Result<T>): Result<T> {
         return if (connectionManager.isConnected) {
-            block()
+            try {
+                block()
+            } catch (e: Exception) {
+                Result.Error(Error.UnknownError)
+            }
         } else {
             Result.Error(Error.NetworkError)
         }
