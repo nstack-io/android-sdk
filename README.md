@@ -20,7 +20,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "dk.nodes.nstack:translation:3.2.5"
+        classpath "dk.nodes.nstack:translation:3.2.6"
     }
 }
 ```
@@ -33,7 +33,7 @@ translation {
 }
 
 dependencies {
-    implementation "dk.nodes.nstack:nstack-kotlin:3.2.5"
+    implementation "dk.nodes.nstack:nstack-kotlin:3.2.6"
 }
 ```
 3. Create an empty `Translation.java` file in the app module
