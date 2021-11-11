@@ -8,7 +8,7 @@ class Application : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        NStack.baseUrl = "https://nstack-staging.vapor.cloud"
+        NStack.baseUrl = "https://nstack.io"
         NStack.translationClass = Translation::class.java
         NStack.init(this, BuildConfig.DEBUG)
         if (BuildConfig.DEBUG) {
