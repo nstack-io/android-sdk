@@ -228,7 +228,7 @@ class NetworkManager(
             .build()
         val response = client.newCall(request).execute()
         if (response.isSuccessful) {
-            val responseString = response.body().toString()
+            val responseString = response.body()!!.string()
             Result.Success(value = responseString)
         } else {
             Result.Error(Error.ApiError(errorCode = response.code()))
@@ -251,7 +251,7 @@ class NetworkManager(
             .build()
         val response = client.newCall(request).execute()
         if (response.isSuccessful) {
-            val responseString = response.body().toString()
+            val responseString = response.body()!!.string()
             Result.Success(value = responseString)
         } else {
             Result.Error(Error.ApiError(errorCode = response.code()))
@@ -275,7 +275,7 @@ class NetworkManager(
             .build()
         val response = client.newCall(request).execute()
         if (response.isSuccessful) {
-            val responseString = response.body().toString()
+            val responseString = response.body()!!.string()
             Result.Success(value = responseString)
         } else {
             Result.Error(Error.ApiError(errorCode = response.code()))

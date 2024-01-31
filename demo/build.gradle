@@ -11,10 +11,10 @@ apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: TranslationPlugin
 
 translation {
-    appId = "dTyz7mezul3YJliMtsoM3z8ZhmWqDR8kJLbF"
-    apiKey = "PtmtXCGzgiKGkGrCKoRgFh0JK0uz8AUMLnGS"
-    acceptHeader = "en-US"
-    contentUrl = "https://nstack-staging.vapor.cloud/"
+    appId = "IXmpT4N7MJbGEXvDfGqGH4UKHrmV0EOqFeK0"
+    apiKey = "LqWLm621BwIxNRzdrei88pKhIIEI2EE8ni8r"
+    acceptHeader = "en-GB"
+    contentUrl = "https://nstack.io/"
 }
 
 android {

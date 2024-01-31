@@ -49,16 +49,7 @@
                 android:layout_marginEnd="16dp"
                 android:text="@string/nstack_home_title" />
 
-            <ToggleButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginBottom="8dp"
-                android:textOff="@string/nstack_home_off"
-                android:textOn="@string/nstack_home_on" />
-
-            <Switch
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
