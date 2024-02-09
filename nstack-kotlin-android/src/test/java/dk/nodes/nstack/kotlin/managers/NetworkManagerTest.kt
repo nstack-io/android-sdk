@@ -1,6 +1,5 @@
 package dk.nodes.nstack.kotlin.managers
 
-import dk.nodes.nstack.kotlin.NStackTest
 import dk.nodes.nstack.kotlin.models.AppOpenSettings
 import dk.nodes.nstack.kotlin.models.FeedbackType
 import io.mockk.every
@@ -85,7 +84,7 @@ class NetworkManagerTest {
 
         runBlockingTest { manager.postAppOpen(appOpenSettings, "da-DK") }
         runBlockingTest { manager.postAppOpen(appOpenSettings, "da-DK", {}, {}) }
-        runBlockingTest { manager.postFeedback(appOpenSettings, "", "", "", null, FeedbackType.FEEDBACK) }
+        runBlockingTest { manager.postFeedback(appOpenSettings, "", "", "", FeedbackType.FEEDBACK) }
         runBlockingTest { manager.postMessageSeen(appOpenSettings, 1) }
         runBlockingTest { manager.postProposal(appOpenSettings, "", "", "", "", {}, {}) }
         runBlockingTest { manager.postRateReminderAction(appOpenSettings, "") }
