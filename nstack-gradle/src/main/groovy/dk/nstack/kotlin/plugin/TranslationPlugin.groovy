@@ -90,6 +90,7 @@ class TranslationPlugin implements Plugin<Project> {
         if (!enumFile.exists()) {
             enumFile = new File('app/' + project.translation.classPath)
         }
+        enumFile.write(enumString)
     }
 
     private void generateTranslationClass() {
