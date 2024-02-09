@@ -17,7 +17,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
 import dk.nodes.nstack.kotlin.NStack.Messages.show
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
-import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
 import dk.nodes.nstack.kotlin.features.messages.presentation.MessageDialog
@@ -872,7 +871,6 @@ object NStack {
             name: String,
             email: String,
             message: String,
-            image: ImageData?,
             type: FeedbackType
         ) = guardConnectivity {
             networkManager.postFeedback(
@@ -880,7 +878,6 @@ object NStack {
                 name = name,
                 email = email,
                 message = message,
-                image = image?.asJpegBytes(),
                 type = type
             )
         }
