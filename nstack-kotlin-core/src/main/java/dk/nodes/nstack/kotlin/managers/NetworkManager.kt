@@ -454,16 +454,13 @@ class NetworkManager(
         // Silent
     }
 
-    suspend fun postFeedback(
+    fun postFeedback(
         settings: AppOpenSettings,
         name: String,
         email: String,
         message: String,
-        image: ByteArray?,
         type: FeedbackType
     ): Result<Empty> = try {
-        val mediaType = MediaType.parse("image/jpg")
-
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("os", settings.osVersion)
@@ -474,14 +471,6 @@ class NetworkManager(
             .addFormDataPart("name", name)
             .addFormDataPart("email", email)
             .addFormDataPart("message", message)
-
-        image?.let {
-            requestBody.addFormDataPart(
-                "image",
-                "feedback.jpg",
-                RequestBody.create(mediaType, image)
-            )
-        }
 
         val request = Request.Builder()
             .url("$baseUrl/api/v2/ugc/feedbacks")
