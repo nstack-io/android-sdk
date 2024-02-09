@@ -82,12 +82,14 @@ class TranslationPlugin implements Plugin<Project> {
         if (enumString.isEmpty()) {
             return
         }
-        getRateReminderActionsPath()
+        def path = getRateReminderActionsPath()
+        if (path == null) {
+            return
+        }
         def enumFile = new File(project.translation.classPath)
         if (!enumFile.exists()) {
             enumFile = new File('app/' + project.translation.classPath)
         }
-        enumFile.write(enumString)
     }
 
     private void generateTranslationClass() {
@@ -116,9 +118,9 @@ class TranslationPlugin implements Plugin<Project> {
     }
 
     /**
-    * Find the path for the Translation.java file
-    * This file is where we generate main class and inner classes from the JSON file from nstack
-    * */
+     * Find the path for the Translation.java file
+     * This file is where we generate main class and inner classes from the JSON file from nstack
+     * */
 
     void getTranslationPath() {
         String searchName = TRANSLATION_FILE_NAME.toLowerCase()
@@ -164,7 +166,8 @@ class TranslationPlugin implements Plugin<Project> {
         }
 
         if (classFilePath == null) {
-            throw Exception("Unable to locate rate reminder actions file")
+            Log.error("Unable to locate rate reminder actions file")
+            return null
         }
 
         String possibleModelPath = classFilePath
@@ -176,11 +179,12 @@ class TranslationPlugin implements Plugin<Project> {
 
         project.translation.modelPath = possibleModelPath
         project.translation.classPath = classFilePath
+        return classFilePath
     }
 
     /**
-    * Generate our Translation.java file to project.translation.classPath
-    * */
+     * Generate our Translation.java file to project.translation.classPath
+     * */
     void generateJavaClass(Map json) {
 
         def translationsFile = new File(project.translation.classPath)
@@ -216,11 +220,11 @@ class TranslationPlugin implements Plugin<Project> {
     }
 
     /**
-    *
-    * @param className
-    * @param data
-    * @return String Inner static class with key/value strings
-    */
+     *
+     * @param className
+     * @param data
+     * @return String Inner static class with key/value strings
+     */
     String generateInnerClass(className, data) {
         def innerClass = "\tpublic final static class ${className} {\n"
 
@@ -235,10 +239,10 @@ class TranslationPlugin implements Plugin<Project> {
     }
 
     /**
-    * Write translation data to xml as a strings resource file
-    * @param json Result object of JsonSlurper parsing
-    * @param project Reference to project scope
-    */
+     * Write translation data to xml as a strings resource file
+     * @param json Result object of JsonSlurper parsing
+     * @param project Reference to project scope
+     */
 
     static void generateStringsResource(Map jsonSection) {
         def sw = new StringWriter()
