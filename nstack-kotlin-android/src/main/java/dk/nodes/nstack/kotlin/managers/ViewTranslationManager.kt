@@ -4,11 +4,13 @@ import android.os.Handler
 import android.view.View
 import android.widget.TextView
 import android.widget.ToggleButton
+import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.textfield.TextInputLayout
 import dk.nodes.nstack.R
 import dk.nodes.nstack.kotlin.models.TranslationData
 import dk.nodes.nstack.kotlin.plugin.NStackViewPlugin
 import dk.nodes.nstack.kotlin.provider.TranslationHolder
+import dk.nodes.nstack.kotlin.util.NLog
 import dk.nodes.nstack.kotlin.util.UpdateViewTranslationListener
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
@@ -126,6 +128,13 @@ internal class ViewTranslationManager(private val translationHolder: Translation
                 translatedTextOn?.let(view::setTextOn)
                 translatedTextOff?.let(view::setTextOff)
             }
+            is SwitchCompat -> {
+                (translatedKey ?: translatedText)?.let(view::setText)
+                translatedHint?.let(view::setHint)
+                translatedDescription?.let(view::setContentDescription)
+                translatedTextOn?.let(view::setTextOn)
+                translatedTextOff?.let(view::setTextOff)
+            }
             is TextView -> {
                 (translatedKey ?: translatedText)?.let(view::setText)
                 translatedHint?.let(view::setHint)
@@ -133,6 +142,9 @@ internal class ViewTranslationManager(private val translationHolder: Translation
             }
             is TextInputLayout -> {
                 translatedHint?.let(view::setHint)
+            }
+            else -> {
+                NLog.d("ViewTranslationManager", view.context.resources.getResourceEntryName(view.id))
             }
         }
     }
