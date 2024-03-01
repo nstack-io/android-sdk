@@ -12,6 +12,9 @@ import dk.nodes.nstack.kotlin.managers.ConnectionManager
 import dk.nodes.nstack.kotlin.managers.NetworkManager
 import dk.nodes.nstack.kotlin.managers.PrefManager
 import dk.nodes.nstack.kotlin.managers.ViewTranslationManager
+import dk.nodes.nstack.kotlin.models.*
+import dk.nodes.nstack.kotlin.providers.ManagersModule
+import dk.nodes.nstack.kotlin.providers.NStackModule
 import dk.nodes.nstack.kotlin.models.AppOpen
 import dk.nodes.nstack.kotlin.models.AppOpenData
 import dk.nodes.nstack.kotlin.models.AppOpenMeta
@@ -35,11 +38,16 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
+import okhttp3.OkHttpClient
 import org.json.JSONObject
+import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import java.security.cert.CertPathValidatorException
+import java.security.cert.CertificateExpiredException
 import java.util.Date
 import java.util.Locale
 

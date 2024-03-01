@@ -32,7 +32,6 @@ import dk.nodes.nstack.kotlin.appupdate.InAppUpdateAvailability
 import dk.nodes.nstack.kotlin.appupdate.InAppUpdateResult
 import dk.nodes.nstack.kotlin.appupdate.InAppUpdateStrategy
 import dk.nodes.nstack.kotlin.features.common.ActiveActivityHolder
-import dk.nodes.nstack.kotlin.features.feedback.domain.model.ImageData
 import dk.nodes.nstack.kotlin.features.feedback.presentation.FeedbackActivity
 import dk.nodes.nstack.kotlin.features.mainmenu.presentation.MainMenuDisplayer
 import dk.nodes.nstack.kotlin.features.messages.presentation.MessageDialog
@@ -697,16 +696,17 @@ object NStack {
 
             // Try to find the exact match
             availableLanguages
+                    // Do our languages match
+                    .find { it.language == locale.toLanguageTag().replace("-", "_").toLowerCase() }
+                    // Return the first value or null
+                    .let { languages[it] } ?:
+
+            availableLanguages // Search our available languages for any keys that might match
                 // Do our languages match
-                .find { it.language == locale.toLanguageTag().replace("-", "_").toLowerCase() }
-                // Return the first value or null
+                .find { it.languageCode == locale.languageCode }
+                    // Return the first value or null
                 .let { languages[it] }
 
-                ?: availableLanguages // Search our available languages for any keys that might match
-                    // Do our languages match
-                    .find { it.languageCode == locale.languageCode }
-                    // Return the first value or null
-                    .let { languages[it] }
         }
     }
 
@@ -785,7 +785,15 @@ object NStack {
      * Exposed Adders(?)
      */
     private fun getTranslationByKey(key: String?): String? {
-        return currentLanguage?.optString(key?.cleanKeyName ?: return null, null)
+        key?.cleanKeyName ?: return null
+        // Try to find value in our JSON map (from cache or network)
+        return  if(currentLanguage?.has(key.cleanKeyName) == true) {
+            currentLanguage?.optString(key.cleanKeyName)
+        // Find the value in our static Translation class as a fallback
+        // (This should work as this is what the app was built with)
+        } else {
+            classTranslationManager.getFieldValue(key)
+        }
     }
 
     fun addView(view: View, translationData: TranslationData) {
@@ -833,7 +841,11 @@ object NStack {
      */
     private suspend fun <T> guardConnectivity(block: suspend () -> Result<T>): Result<T> {
         return if (connectionManager.isConnected) {
-            block()
+            try {
+                block()
+            } catch (e: Exception) {
+                Result.Error(Error.UnknownError)
+            }
         } else {
             Result.Error(Error.NetworkError)
         }
@@ -978,7 +990,6 @@ object NStack {
             name: String,
             email: String,
             message: String,
-            image: ImageData?,
             type: FeedbackType
         ) = guardConnectivity {
             networkManager.postFeedback(
@@ -986,7 +997,6 @@ object NStack {
                 name = name,
                 email = email,
                 message = message,
-                image = image?.asJpegBytes(),
                 type = type
             )
         }

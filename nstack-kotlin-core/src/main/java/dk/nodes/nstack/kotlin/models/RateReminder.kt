@@ -27,14 +27,14 @@ data class RateReminder2(
         fun parse(jsonObject: JsonObject): RateReminder2? {
             return try {
                 val data = jsonObject.getAsJsonObject("data")
-                val localization = jsonObject.getAsJsonObject("data").getAsJsonObject("localization")
+                val localization = data.getAsJsonObject("localization")
                 RateReminder2(
                         id = data.getAsJsonPrimitive("id").asInt,
-                        title = localization.getAsJsonObject("title").asString,
-                        body = localization.getAsJsonObject("body").asString,
-                        yesButton = localization.getAsJsonObject("yesBtn").asString,
-                        laterButton = localization.getAsJsonObject("laterBtn").asString,
-                        noButton = localization.getAsJsonObject("noBtn").asString
+                        title = localization.getAsJsonPrimitive("title").asString,
+                        body = localization.getAsJsonPrimitive("body").asString,
+                        yesButton = localization.getAsJsonPrimitive("yesBtn").asString,
+                        laterButton = localization.getAsJsonPrimitive("laterBtn").asString,
+                        noButton = localization.getAsJsonPrimitive("noBtn").asString
                 )
             } catch (e: Exception) {
                 null
